@@ -11,7 +11,7 @@
 type Timestamp = string;
 type UUID = string;
 
-export type Role = 'member' | 'leadership';
+export type Role = 'member' | 'leadership' | 'platform_admin';
 export type SequenceStatus = 'draft' | 'approved';
 export type SequenceEventKind = 'started' | 'completed' | 'messaged';
 export type ConversationStatus = 'active' | 'blocked';

@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSession } from './SessionProvider';
+import { isLeader } from './roles';
 import { AppShell, type NavItem } from '@/ui/AppShell';
 import { Button } from '@/ui/Button';
 import { CenterLayout, FullPageLoading } from '@/ui/states';
@@ -32,7 +33,7 @@ export function RequireMembership() {
 
 export function RequireLeadership() {
   const { membership } = useSession();
-  if (membership && membership.role !== 'leadership')
+  if (membership && !isLeader(membership.role))
     return <Navigate to="/app" replace />;
   return <Outlet />;
 }
@@ -40,12 +41,12 @@ export function RequireLeadership() {
 /** Authed chrome: role-aware nav + sign-out, wrapping the member/leader routes. */
 export function AuthedLayout() {
   const { membership, signOut } = useSession();
-  const isLeader = membership?.role === 'leadership';
+  const leader = isLeader(membership?.role);
 
   const nav: NavItem[] = [
     { to: '/app', label: 'Your code' },
     { to: '/app/messages', label: 'Messages' },
-    ...(isLeader
+    ...(leader
       ? [
           { to: '/leadership/content', label: 'Content' },
           { to: '/leadership/people', label: 'People' },

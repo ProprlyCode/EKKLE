@@ -91,6 +91,9 @@ function MemberRow({
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium text-sage">{member.name}</span>
+          {member.role === 'platform_admin' && (
+            <span className="eyebrow text-[10px]">admin</span>
+          )}
           {member.role === 'leadership' && (
             <span className="eyebrow text-[10px]">leader</span>
           )}
