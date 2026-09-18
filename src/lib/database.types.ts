@@ -36,6 +36,7 @@ export interface Database {
           name: string;
           join_code: string;
           default_member_id: UUID | null;
+          offer_enabled: boolean;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -45,6 +46,7 @@ export interface Database {
           name: string;
           join_code: string;
           default_member_id?: UUID | null;
+          offer_enabled?: boolean;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -403,6 +405,22 @@ export interface Database {
           p_email: string;
         };
         Returns: string | null;
+      };
+      platform_overview: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      set_org_settings: {
+        Args: {
+          p_name: string;
+          p_default_member_id: string | null;
+          p_offer_enabled: boolean;
+        };
+        Returns: Database['public']['Tables']['organizations']['Row'];
+      };
+      regenerate_join_code: {
+        Args: Record<string, never>;
+        Returns: string;
       };
     };
     Enums: Record<never, never>;

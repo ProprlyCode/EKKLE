@@ -3,6 +3,7 @@ import {
   RequireAuth,
   RequireMembership,
   RequireLeadership,
+  RequirePlatformAdmin,
   AuthedLayout,
 } from '@/auth/guards';
 import { Wordmark } from '@/components/Wordmark';
@@ -13,6 +14,7 @@ import Inbox from '@/routes/member/Inbox';
 import Thread from '@/routes/member/Thread';
 import People from '@/routes/leadership/People';
 import Content from '@/routes/leadership/Content';
+import PlatformConsole from '@/routes/platform/Console';
 import RecipientExperience from '@/recipient/RecipientExperience';
 import Home from '@/public/Home';
 import ForChurches from '@/public/ForChurches';
@@ -45,6 +47,10 @@ export default function App() {
             <Route element={<RequireLeadership />}>
               <Route path="/leadership/content" element={<Content />} />
               <Route path="/leadership/people" element={<People />} />
+            </Route>
+
+            <Route element={<RequirePlatformAdmin />}>
+              <Route path="/platform" element={<PlatformConsole />} />
             </Route>
           </Route>
         </Route>

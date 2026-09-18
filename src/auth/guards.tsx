@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSession } from './SessionProvider';
-import { isLeader } from './roles';
+import { isLeader, isPlatformAdmin } from './roles';
 import { unreadCount } from '@/data/conversations';
 import { AppShell, type NavItem } from '@/ui/AppShell';
 import { Button } from '@/ui/Button';
@@ -40,6 +40,13 @@ export function RequireLeadership() {
   return <Outlet />;
 }
 
+export function RequirePlatformAdmin() {
+  const { membership } = useSession();
+  if (membership && !isPlatformAdmin(membership.role))
+    return <Navigate to="/app" replace />;
+  return <Outlet />;
+}
+
 /** Authed chrome: role-aware nav + sign-out, wrapping the member/leader routes. */
 export function AuthedLayout() {
   const { membership, signOut } = useSession();
@@ -69,6 +76,7 @@ export function AuthedLayout() {
           { to: '/leadership/people', label: 'People' },
         ]
       : []),
+    ...(isPlatformAdmin(membership?.role) ? [{ to: '/platform', label: 'Platform' }] : []),
   ];
 
   return (
