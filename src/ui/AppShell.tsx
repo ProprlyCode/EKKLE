@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { appConfig } from '@/config/app';
+import { BrandName } from '@/components/BrandName';
 import { cn } from '@/lib/cn';
 
 /**
@@ -29,9 +29,7 @@ export function AppShell({
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2">
               <img src="/logo.webp" alt="" width={28} height={28} className="h-7 w-7" />
-              <span className="font-serif text-xl font-medium tracking-tight text-sage">
-                {appConfig.brandName}
-              </span>
+              <BrandName className="font-serif text-xl font-medium tracking-tight text-sage" />
             </span>
             {right && <div className="sm:hidden">{right}</div>}
           </div>
