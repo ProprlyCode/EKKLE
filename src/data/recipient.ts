@@ -74,5 +74,59 @@ export async function startConversation(input: {
     p_body: input.body,
   });
   if (error) throw error;
-  return data as string;
+  const conversationId = data as string;
+  rememberConversation(input.slug, conversationId);
+  return conversationId;
+}
+
+export interface RecipientConversation {
+  member_name: string;
+  status: 'active' | 'blocked';
+  messages: Array<{
+    sender_type: 'member' | 'recipient';
+    body: string;
+    created_at: string;
+  }>;
+}
+
+export async function getConversation(
+  conversationId: string,
+): Promise<RecipientConversation | null> {
+  const { data, error } = await supabase.rpc('get_recipient_conversation', {
+    p_session_token: getRecipientSessionToken(),
+    p_conversation_id: conversationId,
+  });
+  if (error) throw error;
+  return (data as RecipientConversation | null) ?? null;
+}
+
+export async function sendRecipientMessage(
+  conversationId: string,
+  body: string,
+): Promise<void> {
+  const { error } = await supabase.rpc('send_recipient_message', {
+    p_session_token: getRecipientSessionToken(),
+    p_conversation_id: conversationId,
+    p_body: body,
+  });
+  if (error) throw error;
+}
+
+/** Remember the conversation for this member on this device, to resume later. */
+function convoKey(slug: string) {
+  return `ekkle_convo_${slug}`;
+}
+export function rememberConversation(slug: string, conversationId: string) {
+  try {
+    localStorage.setItem(convoKey(slug), conversationId);
+  } catch {
+    /* storage blocked — resume just won't persist */
+  }
+}
+export function savedConversation(slug: string): string | null {
+  try {
+    return localStorage.getItem(convoKey(slug));
+  } catch {
+    return null;
+  }
 }

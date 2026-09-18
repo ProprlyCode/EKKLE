@@ -194,6 +194,7 @@ export interface Database {
           member_id: UUID;
           recipient_id: UUID;
           status: ConversationStatus;
+          member_last_read_at: Timestamp | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -203,6 +204,7 @@ export interface Database {
           member_id: UUID;
           recipient_id: UUID;
           status?: ConversationStatus;
+          member_last_read_at?: Timestamp | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -365,6 +367,27 @@ export interface Database {
       set_my_active_sequence: {
         Args: { p_sequence_id: string | null };
         Returns: Database['public']['Tables']['users']['Row'];
+      };
+      my_conversations: {
+        Args: Record<string, never>;
+        Returns: {
+          conversation_id: string;
+          recipient_id: string;
+          recipient_first_name: string;
+          last_body: string | null;
+          last_at: string | null;
+          last_sender: SenderType | null;
+          unread: boolean;
+          status: ConversationStatus;
+        }[];
+      };
+      get_recipient_conversation: {
+        Args: { p_session_token: string; p_conversation_id: string };
+        Returns: Json;
+      };
+      send_recipient_message: {
+        Args: { p_session_token: string; p_conversation_id: string; p_body: string };
+        Returns: undefined;
       };
     };
     Enums: Record<never, never>;

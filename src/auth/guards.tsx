@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSession } from './SessionProvider';
 import { isLeader } from './roles';
+import { unreadCount } from '@/data/conversations';
 import { AppShell, type NavItem } from '@/ui/AppShell';
 import { Button } from '@/ui/Button';
 import { CenterLayout, FullPageLoading } from '@/ui/states';
@@ -42,10 +44,25 @@ export function RequireLeadership() {
 export function AuthedLayout() {
   const { membership, signOut } = useSession();
   const leader = isLeader(membership?.role);
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const load = () =>
+      unreadCount()
+        .then((n) => active && setUnread(n))
+        .catch(() => {});
+    void load();
+    const t = setInterval(load, 30000);
+    return () => {
+      active = false;
+      clearInterval(t);
+    };
+  }, []);
 
   const nav: NavItem[] = [
     { to: '/app', label: 'Your code' },
-    { to: '/app/messages', label: 'Messages' },
+    { to: '/app/messages', label: 'Messages', dot: unread > 0 },
     ...(leader
       ? [
           { to: '/leadership/content', label: 'Content' },

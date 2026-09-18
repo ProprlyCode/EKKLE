@@ -11,6 +11,7 @@ import { cn } from '@/lib/cn';
 export interface NavItem {
   to: string;
   label: string;
+  dot?: boolean;
 }
 
 export function AppShell({
@@ -51,7 +52,12 @@ export function AppShell({
                     )
                   }
                 >
-                  {item.label}
+                  <span className="inline-flex items-center gap-1.5">
+                    {item.label}
+                    {item.dot && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-sage" aria-label="new" />
+                    )}
+                  </span>
                 </NavLink>
               </li>
             ))}

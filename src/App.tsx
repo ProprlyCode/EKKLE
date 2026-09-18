@@ -6,10 +6,11 @@ import {
   AuthedLayout,
 } from '@/auth/guards';
 import { Wordmark } from '@/components/Wordmark';
-import { EmptyState } from '@/ui/states';
 import SignIn from '@/routes/SignIn';
 import Onboarding from '@/routes/Onboarding';
 import MemberDashboard from '@/routes/member/Dashboard';
+import Inbox from '@/routes/member/Inbox';
+import Thread from '@/routes/member/Thread';
 import People from '@/routes/leadership/People';
 import Content from '@/routes/leadership/Content';
 import RecipientExperience from '@/recipient/RecipientExperience';
@@ -33,7 +34,8 @@ export default function App() {
         <Route element={<RequireMembership />}>
           <Route element={<AuthedLayout />}>
             <Route path="/app" element={<MemberDashboard />} />
-            <Route path="/app/messages" element={<ComingSoon what="Messages" />} />
+            <Route path="/app/messages" element={<Inbox />} />
+            <Route path="/app/messages/:conversationId" element={<Thread />} />
 
             <Route element={<RequireLeadership />}>
               <Route path="/leadership/content" element={<Content />} />
@@ -45,16 +47,6 @@ export default function App() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
-  );
-}
-
-/** In-shell placeholder for routes arriving in later sprints. */
-function ComingSoon({ what }: { what: string }) {
-  return (
-    <EmptyState
-      title={`${what} is on the way`}
-      note="This part of the app is being built in an upcoming sprint."
-    />
   );
 }
 

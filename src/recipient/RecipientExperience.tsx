@@ -4,11 +4,16 @@ import {
   getLanding,
   logEvent,
   startConversation,
+  getConversation,
+  sendRecipientMessage,
+  savedConversation,
   type RecipientLanding,
+  type RecipientConversation,
 } from '@/data/recipient';
 import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { Spinner } from '@/ui/states';
+import { MessageList } from '@/components/MessageList';
 import { SequenceScreenContent } from './SequenceScreenContent';
 
 /**
@@ -24,7 +29,7 @@ type Step =
   | { kind: 'screen'; index: number }
   | { kind: 'connect' }
   | { kind: 'message' }
-  | { kind: 'sent' }
+  | { kind: 'thread'; conversationId: string }
   | { kind: 'closing' };
 
 export default function RecipientExperience() {
@@ -87,6 +92,7 @@ export default function RecipientExperience() {
   }
 
   const { member, screens } = landing;
+  const resumeId = savedConversation(slug);
 
   return (
     <Shell>
@@ -99,6 +105,11 @@ export default function RecipientExperience() {
                 ? { kind: 'screen', index: 0 }
                 : { kind: 'connect' },
             )
+          }
+          onResume={
+            resumeId
+              ? () => goTo({ kind: 'thread', conversationId: resumeId })
+              : undefined
           }
         />
       )}
@@ -138,12 +149,17 @@ export default function RecipientExperience() {
         <MessageForm
           slug={slug}
           memberName={member.name}
-          onSent={() => goTo({ kind: 'sent' })}
+          onSent={(conversationId) => goTo({ kind: 'thread', conversationId })}
           onCancel={() => goTo({ kind: 'connect' })}
         />
       )}
 
-      {step.kind === 'sent' && <Sent memberName={member.name} />}
+      {step.kind === 'thread' && (
+        <RecipientThread
+          conversationId={step.conversationId}
+          fallbackName={member.name}
+        />
+      )}
       {step.kind === 'closing' && <Closing />}
     </Shell>
   );
@@ -163,9 +179,11 @@ function Shell({ children }: { children: React.ReactNode }) {
 function Intro({
   member,
   onBegin,
+  onResume,
 }: {
   member: RecipientLanding['member'];
   onBegin: () => void;
+  onResume?: () => void;
 }) {
   return (
     <div className="flex flex-1 flex-col justify-center gap-8 py-8">
@@ -177,9 +195,16 @@ function Intro({
           </p>
         )}
       </div>
-      <Button onClick={onBegin} className="w-full">
-        Begin
-      </Button>
+      <div className="flex flex-col gap-3">
+        <Button onClick={onBegin} className="w-full">
+          Begin
+        </Button>
+        {onResume && (
+          <Button variant="quiet" onClick={onResume} className="w-full">
+            Continue your conversation with {member.name}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -307,7 +332,7 @@ function MessageForm({
 }: {
   slug: string;
   memberName: string;
-  onSent: () => void;
+  onSent: (conversationId: string) => void;
   onCancel: () => void;
 }) {
   const [firstName, setFirstName] = useState('');
@@ -321,8 +346,8 @@ function MessageForm({
     setError(null);
     setSending(true);
     try {
-      await startConversation({ slug, firstName, email, body });
-      onSent();
+      const conversationId = await startConversation({ slug, firstName, email, body });
+      onSent(conversationId);
     } catch {
       setSending(false);
       setError('That didn’t send. Please try again in a moment.');
@@ -399,15 +424,105 @@ function safeHref(url: string | null): string {
   return `https://${raw}`;
 }
 
-function Sent({ memberName }: { memberName: string }) {
+function RecipientThread({
+  conversationId,
+  fallbackName,
+}: {
+  conversationId: string;
+  fallbackName: string;
+}) {
+  const [convo, setConvo] = useState<RecipientConversation | null | undefined>(
+    undefined,
+  );
+  const [body, setBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      try {
+        const c = await getConversation(conversationId);
+        if (active) setConvo(c);
+      } catch {
+        if (active) setConvo(null);
+      }
+    }
+    void load();
+    // Poll for replies while the thread is open.
+    const t = setInterval(load, 5000);
+    return () => {
+      active = false;
+      clearInterval(t);
+    };
+  }, [conversationId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ block: 'end' });
+  }, [convo]);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!body.trim()) return;
+    setSending(true);
+    try {
+      await sendRecipientMessage(conversationId, body);
+      setBody('');
+      setConvo(await getConversation(conversationId));
+    } catch {
+      /* keep the text so they can retry */
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (convo === undefined) {
+    return (
+      <div className="flex flex-1 items-center justify-center py-16">
+        <Spinner />
+      </div>
+    );
+  }
+
+  const name = convo?.member_name || fallbackName;
+  const closed = convo?.status === 'blocked';
+
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 text-center">
-      <span aria-hidden className="mb-1 block h-[2px] w-8 rounded-full bg-sage/70" />
-      <h1 className="font-serif text-2xl text-sage">Your note is on its way</h1>
-      <p className="max-w-xs text-sm leading-relaxed text-muted-strong">
-        {memberName} will see it and reach out to you personally. You can close
-        this page — they’ll be in touch.
-      </p>
+    <div className="flex min-h-[80vh] flex-col gap-4 py-4">
+      <div className="border-b border-edge/70 pb-3">
+        <p className="text-sm text-muted">Your conversation with</p>
+        <p className="font-serif text-xl text-sage">{name}</p>
+      </div>
+
+      <div className="flex-1">
+        {convo && convo.messages.length > 0 ? (
+          <MessageList messages={convo.messages} mine="recipient" />
+        ) : (
+          <p className="py-8 text-center text-sm text-muted">No messages yet.</p>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {closed ? (
+        <p className="rounded-lg border border-edge bg-card px-3 py-3 text-center text-[13px] text-muted">
+          This conversation has been closed.
+        </p>
+      ) : (
+        <form onSubmit={onSubmit} className="flex items-end gap-2">
+          <div className="flex-1">
+            <TextArea
+              label=""
+              rows={2}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Write a message…"
+            />
+          </div>
+          <Button type="submit" disabled={sending || !body.trim()}>
+            Send
+          </Button>
+        </form>
+      )}
     </div>
   );
 }
