@@ -52,6 +52,7 @@ export interface Database {
           code_slug: string;
           short_message: string;
           active: boolean;
+          email: string | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -64,6 +65,7 @@ export interface Database {
           code_slug: string;
           short_message?: string;
           active?: boolean;
+          email?: string | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -310,7 +312,20 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      claim_membership: {
+        Args: { p_join_code: string; p_name: string };
+        Returns: Database['public']['Tables']['users']['Row'];
+      };
+      invite_member: {
+        Args: { p_name: string; p_email: string };
+        Returns: Database['public']['Tables']['users']['Row'];
+      };
+      set_member_active: {
+        Args: { p_user_id: string; p_active: boolean };
+        Returns: Database['public']['Tables']['users']['Row'];
+      };
+    };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };
