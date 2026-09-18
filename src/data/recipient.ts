@@ -37,6 +37,19 @@ export function getRecipientSessionToken(): string {
   }
 }
 
+/**
+ * Resolve which member a public-offer visitor should be routed to: an explicit
+ * referral (?ref=<slug>), else the org's designated responder, else the first
+ * active member. Returns a code_slug to send them to /r/<slug>.
+ */
+export async function resolveOfferMember(ref: string | null): Promise<string | null> {
+  const { data, error } = await supabase.rpc('resolve_offer_member', {
+    p_ref: ref && ref.trim() ? ref.trim() : null,
+  });
+  if (error) throw error;
+  return (data as string | null) ?? null;
+}
+
 /** Load the greeting + approved sequence for a member handle, or null. */
 export async function getLanding(slug: string): Promise<RecipientLanding | null> {
   const { data, error } = await supabase.rpc('get_recipient_landing', {

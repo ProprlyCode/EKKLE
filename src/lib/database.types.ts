@@ -35,6 +35,7 @@ export interface Database {
           slug: string;
           name: string;
           join_code: string;
+          default_member_id: UUID | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -43,6 +44,7 @@ export interface Database {
           slug: string;
           name: string;
           join_code: string;
+          default_member_id?: UUID | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -388,6 +390,10 @@ export interface Database {
       send_recipient_message: {
         Args: { p_session_token: string; p_conversation_id: string; p_body: string };
         Returns: undefined;
+      };
+      resolve_offer_member: {
+        Args: { p_ref: string | null };
+        Returns: string | null;
       };
     };
     Enums: Record<never, never>;

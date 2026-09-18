@@ -11,3 +11,15 @@ export async function sendMagicLink(email: string): Promise<void> {
   });
   if (error) throw error;
 }
+
+/** Email + password sign-in (admins). Members use the magic link above. */
+export async function signInWithPassword(
+  email: string,
+  password: string,
+): Promise<void> {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  });
+  if (error) throw error;
+}

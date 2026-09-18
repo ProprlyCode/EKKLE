@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
-import { sendMagicLink } from '@/data/auth';
+import { sendMagicLink, signInWithPassword } from '@/data/auth';
 import { Wordmark } from '@/components/Wordmark';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
@@ -9,12 +9,15 @@ import { Marker } from '@/ui/Card';
 import { CenterLayout, ErrorNote, FullPageLoading } from '@/ui/states';
 
 /**
- * Magic-link sign-in. Focal element: the single email field + one action. Once
- * sent, the screen becomes a calm "check your inbox" confirmation — no dead end.
+ * Sign-in. Magic link is the default for everyone; a quiet "use a password"
+ * path is available for admins (they set a password in Supabase). Members never
+ * need it.
  */
 export default function SignIn() {
   const { ready, configured, session } = useSession();
+  const [mode, setMode] = useState<'magic' | 'password'>('magic');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +31,7 @@ export default function SignIn() {
   if (!ready) return <FullPageLoading />;
   if (session) return <Navigate to="/app" replace />;
 
-  async function onSubmit(e: FormEvent) {
+  async function onMagicSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setStatus('sending');
@@ -38,6 +41,19 @@ export default function SignIn() {
     } catch {
       setStatus('idle');
       setError('That didn’t send. Check the address and try again.');
+    }
+  }
+
+  async function onPasswordSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setStatus('sending');
+    try {
+      await signInWithPassword(email, password);
+      // Session updates via the auth listener → redirect happens above.
+    } catch {
+      setStatus('idle');
+      setError('That didn’t work. Check your email and password.');
     }
   }
 
@@ -53,17 +69,12 @@ export default function SignIn() {
               We sent a sign-in link to <span className="text-sage">{email}</span>.
               Open it on this device to continue.
             </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setStatus('idle')}
-              className="mt-1"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setStatus('idle')} className="mt-1">
               Use a different email
             </Button>
           </div>
-        ) : (
-          <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        ) : mode === 'magic' ? (
+          <form onSubmit={onMagicSubmit} className="flex flex-col gap-4">
             <div>
               <h1 className="text-lg">Sign in</h1>
               <p className="mt-1 text-sm text-muted-strong">
@@ -84,6 +95,54 @@ export default function SignIn() {
             <Button type="submit" disabled={status === 'sending' || !email}>
               {status === 'sending' ? 'Sending…' : 'Email me a link'}
             </Button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('password');
+                setError(null);
+              }}
+              className="text-center text-[12px] text-muted transition-colors hover:text-sage"
+            >
+              Use a password instead
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={onPasswordSubmit} className="flex flex-col gap-4">
+            <div>
+              <h1 className="text-lg">Sign in with a password</h1>
+              <p className="mt-1 text-sm text-muted-strong">For admin accounts.</p>
+            </div>
+            <TextInput
+              label="Email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextInput
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {error && <ErrorNote>{error}</ErrorNote>}
+            <Button type="submit" disabled={status === 'sending' || !email || !password}>
+              {status === 'sending' ? 'Signing in…' : 'Sign in'}
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('magic');
+                setError(null);
+              }}
+              className="text-center text-[12px] text-muted transition-colors hover:text-sage"
+            >
+              Use a magic link instead
+            </button>
           </form>
         )}
       </div>

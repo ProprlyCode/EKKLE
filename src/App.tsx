@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import {
   RequireAuth,
   RequireMembership,
@@ -14,6 +14,8 @@ import Thread from '@/routes/member/Thread';
 import People from '@/routes/leadership/People';
 import Content from '@/routes/leadership/Content';
 import RecipientExperience from '@/recipient/RecipientExperience';
+import Home from '@/public/Home';
+import ForChurches from '@/public/ForChurches';
 
 /**
  * Route map. Public: /sign-in and the recipient view /r/:slug (Sprint 3).
@@ -22,7 +24,8 @@ import RecipientExperience from '@/recipient/RecipientExperience';
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/app" replace />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/for-churches" element={<ForChurches />} />
       <Route path="/sign-in" element={<SignIn />} />
 
       {/* Recipient experience (no login) */}
