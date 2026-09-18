@@ -28,7 +28,7 @@ export function AppShell({
         <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 pt-5 pb-0 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <img src="/logo.webp" alt="" width={28} height={28} className="h-7 w-7" />
+              <img src="/logo.png" alt="" width={28} height={28} className="h-7 w-7" />
               <BrandName className="font-serif text-xl font-medium tracking-tight text-sage" />
             </span>
             {right && <div className="sm:hidden">{right}</div>}

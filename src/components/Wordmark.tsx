@@ -8,7 +8,7 @@ import { BrandName } from './BrandName';
 export function Wordmark({ withTagline = false }: { withTagline?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-2">
-      <img src="/logo.webp" alt="" width={56} height={56} className="h-14 w-14" />
+      <img src="/logo.png" alt="" width={56} height={56} className="h-14 w-14" />
       <BrandName className="font-serif text-2xl font-medium tracking-tight text-sage" />
       {withTagline && <span className="eyebrow">{appConfig.tagline}</span>}
     </div>
