@@ -1,0 +1,16 @@
+import { chromium } from 'playwright-core';
+const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args:['--no-sandbox'] });
+const S='/tmp/claude-0/-home-user-EKKLE/379d6e68-028a-5235-802c-63c45f52ddaf/scratchpad/';
+const p = await b.newPage({ viewport:{width:390,height:844} });
+await p.goto('http://localhost:4173/r/demo', { waitUntil:'domcontentloaded' });
+await p.waitForTimeout(400);
+await p.screenshot({ path:S+'r-intro.png' });
+await p.getByText('Begin').click(); await p.waitForTimeout(300);
+await p.screenshot({ path:S+'r-screen.png' });
+await p.getByText('Continue').click(); await p.waitForTimeout(200);
+await p.getByText('Continue').click(); await p.waitForTimeout(200);
+await p.getByText('One more thing').click(); await p.waitForTimeout(300);
+await p.screenshot({ path:S+'r-connect.png' });
+await p.getByText('Message David').click(); await p.waitForTimeout(300);
+await p.screenshot({ path:S+'r-message.png' });
+await b.close(); console.log('recipient shots done');

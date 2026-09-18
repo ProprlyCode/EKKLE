@@ -11,10 +11,17 @@ export type Member = Tables<'users'>;
 
 /** The current signed-in user's membership row, or null if not yet a member. */
 export async function getMyMembership(): Promise<Member | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  // Must filter by auth_uid: RLS lets a member see every user in their org, so
+  // an unfiltered query would return an arbitrary row, not the signed-in one.
   const { data, error } = await supabase
     .from('users')
     .select('*')
-    .limit(1)
+    .eq('auth_uid', user.id)
     .maybeSingle();
   if (error) throw error;
   return data;

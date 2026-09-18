@@ -11,6 +11,7 @@ import SignIn from '@/routes/SignIn';
 import Onboarding from '@/routes/Onboarding';
 import MemberDashboard from '@/routes/member/Dashboard';
 import People from '@/routes/leadership/People';
+import RecipientExperience from '@/recipient/RecipientExperience';
 
 /**
  * Route map. Public: /sign-in and the recipient view /r/:slug (Sprint 3).
@@ -22,8 +23,8 @@ export default function App() {
       <Route path="/" element={<Navigate to="/app" replace />} />
       <Route path="/sign-in" element={<SignIn />} />
 
-      {/* Recipient experience — built in Sprint 3 */}
-      <Route path="/r/:slug" element={<RecipientPlaceholder />} />
+      {/* Recipient experience (no login) */}
+      <Route path="/r/:slug" element={<RecipientExperience />} />
 
       <Route element={<RequireAuth />}>
         <Route path="/welcome" element={<Onboarding />} />
@@ -56,20 +57,6 @@ function ComingSoon({ what }: { what: string }) {
       title={`${what} is on the way`}
       note="This part of the app is being built in an upcoming sprint."
     />
-  );
-}
-
-function RecipientPlaceholder() {
-  return (
-    <main className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-6 px-4 py-16 text-center">
-      <Wordmark withTagline />
-      <div className="card w-full px-6 py-8">
-        <h1 className="text-xl">A moment shared with you</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-strong">
-          The guided welcome experience arrives in the next sprint.
-        </p>
-      </div>
-    </main>
   );
 }
 

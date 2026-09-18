@@ -10,6 +10,13 @@
 
 type Timestamp = string;
 type UUID = string;
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export type Role = 'member' | 'leadership' | 'platform_admin';
 export type SequenceStatus = 'draft' | 'approved';
@@ -324,6 +331,24 @@ export interface Database {
       set_member_active: {
         Args: { p_user_id: string; p_active: boolean };
         Returns: Database['public']['Tables']['users']['Row'];
+      };
+      get_recipient_landing: {
+        Args: { p_slug: string };
+        Returns: Json;
+      };
+      log_sequence_event: {
+        Args: { p_session_token: string; p_slug: string; p_event: string };
+        Returns: undefined;
+      };
+      start_conversation: {
+        Args: {
+          p_session_token: string;
+          p_slug: string;
+          p_first_name: string;
+          p_email: string;
+          p_body: string;
+        };
+        Returns: string;
       };
     };
     Enums: Record<never, never>;
