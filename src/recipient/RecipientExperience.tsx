@@ -7,6 +7,7 @@ import {
   getConversation,
   sendRecipientMessage,
   savedConversation,
+  savedLead,
   type RecipientLanding,
   type RecipientConversation,
 } from '@/data/recipient';
@@ -335,8 +336,9 @@ function MessageForm({
   onSent: (conversationId: string) => void;
   onCancel: () => void;
 }) {
-  const [firstName, setFirstName] = useState('');
-  const [email, setEmail] = useState('');
+  const lead = savedLead();
+  const [firstName, setFirstName] = useState(lead?.firstName ?? '');
+  const [email, setEmail] = useState(lead?.email ?? '');
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);

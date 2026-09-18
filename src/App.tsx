@@ -16,6 +16,7 @@ import Content from '@/routes/leadership/Content';
 import RecipientExperience from '@/recipient/RecipientExperience';
 import Home from '@/public/Home';
 import ForChurches from '@/public/ForChurches';
+import Offer from '@/public/Offer';
 
 /**
  * Route map. Public: /sign-in and the recipient view /r/:slug (Sprint 3).
@@ -26,6 +27,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/for-churches" element={<ForChurches />} />
+      <Route path="/offer" element={<Offer />} />
       <Route path="/sign-in" element={<SignIn />} />
 
       {/* Recipient experience (no login) */}

@@ -50,6 +50,45 @@ export async function resolveOfferMember(ref: string | null): Promise<string | n
   return (data as string | null) ?? null;
 }
 
+const LEAD_KEY = 'ekkle_offer_lead';
+
+/** The name/email captured at the /offer gate, remembered to prefill later. */
+export function savedLead(): { firstName: string; email: string } | null {
+  try {
+    const raw = localStorage.getItem(LEAD_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Offer email gate: capture the lead (name + email) attributed to the resolved
+ * member, then return the member slug to route into the study (/r/<slug>).
+ */
+export async function registerOfferLead(input: {
+  ref: string | null;
+  firstName: string;
+  email: string;
+}): Promise<string | null> {
+  const { data, error } = await supabase.rpc('register_offer_lead', {
+    p_session_token: getRecipientSessionToken(),
+    p_ref: input.ref && input.ref.trim() ? input.ref.trim() : null,
+    p_first_name: input.firstName,
+    p_email: input.email,
+  });
+  if (error) throw error;
+  try {
+    localStorage.setItem(
+      LEAD_KEY,
+      JSON.stringify({ firstName: input.firstName.trim(), email: input.email.trim() }),
+    );
+  } catch {
+    /* storage blocked — prefill just won't persist */
+  }
+  return (data as string | null) ?? null;
+}
+
 /** Load the greeting + approved sequence for a member handle, or null. */
 export async function getLanding(slug: string): Promise<RecipientLanding | null> {
   const { data, error } = await supabase.rpc('get_recipient_landing', {

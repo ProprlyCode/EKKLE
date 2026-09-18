@@ -395,6 +395,15 @@ export interface Database {
         Args: { p_ref: string | null };
         Returns: string | null;
       };
+      register_offer_lead: {
+        Args: {
+          p_session_token: string;
+          p_ref: string | null;
+          p_first_name: string;
+          p_email: string;
+        };
+        Returns: string | null;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
