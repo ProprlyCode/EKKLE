@@ -1,58 +1,88 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import {
+  RequireAuth,
+  RequireMembership,
+  RequireLeadership,
+  AuthedLayout,
+} from '@/auth/guards';
 import { Wordmark } from '@/components/Wordmark';
+import { EmptyState } from '@/ui/states';
+import SignIn from '@/routes/SignIn';
+import Onboarding from '@/routes/Onboarding';
+import MemberDashboard from '@/routes/member/Dashboard';
+import People from '@/routes/leadership/People';
 
 /**
- * App shell + routing.
- *
- * Sprint 1 lays down the route map with branded placeholders. Real screens land
- * per sprint:
- *   - /sign-in, /app (member), /leadership   → Sprint 2
- *   - /r/:slug (recipient experience)         → Sprint 3
+ * Route map. Public: /sign-in and the recipient view /r/:slug (Sprint 3).
+ * Authed member area and leadership tools sit behind guards + the shared shell.
  */
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/app" replace />} />
+      <Route path="/sign-in" element={<SignIn />} />
 
-function Placeholder({ title, note }: { title: string; note: string }) {
+      {/* Recipient experience — built in Sprint 3 */}
+      <Route path="/r/:slug" element={<RecipientPlaceholder />} />
+
+      <Route element={<RequireAuth />}>
+        <Route path="/welcome" element={<Onboarding />} />
+
+        <Route element={<RequireMembership />}>
+          <Route element={<AuthedLayout />}>
+            <Route path="/app" element={<MemberDashboard />} />
+            <Route path="/app/messages" element={<ComingSoon what="Messages" />} />
+
+            <Route element={<RequireLeadership />}>
+              <Route
+                path="/leadership/content"
+                element={<ComingSoon what="Content" />}
+              />
+              <Route path="/leadership/people" element={<People />} />
+            </Route>
+          </Route>
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+/** In-shell placeholder for routes arriving in later sprints. */
+function ComingSoon({ what }: { what: string }) {
+  return (
+    <EmptyState
+      title={`${what} is on the way`}
+      note="This part of the app is being built in an upcoming sprint."
+    />
+  );
+}
+
+function RecipientPlaceholder() {
   return (
     <main className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-6 px-4 py-16 text-center">
       <Wordmark withTagline />
       <div className="card w-full px-6 py-8">
-        <h1 className="text-xl">{title}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-strong">{note}</p>
+        <h1 className="text-xl">A moment shared with you</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-strong">
+          The guided welcome experience arrives in the next sprint.
+        </p>
       </div>
     </main>
   );
 }
 
-export default function App() {
+function NotFound() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/sign-in" replace />} />
-      <Route
-        path="/sign-in"
-        element={
-          <Placeholder
-            title="Welcome"
-            note="Sign-in for members and leaders arrives in the next sprint."
-          />
-        }
-      />
-      <Route
-        path="/r/:slug"
-        element={
-          <Placeholder
-            title="A moment shared with you"
-            note="The guided welcome experience arrives in a later sprint."
-          />
-        }
-      />
-      <Route
-        path="*"
-        element={
-          <Placeholder
-            title="Not found"
-            note="This page doesn’t exist, or it moved somewhere quieter."
-          />
-        }
-      />
-    </Routes>
+    <main className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-6 px-4 py-16 text-center">
+      <Wordmark />
+      <div className="card w-full px-6 py-8">
+        <h1 className="text-xl">Not found</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-strong">
+          This page doesn’t exist, or it moved somewhere quieter.
+        </p>
+      </div>
+    </main>
   );
 }
