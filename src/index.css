@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Brand tokens — single source of truth for the Ekklē palette.
+ * Change these to rebrand the platform chrome. Church-authored content and
+ * the recipient experience deliberately keep this restrained.
+ */
+:root {
+  --color-sage: #3f4a3a;
+  --color-sage-soft: #4d5945;
+  --color-canvas: #f4f1ea;
+  --color-card: #fdfcf8;
+  --color-edge: #e4dfd1;
+  --color-muted: #8a8676;
+  --color-muted-strong: #6b6754;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-sage antialiased;
+    font-family: theme('fontFamily.sans');
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: theme('fontFamily.serif');
+    font-weight: 500;
+    font-optical-sizing: auto;
+  }
+}
+
+@layer components {
+  /* Small uppercase eyebrow label, e.g. "gathered together" */
+  .eyebrow {
+    @apply text-xs uppercase tracking-eyebrow text-muted;
+  }
+
+  .card {
+    @apply rounded-card border border-edge bg-card;
+  }
+}
