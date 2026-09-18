@@ -11,6 +11,7 @@ import SignIn from '@/routes/SignIn';
 import Onboarding from '@/routes/Onboarding';
 import MemberDashboard from '@/routes/member/Dashboard';
 import People from '@/routes/leadership/People';
+import Content from '@/routes/leadership/Content';
 import RecipientExperience from '@/recipient/RecipientExperience';
 
 /**
@@ -35,10 +36,7 @@ export default function App() {
             <Route path="/app/messages" element={<ComingSoon what="Messages" />} />
 
             <Route element={<RequireLeadership />}>
-              <Route
-                path="/leadership/content"
-                element={<ComingSoon what="Content" />}
-              />
+              <Route path="/leadership/content" element={<Content />} />
               <Route path="/leadership/people" element={<People />} />
             </Route>
           </Route>

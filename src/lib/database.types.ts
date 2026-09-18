@@ -350,6 +350,10 @@ export interface Database {
         };
         Returns: string;
       };
+      replace_sequence_screens: {
+        Args: { p_sequence_id: string; p_screens: Json };
+        Returns: undefined;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

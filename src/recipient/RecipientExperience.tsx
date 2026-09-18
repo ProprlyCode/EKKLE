@@ -9,6 +9,7 @@ import {
 import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { Spinner } from '@/ui/states';
+import { SequenceScreenContent } from './SequenceScreenContent';
 
 /**
  * The recipient experience (/r/:slug) — no login.
@@ -198,11 +199,8 @@ function ScreenView({
   return (
     <div className="flex flex-1 flex-col">
       <Progress index={index} total={total} />
-      <div className="flex flex-1 flex-col justify-center gap-5 py-10">
-        <h1 className="font-serif text-3xl leading-tight text-sage">
-          {screen.headline}
-        </h1>
-        <p className="text-[17px] leading-relaxed text-muted-strong">{screen.body}</p>
+      <div className="flex flex-1 flex-col justify-center py-10">
+        <SequenceScreenContent headline={screen.headline} body={screen.body} />
       </div>
       <div className="flex flex-col gap-3">
         <Button onClick={onContinue} className="w-full">
