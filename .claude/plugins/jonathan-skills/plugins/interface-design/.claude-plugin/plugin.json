@@ -1,0 +1,9 @@
+{
+  "name": "interface-design",
+  "version": "1.0.0",
+  "description": "Craft-first interface design for dashboards, admin panels, SaaS apps, tools, settings pages, and data interfaces. Enforces visual hierarchy, design-system architecture, and polish so UI reads as designed, not generated.",
+  "author": {
+    "name": "Jonathan"
+  },
+  "keywords": ["design", "ui", "interface", "dashboard", "design-system", "frontend"]
+}

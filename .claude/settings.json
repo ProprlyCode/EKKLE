@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "jonathan-skills": {
+      "source": {
+        "source": "directory",
+        "path": ".claude/plugins/jonathan-skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "interface-design@jonathan-skills": true
+  }
+}

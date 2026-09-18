@@ -1,0 +1,16 @@
+{
+  "name": "jonathan-skills",
+  "owner": {
+    "name": "Jonathan"
+  },
+  "metadata": {
+    "description": "Personal Claude Code plugins."
+  },
+  "plugins": [
+    {
+      "name": "interface-design",
+      "source": "./plugins/interface-design",
+      "description": "Craft-first interface design for product UI — hierarchy, design systems, and polish."
+    }
+  ]
+}
