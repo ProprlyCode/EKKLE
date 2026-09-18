@@ -14,7 +14,7 @@ export function BrandName({ className }: { className?: string }) {
         <span
           aria-hidden
           className="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-full bg-current"
-          style={{ width: '0.5em', height: '0.06em', bottom: '0.74em' }}
+          style={{ width: '0.34em', height: '0.045em', bottom: '0.72em' }}
         />
       </span>
     </span>
