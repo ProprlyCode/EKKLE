@@ -216,8 +216,9 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
       setSavedScreens(screens);
       await updateSequenceConnect(id, connect);
       setSavedConnect(connect);
-    } catch {
-      setError('Couldn’t save. Please try again.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(`Couldn’t save: ${msg}`);
     } finally {
       setSaving(false);
     }
