@@ -39,15 +39,21 @@ as $$
   );
 $$;
 
--- Provision the founder as platform admin. No auth_uid yet — it links to the
--- Supabase auth account on first magic-link sign-in (email match).
-insert into users (id, org_id, name, role, code_slug, email, short_message)
-values (
-  '00000000-0000-0000-0000-0000000000b0',
+-- Provision the founder as platform admin. Idempotent and safe whether or not
+-- the account already exists (e.g. they self-joined before this ran): promote
+-- the row for this email if present, otherwise create one with a collision-proof
+-- slug. Links to the Supabase auth account on first magic-link sign-in.
+update users set role = 'platform_admin'
+where lower(email) = 'jwoodhall24@gmail.com';
+
+insert into users (org_id, name, role, code_slug, email, short_message)
+select
   '00000000-0000-0000-0000-0000000000a1',
   'Jonathan',
   'platform_admin',
-  'jonathan',
+  generate_member_slug('Jonathan'),
   'jwoodhall24@gmail.com',
   'Would love to talk whenever you’re ready.'
-) on conflict (id) do nothing;
+where not exists (
+  select 1 from users where lower(email) = 'jwoodhall24@gmail.com'
+);
