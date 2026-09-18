@@ -12,6 +12,30 @@ export interface ScreenDraft {
   icon: string | null;
 }
 
+export type CtaKind = 'message' | 'link';
+export interface Cta {
+  label: string;
+  kind: CtaKind;
+  url: string | null;
+}
+export interface ConnectConfig {
+  headline: string;
+  body: string;
+  ctas: Cta[];
+}
+
+/** Parse a sequence row's stored ending config into a typed ConnectConfig. */
+export function readConnect(sequence: Sequence): ConnectConfig {
+  const ctas = Array.isArray(sequence.ctas)
+    ? (sequence.ctas as unknown as Cta[])
+    : [];
+  return {
+    headline: sequence.connect_headline ?? '',
+    body: sequence.connect_body ?? '',
+    ctas,
+  };
+}
+
 export interface SequenceWithScreens {
   sequence: Sequence;
   screens: SequenceScreen[];
@@ -78,6 +102,22 @@ export async function updateSequenceTitle(id: string, title: string): Promise<vo
   const { error } = await supabase
     .from('sequences')
     .update({ title: title.trim() || 'Untitled flow' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+/** Save a flow's ending headline/body + CTAs. */
+export async function updateSequenceConnect(
+  id: string,
+  connect: ConnectConfig,
+): Promise<void> {
+  const { error } = await supabase
+    .from('sequences')
+    .update({
+      connect_headline: connect.headline,
+      connect_body: connect.body,
+      ctas: connect.ctas as unknown as Json,
+    })
     .eq('id', id);
   if (error) throw error;
 }

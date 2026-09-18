@@ -127,6 +127,7 @@ export default function RecipientExperience() {
 
       {step.kind === 'connect' && (
         <Connect
+          connect={landing.connect}
           memberName={member.name}
           onMessage={() => goTo({ kind: 'message' })}
           onKeepReading={() => goTo({ kind: 'closing' })}
@@ -234,30 +235,62 @@ function Progress({ index, total }: { index: number; total: number }) {
 }
 
 function Connect({
+  connect,
   memberName,
   onMessage,
   onKeepReading,
 }: {
+  connect: RecipientLanding['connect'];
   memberName: string;
   onMessage: () => void;
   onKeepReading: () => void;
 }) {
+  const headline = connect.headline?.trim() || 'someone here would love to talk';
+  const body =
+    connect.body?.trim() ||
+    `${memberName} shared this with you and would genuinely welcome a conversation — no pressure, no script. Or you can sit with it a while. Both are okay.`;
+  // Default to a single "message the member" action if nothing is configured.
+  const ctas =
+    connect.ctas.length > 0
+      ? connect.ctas
+      : [{ label: `Message ${memberName}`, kind: 'message' as const, url: null }];
+
   return (
     <div className="flex flex-1 flex-col justify-center gap-6 py-10">
       <div className="flex flex-col gap-3">
-        <h1 className="font-serif text-3xl leading-tight text-sage">
-          someone here would love to talk
-        </h1>
-        <p className="text-[17px] leading-relaxed text-muted-strong">
-          {memberName} shared this with you and would genuinely welcome a
-          conversation — no pressure, no script. Or you can sit with it a while.
-          Both are okay.
+        <h1 className="font-serif text-3xl leading-tight text-sage">{headline}</h1>
+        <p className="whitespace-pre-wrap text-[17px] leading-relaxed text-muted-strong">
+          {body}
         </p>
       </div>
       <div className="flex flex-col gap-3">
-        <Button onClick={onMessage} className="w-full">
-          Message {memberName}
-        </Button>
+        {ctas.map((cta, i) =>
+          cta.kind === 'message' ? (
+            <Button
+              key={i}
+              variant={i === 0 ? 'primary' : 'quiet'}
+              onClick={onMessage}
+              className="w-full"
+            >
+              {cta.label || `Message ${memberName}`}
+            </Button>
+          ) : (
+            <a
+              key={i}
+              href={safeHref(cta.url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={
+                'inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-colors ' +
+                (i === 0
+                  ? 'bg-sage text-canvas hover:bg-sage-soft'
+                  : 'text-sage hover:bg-sage/5')
+              }
+            >
+              {cta.label || 'Open'}
+            </a>
+          ),
+        )}
         <Button variant="quiet" onClick={onKeepReading} className="w-full">
           Not right now
         </Button>
@@ -355,6 +388,15 @@ function MessageForm({
       </form>
     </div>
   );
+}
+
+/** Only allow http(s) link destinations; add https:// if the scheme is missing. */
+function safeHref(url: string | null): string {
+  const raw = (url ?? '').trim();
+  if (!raw) return '#';
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) return '#'; // some other scheme (javascript:, data:, …)
+  return `https://${raw}`;
 }
 
 function Sent({ memberName }: { memberName: string }) {

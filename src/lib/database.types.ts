@@ -88,6 +88,9 @@ export interface Database {
           title: string;
           type: string;
           status: SequenceStatus;
+          connect_headline: string;
+          connect_body: string;
+          ctas: Json;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -97,6 +100,9 @@ export interface Database {
           title: string;
           type?: string;
           status?: SequenceStatus;
+          connect_headline?: string;
+          connect_body?: string;
+          ctas?: Json;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };

@@ -5,11 +5,15 @@ import {
   getSequence,
   createSequence,
   updateSequenceTitle,
+  updateSequenceConnect,
   deleteSequence,
   setSequenceStatus,
   replaceScreens,
+  readConnect,
   type Sequence,
   type ScreenDraft,
+  type ConnectConfig,
+  type Cta,
 } from '@/data/sequences';
 import { Card } from '@/ui/Card';
 import { Button } from '@/ui/Button';
@@ -134,6 +138,16 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
   const [status, setStatus] = useState<'draft' | 'approved'>('draft');
   const [screens, setScreens] = useState<EditableScreen[]>([]);
   const [savedScreens, setSavedScreens] = useState<EditableScreen[]>([]);
+  const [connect, setConnect] = useState<ConnectConfig>({
+    headline: '',
+    body: '',
+    ctas: [],
+  });
+  const [savedConnect, setSavedConnect] = useState<ConnectConfig>({
+    headline: '',
+    body: '',
+    ctas: [],
+  });
   const [saving, setSaving] = useState(false);
   const [preview, setPreview] = useState(0);
 
@@ -152,6 +166,9 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
         }));
         setScreens(es);
         setSavedScreens(es);
+        const c = readConnect(data.sequence);
+        setConnect(c);
+        setSavedConnect(c);
       })
       .catch(() => setError('Couldn’t load this flow.'))
       .finally(() => setLoading(false));
@@ -160,8 +177,9 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
   const dirty = useMemo(
     () =>
       title !== savedTitle ||
-      JSON.stringify(strip(screens)) !== JSON.stringify(strip(savedScreens)),
-    [title, savedTitle, screens, savedScreens],
+      JSON.stringify(strip(screens)) !== JSON.stringify(strip(savedScreens)) ||
+      JSON.stringify(connect) !== JSON.stringify(savedConnect),
+    [title, savedTitle, screens, savedScreens, connect, savedConnect],
   );
 
   function update(key: string, patch: Partial<ScreenDraft>) {
@@ -196,11 +214,29 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
       }
       await replaceScreens(id, strip(screens));
       setSavedScreens(screens);
+      await updateSequenceConnect(id, connect);
+      setSavedConnect(connect);
     } catch {
       setError('Couldn’t save. Please try again.');
     } finally {
       setSaving(false);
     }
+  }
+
+  function updateCta(index: number, patch: Partial<Cta>) {
+    setConnect((c) => ({
+      ...c,
+      ctas: c.ctas.map((cta, i) => (i === index ? { ...cta, ...patch } : cta)),
+    }));
+  }
+  function addCta() {
+    setConnect((c) => ({
+      ...c,
+      ctas: [...c.ctas, { label: '', kind: 'message', url: null }],
+    }));
+  }
+  function removeCta(index: number) {
+    setConnect((c) => ({ ...c, ctas: c.ctas.filter((_, i) => i !== index) }));
   }
 
   async function toggleStatus() {
@@ -309,10 +345,82 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
               />
             </Card>
           ))}
+          <Button variant="quiet" className="self-start" onClick={add}>
+            Add screen
+          </Button>
+
+          {/* Ending: headline, body, and the CTAs that decide where people go */}
+          <Card className="flex flex-col gap-3">
+            <div>
+              <span className="eyebrow">ending</span>
+              <p className="mt-1 text-[13px] text-muted-strong">
+                The last screen and where its buttons take people.
+              </p>
+            </div>
+            <TextInput
+              label="Headline"
+              value={connect.headline}
+              placeholder="someone here would love to talk"
+              onChange={(e) => setConnect((c) => ({ ...c, headline: e.target.value }))}
+            />
+            <TextArea
+              label="Body"
+              rows={3}
+              value={connect.body}
+              placeholder="Leave blank to use the default invitation."
+              onChange={(e) => setConnect((c) => ({ ...c, body: e.target.value }))}
+            />
+            <div className="flex flex-col gap-3">
+              <span className="text-[13px] font-medium text-muted-strong">Buttons</span>
+              {connect.ctas.length === 0 && (
+                <p className="text-[13px] text-muted">
+                  No buttons yet — recipients will just see “Message {`{member}`}”.
+                </p>
+              )}
+              {connect.ctas.map((cta, i) => (
+                <div key={i} className="flex flex-col gap-2 rounded-lg border border-edge/70 p-3">
+                  <div className="flex gap-2">
+                    <input
+                      value={cta.label}
+                      placeholder="Button label"
+                      onChange={(e) => updateCta(i, { label: e.target.value })}
+                      className="flex-1 rounded-lg border border-edge bg-canvas px-3 py-2 text-sm text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
+                    />
+                    <select
+                      value={cta.kind}
+                      onChange={(e) =>
+                        updateCta(i, { kind: e.target.value as Cta['kind'] })
+                      }
+                      className="rounded-lg border border-edge bg-canvas px-2 py-2 text-sm text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
+                    >
+                      <option value="message">Message the member</option>
+                      <option value="link">Open a link</option>
+                    </select>
+                  </div>
+                  {cta.kind === 'link' && (
+                    <input
+                      value={cta.url ?? ''}
+                      placeholder="https://…"
+                      inputMode="url"
+                      onChange={(e) => updateCta(i, { url: e.target.value })}
+                      className="rounded-lg border border-edge bg-canvas px-3 py-2 text-sm text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
+                    />
+                  )}
+                  <button
+                    onClick={() => removeCta(i)}
+                    className="self-start text-[12px] text-muted transition-colors hover:text-sage"
+                  >
+                    Remove button
+                  </button>
+                </div>
+              ))}
+              <Button variant="quiet" size="sm" className="self-start" onClick={addCta}>
+                Add button
+              </Button>
+            </div>
+          </Card>
+
           <div className="flex items-center gap-3">
-            <Button variant="quiet" onClick={add}>
-              Add screen
-            </Button>
             <div className="flex-1" />
             <Button onClick={save} disabled={!dirty || saving}>
               {saving ? 'Saving…' : 'Save'}
@@ -372,6 +480,38 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+
+          <span className="mt-4 block eyebrow">ending preview</span>
+          <div className="mt-2 overflow-hidden rounded-2xl border border-edge bg-canvas">
+            <div className="flex flex-col gap-4 px-5 py-6">
+              <h1 className="font-serif text-2xl leading-tight text-sage">
+                {connect.headline.trim() || 'someone here would love to talk'}
+              </h1>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-strong">
+                {connect.body.trim() ||
+                  'They shared this with you and would genuinely welcome a conversation.'}
+              </p>
+              <div className="flex flex-col gap-2">
+                {(connect.ctas.length > 0
+                  ? connect.ctas
+                  : [{ label: 'Message the member', kind: 'message' as const, url: null }]
+                ).map((cta, i) => (
+                  <span
+                    key={i}
+                    className={
+                      'inline-flex h-9 items-center justify-center rounded-lg px-3 text-[13px] font-medium ' +
+                      (i === 0 ? 'bg-sage text-canvas' : 'text-sage')
+                    }
+                  >
+                    {cta.label || (cta.kind === 'link' ? 'Open' : 'Message the member')}
+                  </span>
+                ))}
+                <span className="inline-flex h-9 items-center justify-center rounded-lg px-3 text-[13px] font-medium text-sage">
+                  Not right now
+                </span>
+              </div>
             </div>
           </div>
         </div>

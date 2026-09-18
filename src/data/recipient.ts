@@ -5,9 +5,16 @@ import { supabase } from '@/lib/supabase';
  * The recipient is identified only by a device-local session token.
  */
 
+export interface RecipientCta {
+  label: string;
+  kind: 'message' | 'link';
+  url: string | null;
+}
+
 export interface RecipientLanding {
   member: { name: string; short_message: string };
   sequence: { id: string; title: string };
+  connect: { headline: string; body: string; ctas: RecipientCta[] };
   screens: Array<{ headline: string; body: string; icon: string | null }>;
 }
 
