@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSession } from '@/auth/SessionProvider';
-import { updateMyProfile } from '@/data/members';
+import { updateMyProfile, setActiveSequence } from '@/data/members';
+import { listApprovedSequences, type Sequence } from '@/data/sequences';
 import { env } from '@/lib/env';
 import { appConfig } from '@/config/app';
 import { QrImage, useQrDataUrl } from '@/ui/QrCode';
@@ -31,6 +32,13 @@ export default function MemberDashboard() {
         name={membership.name}
         message={membership.short_message}
         shareUrl={shareUrl}
+      />
+      <FlowPicker
+        activeSequenceId={membership.active_sequence_id}
+        onChange={async (sequenceId) => {
+          await setActiveSequence(sequenceId);
+          await refreshMembership();
+        }}
       />
       <ProfileEditor
         key={membership.id}
@@ -112,6 +120,59 @@ function KeepsakeCard({
         <p className="break-all text-center text-[12px] text-muted">{shareUrl}</p>
       </div>
     </section>
+  );
+}
+
+function FlowPicker({
+  activeSequenceId,
+  onChange,
+}: {
+  activeSequenceId: string | null;
+  onChange: (sequenceId: string | null) => Promise<void>;
+}) {
+  const [flows, setFlows] = useState<Pick<Sequence, 'id' | 'title'>[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    listApprovedSequences()
+      .then(setFlows)
+      .catch(() => setFlows([]));
+  }, []);
+
+  // Only a meaningful choice when there's more than one published flow.
+  if (flows.length < 2) return null;
+
+  async function select(value: string) {
+    setSaving(true);
+    try {
+      await onChange(value || null);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card className="flex flex-col gap-3">
+      <div>
+        <h2 className="text-base">Which invitation your code shares</h2>
+        <p className="mt-1 text-sm text-muted-strong">
+          Choose the flow people see when they open your code.
+        </p>
+      </div>
+      <select
+        value={activeSequenceId ?? ''}
+        disabled={saving}
+        onChange={(e) => void select(e.target.value)}
+        className="w-full rounded-lg border border-edge bg-canvas px-3 py-2 text-sm text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40 disabled:opacity-50"
+      >
+        <option value="">Default (first published)</option>
+        {flows.map((f) => (
+          <option key={f.id} value={f.id}>
+            {f.title}
+          </option>
+        ))}
+      </select>
+    </Card>
   );
 }
 

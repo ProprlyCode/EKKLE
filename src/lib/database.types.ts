@@ -60,6 +60,7 @@ export interface Database {
           short_message: string;
           active: boolean;
           email: string | null;
+          active_sequence_id: UUID | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -73,6 +74,7 @@ export interface Database {
           short_message?: string;
           active?: boolean;
           email?: string | null;
+          active_sequence_id?: UUID | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -353,6 +355,10 @@ export interface Database {
       replace_sequence_screens: {
         Args: { p_sequence_id: string; p_screens: Json };
         Returns: undefined;
+      };
+      set_my_active_sequence: {
+        Args: { p_sequence_id: string | null };
+        Returns: Database['public']['Tables']['users']['Row'];
       };
     };
     Enums: Record<never, never>;

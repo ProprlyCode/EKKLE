@@ -86,6 +86,17 @@ export async function inviteMember(name: string, email: string): Promise<Member>
   return data;
 }
 
+/** Set (or clear, with null) the member's active flow. Must be an approved flow. */
+export async function setActiveSequence(
+  sequenceId: string | null,
+): Promise<Member> {
+  const { data, error } = await supabase.rpc('set_my_active_sequence', {
+    p_sequence_id: sequenceId,
+  });
+  if (error) throw error;
+  return data;
+}
+
 /** Leadership: activate/deactivate a member. */
 export async function setMemberActive(
   userId: string,

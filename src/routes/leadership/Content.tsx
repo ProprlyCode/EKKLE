@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSession } from '@/auth/SessionProvider';
 import {
-  getOrgSequence,
+  listSequences,
+  getSequence,
+  createSequence,
+  updateSequenceTitle,
+  deleteSequence,
   setSequenceStatus,
   replaceScreens,
+  type Sequence,
   type ScreenDraft,
 } from '@/data/sequences';
 import { Card } from '@/ui/Card';
@@ -11,19 +17,120 @@ import { TextInput, TextArea } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
 import { SequenceScreenContent } from '@/recipient/SequenceScreenContent';
 
+/**
+ * Leadership → Content. Manage multiple invitation flows: a list of flows, and
+ * an editor for each (title, screens with live preview, draft/published).
+ * Members choose a published flow for their own QR (see the member dashboard).
+ */
+export default function Content() {
+  const { membership } = useSession();
+  const [view, setView] = useState<{ mode: 'list' } | { mode: 'edit'; id: string }>({
+    mode: 'list',
+  });
+  const [sequences, setSequences] = useState<Sequence[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function refresh() {
+    try {
+      setSequences(await listSequences());
+    } catch {
+      setError('Couldn’t load your flows.');
+    }
+  }
+  useEffect(() => {
+    void refresh();
+  }, []);
+
+  async function newFlow() {
+    if (!membership) return;
+    try {
+      const seq = await createSequence(membership.org_id, 'New flow');
+      await refresh();
+      setView({ mode: 'edit', id: seq.id });
+    } catch {
+      setError('Couldn’t create a flow.');
+    }
+  }
+
+  if (view.mode === 'edit') {
+    return (
+      <FlowEditor
+        id={view.id}
+        onBack={() => {
+          setView({ mode: 'list' });
+          void refresh();
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl">Content</h1>
+          <p className="mt-1 text-sm text-muted-strong">
+            Invitation flows your members can share.
+          </p>
+        </div>
+        <Button onClick={newFlow}>New flow</Button>
+      </div>
+
+      {error && <ErrorNote>{error}</ErrorNote>}
+
+      {sequences === null ? (
+        <div className="py-8">
+          <Spinner />
+        </div>
+      ) : sequences.length === 0 ? (
+        <EmptyState
+          title="No flows yet"
+          note="Create your first invitation flow to get started."
+          action={
+            <Button className="mt-1" onClick={newFlow}>
+              New flow
+            </Button>
+          }
+        />
+      ) : (
+        <Card className="p-0">
+          <ul className="divide-y divide-edge/70">
+            {sequences.map((s) => (
+              <li key={s.id}>
+                <button
+                  onClick={() => setView({ mode: 'edit', id: s.id })}
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-sage/5"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium text-sage">
+                      {s.title}
+                    </span>
+                    <span className="text-[13px] text-muted">
+                      {s.status === 'approved' ? 'Published' : 'Draft'}
+                    </span>
+                  </span>
+                  <span aria-hidden className="text-muted">
+                    →
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 interface EditableScreen extends ScreenDraft {
   key: string;
 }
 
-/**
- * Leadership → Content. Author the guided welcome sequence with a live preview
- * of exactly what recipients see. Draft/approved gates whether it's ever shown.
- */
-export default function Content() {
+function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sequenceId, setSequenceId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
+  const [savedTitle, setSavedTitle] = useState('');
   const [status, setStatus] = useState<'draft' | 'approved'>('draft');
   const [screens, setScreens] = useState<EditableScreen[]>([]);
   const [savedScreens, setSavedScreens] = useState<EditableScreen[]>([]);
@@ -31,11 +138,11 @@ export default function Content() {
   const [preview, setPreview] = useState(0);
 
   useEffect(() => {
-    getOrgSequence()
+    getSequence(id)
       .then((data) => {
         if (!data) return;
-        setSequenceId(data.sequence.id);
         setTitle(data.sequence.title);
+        setSavedTitle(data.sequence.title);
         setStatus(data.sequence.status);
         const es = data.screens.map((s) => ({
           key: crypto.randomUUID(),
@@ -46,19 +153,19 @@ export default function Content() {
         setScreens(es);
         setSavedScreens(es);
       })
-      .catch(() => setError('Couldn’t load your sequence.'))
+      .catch(() => setError('Couldn’t load this flow.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [id]);
 
   const dirty = useMemo(
-    () => JSON.stringify(strip(screens)) !== JSON.stringify(strip(savedScreens)),
-    [screens, savedScreens],
+    () =>
+      title !== savedTitle ||
+      JSON.stringify(strip(screens)) !== JSON.stringify(strip(savedScreens)),
+    [title, savedTitle, screens, savedScreens],
   );
 
   function update(key: string, patch: Partial<ScreenDraft>) {
-    setScreens((prev) =>
-      prev.map((s) => (s.key === key ? { ...s, ...patch } : s)),
-    );
+    setScreens((prev) => prev.map((s) => (s.key === key ? { ...s, ...patch } : s)));
   }
   function add() {
     setScreens((prev) => [
@@ -80,11 +187,14 @@ export default function Content() {
   }
 
   async function save() {
-    if (!sequenceId) return;
     setSaving(true);
     setError(null);
     try {
-      await replaceScreens(sequenceId, strip(screens));
+      if (title !== savedTitle) {
+        await updateSequenceTitle(id, title);
+        setSavedTitle(title);
+      }
+      await replaceScreens(id, strip(screens));
       setSavedScreens(screens);
     } catch {
       setError('Couldn’t save. Please try again.');
@@ -94,14 +204,23 @@ export default function Content() {
   }
 
   async function toggleStatus() {
-    if (!sequenceId) return;
     const next = status === 'approved' ? 'draft' : 'approved';
     setStatus(next);
     try {
-      await setSequenceStatus(sequenceId, next);
+      await setSequenceStatus(id, next);
     } catch {
-      setStatus(status); // revert on failure
+      setStatus(status);
       setError('Couldn’t change status.');
+    }
+  }
+
+  async function removeFlow() {
+    if (!confirm('Delete this flow? This can’t be undone.')) return;
+    try {
+      await deleteSequence(id);
+      onBack();
+    } catch {
+      setError('Couldn’t delete this flow.');
     }
   }
 
@@ -112,23 +231,27 @@ export default function Content() {
       </div>
     );
 
-  if (!sequenceId)
-    return (
-      <EmptyState title="No sequence yet" note="A welcome sequence will appear here." />
-    );
-
   const previewIndex = Math.min(preview, Math.max(0, screens.length - 1));
 
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl">Content</h1>
-        <p className="mt-1 text-sm text-muted-strong">{title}</p>
+        <button
+          onClick={onBack}
+          className="text-[13px] text-muted transition-colors hover:text-sage"
+        >
+          ← All flows
+        </button>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="mt-2 w-full bg-transparent font-serif text-2xl font-medium text-sage focus:outline-none"
+          aria-label="Flow title"
+        />
       </div>
 
       {error && <ErrorNote>{error}</ErrorNote>}
 
-      {/* Status */}
       <Card className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-sage">
@@ -136,17 +259,19 @@ export default function Content() {
           </p>
           <p className="mt-1 text-[13px] text-muted-strong">
             {status === 'approved'
-              ? 'This is live — people your members share with will see it.'
-              : 'Only you can see this. Publish when it’s ready to share.'}
+              ? 'Members can choose this flow for their code.'
+              : 'Only you can see this. Publish so members can choose it.'}
           </p>
         </div>
-        <Button variant={status === 'approved' ? 'quiet' : 'primary'} onClick={toggleStatus}>
+        <Button
+          variant={status === 'approved' ? 'quiet' : 'primary'}
+          onClick={toggleStatus}
+        >
           {status === 'approved' ? 'Move to draft' : 'Publish'}
         </Button>
       </Card>
 
       <div className="grid gap-8 md:grid-cols-[1fr_320px]">
-        {/* Editor */}
         <div className="flex flex-col gap-4">
           {screens.map((s, i) => (
             <Card key={s.key} className="flex flex-col gap-3">
@@ -193,9 +318,14 @@ export default function Content() {
               {saving ? 'Saving…' : 'Save'}
             </Button>
           </div>
+          <button
+            onClick={removeFlow}
+            className="self-start pt-2 text-[13px] text-muted transition-colors hover:text-sage"
+          >
+            Delete this flow
+          </button>
         </div>
 
-        {/* Live preview */}
         <div className="md:sticky md:top-6 md:self-start">
           <span className="eyebrow">preview</span>
           <div className="mt-2 overflow-hidden rounded-2xl border border-edge bg-canvas">

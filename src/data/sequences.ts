@@ -17,13 +17,35 @@ export interface SequenceWithScreens {
   screens: SequenceScreen[];
 }
 
-/** The org's primary sequence + ordered screens (leadership sees drafts too). */
-export async function getOrgSequence(): Promise<SequenceWithScreens | null> {
+/** All of the org's flows (leadership sees drafts too), newest last. */
+export async function listSequences(): Promise<Sequence[]> {
+  const { data, error } = await supabase
+    .from('sequences')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Approved flows a member can choose from (id + title). */
+export async function listApprovedSequences(): Promise<
+  Pick<Sequence, 'id' | 'title'>[]
+> {
+  const { data, error } = await supabase
+    .from('sequences')
+    .select('id, title')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** One flow + its ordered screens. */
+export async function getSequence(id: string): Promise<SequenceWithScreens | null> {
   const { data: sequence, error: seqErr } = await supabase
     .from('sequences')
     .select('*')
-    .order('created_at', { ascending: true })
-    .limit(1)
+    .eq('id', id)
     .maybeSingle();
   if (seqErr) throw seqErr;
   if (!sequence) return null;
@@ -31,11 +53,38 @@ export async function getOrgSequence(): Promise<SequenceWithScreens | null> {
   const { data: screens, error: scrErr } = await supabase
     .from('sequence_screens')
     .select('*')
-    .eq('sequence_id', sequence.id)
+    .eq('sequence_id', id)
     .order('sort_order', { ascending: true });
   if (scrErr) throw scrErr;
 
   return { sequence, screens: screens ?? [] };
+}
+
+/** Create a new (draft) flow in the org. */
+export async function createSequence(
+  orgId: string,
+  title: string,
+): Promise<Sequence> {
+  const { data, error } = await supabase
+    .from('sequences')
+    .insert({ org_id: orgId, title: title.trim() || 'Untitled flow', status: 'draft' })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateSequenceTitle(id: string, title: string): Promise<void> {
+  const { error } = await supabase
+    .from('sequences')
+    .update({ title: title.trim() || 'Untitled flow' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteSequence(id: string): Promise<void> {
+  const { error } = await supabase.from('sequences').delete().eq('id', id);
+  if (error) throw error;
 }
 
 export async function setSequenceStatus(
