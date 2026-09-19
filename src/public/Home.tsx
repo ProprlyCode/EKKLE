@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PublicLayout } from './PublicLayout';
-import { resolveOfferMember } from '@/data/recipient';
 import { Button } from '@/ui/Button';
 import { Marker } from '@/ui/Card';
 
@@ -13,17 +11,11 @@ export default function Home() {
   const [params] = useSearchParams();
   const ref = params.get('ref');
   const navigate = useNavigate();
-  const [starting, setStarting] = useState(false);
 
-  async function start() {
-    setStarting(true);
-    try {
-      const slug = await resolveOfferMember(ref);
-      if (slug) navigate(`/r/${slug}`);
-      else setStarting(false);
-    } catch {
-      setStarting(false);
-    }
+  // Every "start" path leads to the /offer email gate, which opens the studies
+  // library — not straight into a member's QR flow. Carry any ?ref for attribution.
+  function start() {
+    navigate(ref ? `/offer?ref=${encodeURIComponent(ref)}` : '/offer');
   }
 
   return (
@@ -43,8 +35,8 @@ export default function Home() {
           pressure, no rush.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
-          <Button onClick={start} disabled={starting} className="px-6">
-            {starting ? 'One moment…' : 'Start a study'}
+          <Button onClick={start} className="px-6">
+            Start a study
           </Button>
           <p className="text-[13px] text-muted">Begin anywhere. Stop anytime.</p>
         </div>
@@ -87,8 +79,7 @@ export default function Home() {
             <button
               key={t.title}
               onClick={start}
-              disabled={starting}
-              className="rounded-card border border-edge bg-card p-6 text-left transition-colors hover:border-sage/40 disabled:opacity-60"
+              className="rounded-card border border-edge bg-card p-6 text-left transition-colors hover:border-sage/40"
             >
               <h3 className="font-serif text-lg text-sage">{t.title}</h3>
               <p className="mt-1 text-[14px] leading-relaxed text-muted-strong">{t.blurb}</p>
@@ -109,8 +100,8 @@ export default function Home() {
             place to explore, and a real person if you want one.
           </p>
           <div className="mt-7">
-            <Button onClick={start} disabled={starting} className="px-6">
-              {starting ? 'One moment…' : 'Start a study'}
+            <Button onClick={start} className="px-6">
+              Start a study
             </Button>
           </div>
         </div>
