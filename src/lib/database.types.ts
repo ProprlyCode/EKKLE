@@ -167,6 +167,70 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['recipients']['Insert']>;
         Relationships: [];
       };
+      studies: {
+        Row: {
+          id: UUID;
+          org_id: UUID;
+          sort_order: number;
+          number: number | null;
+          title: string;
+          tagline: string | null;
+          status: SequenceStatus;
+          created_at: Timestamp;
+          updated_at: Timestamp;
+        };
+        Insert: {
+          id?: UUID;
+          org_id: UUID;
+          sort_order?: number;
+          number?: number | null;
+          title: string;
+          tagline?: string | null;
+          status?: SequenceStatus;
+          created_at?: Timestamp;
+          updated_at?: Timestamp;
+        };
+        Update: Partial<Database['public']['Tables']['studies']['Insert']>;
+        Relationships: [];
+      };
+      study_pages: {
+        Row: {
+          id: UUID;
+          study_id: UUID;
+          page_number: number;
+          blocks: Json;
+        };
+        Insert: {
+          id?: UUID;
+          study_id: UUID;
+          page_number: number;
+          blocks?: Json;
+        };
+        Update: Partial<Database['public']['Tables']['study_pages']['Insert']>;
+        Relationships: [];
+      };
+      study_progress: {
+        Row: {
+          id: UUID;
+          recipient_id: UUID;
+          study_id: UUID;
+          last_page: number;
+          answers: Json;
+          completed_at: Timestamp | null;
+          updated_at: Timestamp;
+        };
+        Insert: {
+          id?: UUID;
+          recipient_id: UUID;
+          study_id: UUID;
+          last_page?: number;
+          answers?: Json;
+          completed_at?: Timestamp | null;
+          updated_at?: Timestamp;
+        };
+        Update: Partial<Database['public']['Tables']['study_progress']['Insert']>;
+        Relationships: [];
+      };
       sequence_events: {
         Row: {
           id: UUID;
@@ -421,6 +485,27 @@ export interface Database {
       regenerate_join_code: {
         Args: Record<string, never>;
         Returns: string;
+      };
+      list_studies: {
+        Args: { p_session_token: string };
+        Returns: Json;
+      };
+      get_study: {
+        Args: { p_session_token: string; p_study_id: string };
+        Returns: Json;
+      };
+      save_study_progress: {
+        Args: {
+          p_session_token: string;
+          p_study_id: string;
+          p_last_page: number;
+          p_answers: Json;
+        };
+        Returns: undefined;
+      };
+      complete_study: {
+        Args: { p_session_token: string; p_study_id: string; p_answers: Json };
+        Returns: undefined;
       };
     };
     Enums: Record<never, never>;

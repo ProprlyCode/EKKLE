@@ -16,6 +16,8 @@ import People from '@/routes/leadership/People';
 import Content from '@/routes/leadership/Content';
 import PlatformConsole from '@/routes/platform/Console';
 import RecipientExperience from '@/recipient/RecipientExperience';
+import StudyLibrary from '@/studies/StudyLibrary';
+import StudyReader from '@/studies/StudyReader';
 import Home from '@/public/Home';
 import ForChurches from '@/public/ForChurches';
 import Offer from '@/public/Offer';
@@ -34,6 +36,10 @@ export default function App() {
 
       {/* Recipient experience (no login) */}
       <Route path="/r/:slug" element={<RecipientExperience />} />
+
+      {/* Self-hosted studies library (no login; opened after the /offer gate) */}
+      <Route path="/studies" element={<StudyLibrary />} />
+      <Route path="/studies/:studyId" element={<StudyReader />} />
 
       <Route element={<RequireAuth />}>
         <Route path="/welcome" element={<Onboarding />} />

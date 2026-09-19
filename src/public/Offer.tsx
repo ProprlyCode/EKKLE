@@ -26,12 +26,9 @@ export default function Offer() {
     setError(null);
     setSubmitting(true);
     try {
-      const slug = await registerOfferLead({ ref, firstName, email });
-      if (slug) navigate(`/r/${slug}`);
-      else {
-        setSubmitting(false);
-        setError('We couldn’t start just now. Please try again.');
-      }
+      // Capture the lead (email + attribution) up front, then open the library.
+      await registerOfferLead({ ref, firstName, email });
+      navigate('/studies');
     } catch {
       setSubmitting(false);
       setError('We couldn’t start just now. Please try again.');
