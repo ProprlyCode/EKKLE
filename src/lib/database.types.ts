@@ -507,6 +507,34 @@ export interface Database {
         Args: { p_session_token: string; p_study_id: string; p_answers: Json };
         Returns: undefined;
       };
+      link_seeker_account: {
+        Args: { p_first_name: string; p_ref: string | null };
+        Returns: undefined;
+      };
+      seeker_studies: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      seeker_study: {
+        Args: { p_study_id: string };
+        Returns: Json;
+      };
+      seeker_save_progress: {
+        Args: { p_study_id: string; p_last_page: number; p_answers: Json };
+        Returns: undefined;
+      };
+      seeker_complete_study: {
+        Args: { p_study_id: string; p_answers: Json };
+        Returns: undefined;
+      };
+      seeker_connection: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      seeker_send_message: {
+        Args: { p_body: string };
+        Returns: undefined;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

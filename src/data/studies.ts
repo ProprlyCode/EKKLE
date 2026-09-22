@@ -1,10 +1,8 @@
 import { supabase } from '@/lib/supabase';
-import { getRecipientSessionToken } from '@/data/recipient';
 
 /**
- * Studies data access — the self-hosted, progressively-unlocked workbook
- * library. All anonymous-safe RPCs, keyed by the device session token; no
- * direct table access.
+ * Studies data access for the signed-in seeker. All seeker_* RPCs resolve the
+ * account by auth.uid() (no device token), so progress follows the person.
  */
 
 export type StudyBlock =
@@ -24,6 +22,8 @@ export interface StudySummary {
   tagline: string | null;
   completed: boolean;
   locked: boolean;
+  started: boolean;
+  last_page: number;
 }
 
 export interface StudyDetail {
@@ -40,21 +40,16 @@ export interface StudyDetail {
   } | null;
 }
 
-/** The full library with per-recipient lock + completion state. */
+/** The full library with per-account lock + completion state. */
 export async function listStudies(): Promise<StudySummary[]> {
-  const { data, error } = await supabase.rpc('list_studies', {
-    p_session_token: getRecipientSessionToken(),
-  });
+  const { data, error } = await supabase.rpc('seeker_studies');
   if (error) throw error;
   return (data as unknown as StudySummary[]) ?? [];
 }
 
-/** One study's pages + saved progress. `locked: true` (no pages) if not yet unlocked. */
+/** One study's pages + saved progress. `locked: true` (no pages) if not unlocked. */
 export async function getStudy(studyId: string): Promise<StudyDetail | null> {
-  const { data, error } = await supabase.rpc('get_study', {
-    p_session_token: getRecipientSessionToken(),
-    p_study_id: studyId,
-  });
+  const { data, error } = await supabase.rpc('seeker_study', { p_study_id: studyId });
   if (error) throw error;
   return (data as StudyDetail | null) ?? null;
 }
@@ -65,8 +60,7 @@ export async function saveStudyProgress(
   lastPage: number,
   answers: Record<string, string>,
 ): Promise<void> {
-  const { error } = await supabase.rpc('save_study_progress', {
-    p_session_token: getRecipientSessionToken(),
+  const { error } = await supabase.rpc('seeker_save_progress', {
     p_study_id: studyId,
     p_last_page: lastPage,
     p_answers: answers,
@@ -79,8 +73,7 @@ export async function completeStudy(
   studyId: string,
   answers: Record<string, string>,
 ): Promise<void> {
-  const { error } = await supabase.rpc('complete_study', {
-    p_session_token: getRecipientSessionToken(),
+  const { error } = await supabase.rpc('seeker_complete_study', {
     p_study_id: studyId,
     p_answers: answers,
   });

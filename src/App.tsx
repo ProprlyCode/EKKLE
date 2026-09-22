@@ -16,8 +16,12 @@ import People from '@/routes/leadership/People';
 import Content from '@/routes/leadership/Content';
 import PlatformConsole from '@/routes/platform/Console';
 import RecipientExperience from '@/recipient/RecipientExperience';
-import StudyLibrary from '@/studies/StudyLibrary';
+import SeekerGate from '@/studies/SeekerGate';
+import SeekerLayout from '@/studies/SeekerLayout';
+import StudyDashboard from '@/studies/StudyDashboard';
 import StudyReader from '@/studies/StudyReader';
+import Connection from '@/studies/Connection';
+import Account from '@/studies/Account';
 import Home from '@/public/Home';
 import ForChurches from '@/public/ForChurches';
 import Offer from '@/public/Offer';
@@ -37,9 +41,16 @@ export default function App() {
       {/* Recipient experience (no login) */}
       <Route path="/r/:slug" element={<RecipientExperience />} />
 
-      {/* Self-hosted studies library (no login; opened after the /offer gate) */}
-      <Route path="/studies" element={<StudyLibrary />} />
-      <Route path="/studies/:studyId" element={<StudyReader />} />
+      {/* Seeker study account — gated. Signed out → seeker sign-in; signed in →
+          the student dashboard, the immersive reader, messages, and account. */}
+      <Route element={<SeekerGate />}>
+        <Route path="/studies/:studyId" element={<StudyReader />} />
+        <Route element={<SeekerLayout />}>
+          <Route path="/studies" element={<StudyDashboard />} />
+          <Route path="/studies/connection" element={<Connection />} />
+          <Route path="/studies/account" element={<Account />} />
+        </Route>
+      </Route>
 
       <Route element={<RequireAuth />}>
         <Route path="/welcome" element={<Onboarding />} />
