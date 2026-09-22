@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { sendStudyMagicLink, signInWithPassword } from '@/data/auth';
+import { sendStudyMagicLink, signInWithPassword, sendPasswordReset } from '@/data/auth';
 import { BrandName } from '@/components/BrandName';
 import { Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
@@ -19,6 +19,7 @@ export default function SeekerSignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [sentKind, setSentKind] = useState<'link' | 'reset'>('link');
   const [error, setError] = useState<string | null>(null);
 
   async function onMagic(e: FormEvent) {
@@ -27,6 +28,24 @@ export default function SeekerSignIn() {
     setStatus('sending');
     try {
       await sendStudyMagicLink({ email, ref });
+      setSentKind('link');
+      setStatus('sent');
+    } catch {
+      setStatus('idle');
+      setError('We couldn’t send that just now. Please try again.');
+    }
+  }
+
+  async function onForgot() {
+    if (!email) {
+      setError('Enter your email first, then choose “Forgot password.”');
+      return;
+    }
+    setError(null);
+    setStatus('sending');
+    try {
+      await sendPasswordReset(email, 'seeker');
+      setSentKind('reset');
       setStatus('sent');
     } catch {
       setStatus('idle');
@@ -60,8 +79,17 @@ export default function SeekerSignIn() {
           <div className="text-center">
             <h1 className="font-serif text-2xl leading-tight text-sage">Check your email</h1>
             <p className="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-muted-strong">
-              We sent a sign-in link to <span className="text-sage">{email}</span>. Open it
-              on this device to reach your studies.
+              {sentKind === 'reset' ? (
+                <>
+                  We sent a password-reset link to <span className="text-sage">{email}</span>.
+                  Open it to choose a new password.
+                </>
+              ) : (
+                <>
+                  We sent a sign-in link to <span className="text-sage">{email}</span>. Open it
+                  on this device to reach your studies.
+                </>
+              )}
             </p>
             <button
               onClick={() => setStatus('idle')}
@@ -122,6 +150,13 @@ export default function SeekerSignIn() {
                 >
                   {status === 'sending' ? 'Signing in…' : 'Sign in'}
                 </Button>
+                <button
+                  type="button"
+                  onClick={onForgot}
+                  className="text-center text-[13px] text-muted underline-offset-2 hover:text-sage hover:underline"
+                >
+                  Forgot password?
+                </button>
               </form>
             )}
 

@@ -70,3 +70,18 @@ export async function setMyPassword(password: string): Promise<void> {
   const { error } = await supabase.auth.updateUser({ password });
   if (error) throw error;
 }
+
+/**
+ * Email a password-reset link. The link opens /reset-password with a recovery
+ * session; `src` steers where they land afterward (admin area vs studies).
+ */
+export async function sendPasswordReset(
+  email: string,
+  src: 'admin' | 'seeker',
+): Promise<void> {
+  const redirectTo = env.siteUrl || window.location.origin;
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    redirectTo: `${redirectTo}/reset-password?src=${src}`,
+  });
+  if (error) throw error;
+}

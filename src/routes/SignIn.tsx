@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
-import { sendMagicLink, signInWithPassword } from '@/data/auth';
+import { sendMagicLink, signInWithPassword, sendPasswordReset } from '@/data/auth';
 import { Wordmark } from '@/components/Wordmark';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
@@ -19,6 +19,7 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [sentKind, setSentKind] = useState<'link' | 'reset'>('link');
   const [error, setError] = useState<string | null>(null);
 
   if (!configured)
@@ -57,6 +58,23 @@ export default function SignIn() {
     }
   }
 
+  async function onForgot() {
+    if (!email) {
+      setError('Enter your email first, then choose “Forgot password.”');
+      return;
+    }
+    setError(null);
+    setStatus('sending');
+    try {
+      await sendPasswordReset(email, 'admin');
+      setSentKind('reset');
+      setStatus('sent');
+    } catch {
+      setStatus('idle');
+      setError('We couldn’t send that. Check the address and try again.');
+    }
+  }
+
   return (
     <CenterLayout>
       <Wordmark withTagline />
@@ -66,8 +84,18 @@ export default function SignIn() {
             <Marker />
             <h1 className="text-lg">Check your inbox</h1>
             <p className="text-sm leading-relaxed text-muted-strong">
-              We sent a sign-in link to <span className="text-sage">{email}</span>.
-              Open it on this device to continue.
+              {sentKind === 'reset' ? (
+                <>
+                  We sent a password-reset link to{' '}
+                  <span className="text-sage">{email}</span>. Open it to choose a new
+                  password.
+                </>
+              ) : (
+                <>
+                  We sent a sign-in link to <span className="text-sage">{email}</span>.
+                  Open it on this device to continue.
+                </>
+              )}
             </p>
             <Button variant="ghost" size="sm" onClick={() => setStatus('idle')} className="mt-1">
               Use a different email
@@ -133,16 +161,25 @@ export default function SignIn() {
             <Button type="submit" disabled={status === 'sending' || !email || !password}>
               {status === 'sending' ? 'Signing in…' : 'Sign in'}
             </Button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode('magic');
-                setError(null);
-              }}
-              className="text-center text-[12px] text-muted transition-colors hover:text-sage"
-            >
-              Use a magic link instead
-            </button>
+            <div className="flex items-center justify-between text-[12px] text-muted">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('magic');
+                  setError(null);
+                }}
+                className="transition-colors hover:text-sage"
+              >
+                Use a magic link instead
+              </button>
+              <button
+                type="button"
+                onClick={onForgot}
+                className="transition-colors hover:text-sage"
+              >
+                Forgot password?
+              </button>
+            </div>
           </form>
         )}
       </div>

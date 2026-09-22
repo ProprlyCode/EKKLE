@@ -8,6 +8,7 @@ import {
 } from '@/auth/guards';
 import { Wordmark } from '@/components/Wordmark';
 import SignIn from '@/routes/SignIn';
+import ResetPassword from '@/routes/ResetPassword';
 import Onboarding from '@/routes/Onboarding';
 import MemberDashboard from '@/routes/member/Dashboard';
 import Inbox from '@/routes/member/Inbox';
@@ -37,6 +38,7 @@ export default function App() {
       <Route path="/for-churches" element={<ForChurches />} />
       <Route path="/offer" element={<Offer />} />
       <Route path="/sign-in" element={<SignIn />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Recipient experience (no login) */}
       <Route path="/r/:slug" element={<RecipientExperience />} />
