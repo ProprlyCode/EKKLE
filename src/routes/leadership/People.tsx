@@ -5,6 +5,7 @@ import {
   setMemberActive,
   type Member,
 } from '@/data/members';
+import { listReports, resolveReport, type IncidentReport } from '@/data/reports';
 import { Card } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
@@ -40,6 +41,8 @@ export default function People() {
         </p>
       </div>
 
+      <IncidentReports />
+
       <InviteForm onInvited={refresh} />
 
       {error && <ErrorNote>{error}</ErrorNote>}
@@ -63,6 +66,94 @@ export default function People() {
         </Card>
       )}
     </div>
+  );
+}
+
+function IncidentReports() {
+  const [reports, setReports] = useState<IncidentReport[] | null>(null);
+  const [showReviewed, setShowReviewed] = useState(false);
+
+  async function refresh() {
+    try {
+      setReports(await listReports());
+    } catch {
+      setReports([]);
+    }
+  }
+  useEffect(() => {
+    void refresh();
+  }, []);
+
+  if (reports === null || reports.length === 0) return null;
+
+  const open = reports.filter((r) => !r.reviewed);
+  const shown = showReviewed ? reports : open;
+
+  async function markReviewed(id: string) {
+    setReports((rs) => rs?.map((r) => (r.id === id ? { ...r, reviewed: true } : r)) ?? rs);
+    try {
+      await resolveReport(id);
+    } catch {
+      void refresh();
+    }
+  }
+
+  return (
+    <Card className="border-amber-700/30 p-0">
+      <div className="flex items-center justify-between border-b border-edge/70 px-5 py-3">
+        <div className="flex items-center gap-2">
+          <span className="eyebrow">incident reports</span>
+          {open.length > 0 && (
+            <span className="rounded-full bg-amber-700/15 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+              {open.length} to review
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => setShowReviewed((v) => !v)}
+          className="text-[12px] text-muted transition-colors hover:text-sage"
+        >
+          {showReviewed ? 'Hide resolved' : 'Show all'}
+        </button>
+      </div>
+      {shown.length === 0 ? (
+        <p className="px-5 py-5 text-sm text-muted">Nothing needs review right now.</p>
+      ) : (
+        <ul className="divide-y divide-edge/70">
+          {shown.map((r) => (
+            <li key={r.id} className="flex items-start justify-between gap-4 px-5 py-4">
+              <div className="min-w-0">
+                <p className="text-sm text-sage">
+                  {r.reporter_type === 'member' ? r.member_name : r.recipient_name || 'A recipient'}{' '}
+                  <span className="text-muted">reported this conversation</span>
+                </p>
+                <p className="mt-0.5 text-[12px] text-muted">
+                  Between {r.member_name} and {r.recipient_name || 'a recipient'} ·{' '}
+                  {new Date(r.created_at).toLocaleDateString()}
+                </p>
+                {r.reason && (
+                  <p className="mt-1.5 rounded-lg border border-edge bg-canvas px-3 py-2 text-[13px] text-muted-strong">
+                    “{r.reason}”
+                  </p>
+                )}
+              </div>
+              {r.reviewed ? (
+                <span className="shrink-0 text-[12px] uppercase tracking-eyebrow text-muted">
+                  Resolved
+                </span>
+              ) : (
+                <Button variant="quiet" size="sm" onClick={() => void markReviewed(r.id)}>
+                  Mark reviewed
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="border-t border-edge/70 px-5 py-3 text-[12px] text-muted">
+        You see who reported and their note — never the messages themselves.
+      </p>
+    </Card>
   );
 }
 

@@ -555,6 +555,18 @@ export interface Database {
         Args: { p_reason: string };
         Returns: undefined;
       };
+      list_reports: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      open_reports_count: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      resolve_report: {
+        Args: { p_report_id: string };
+        Returns: undefined;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

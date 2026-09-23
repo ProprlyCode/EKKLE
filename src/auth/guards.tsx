@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSession } from './SessionProvider';
 import { isLeader, isPlatformAdmin } from './roles';
 import { unreadCount } from '@/data/conversations';
+import { openReportsCount } from '@/data/reports';
 import { AppShell, type NavItem } from '@/ui/AppShell';
 import { Button } from '@/ui/Button';
 import { CenterLayout, FullPageLoading } from '@/ui/states';
@@ -52,20 +53,26 @@ export function AuthedLayout() {
   const { membership, signOut } = useSession();
   const leader = isLeader(membership?.role);
   const [unread, setUnread] = useState(0);
+  const [openReports, setOpenReports] = useState(0);
 
   useEffect(() => {
     let active = true;
-    const load = () =>
+    const load = () => {
       unreadCount()
         .then((n) => active && setUnread(n))
         .catch(() => {});
+      if (leader)
+        openReportsCount()
+          .then((n) => active && setOpenReports(n))
+          .catch(() => {});
+    };
     void load();
     const t = setInterval(load, 30000);
     return () => {
       active = false;
       clearInterval(t);
     };
-  }, []);
+  }, [leader]);
 
   const nav: NavItem[] = [
     { to: '/app', label: 'Your code' },
@@ -73,7 +80,7 @@ export function AuthedLayout() {
     ...(leader
       ? [
           { to: '/leadership/content', label: 'Content' },
-          { to: '/leadership/people', label: 'People' },
+          { to: '/leadership/people', label: 'People', dot: openReports > 0 },
         ]
       : []),
     ...(isPlatformAdmin(membership?.role) ? [{ to: '/platform', label: 'Platform' }] : []),
