@@ -36,3 +36,9 @@ export async function sendSeekerMessage(body: string): Promise<void> {
   const { error } = await supabase.rpc('seeker_send_message', { p_body: body });
   if (error) throw error;
 }
+
+/** Block the conversation with their member (writes a report, closes it). */
+export async function blockSeekerConnection(reason: string): Promise<void> {
+  const { error } = await supabase.rpc('seeker_block_conversation', { p_reason: reason });
+  if (error) throw error;
+}

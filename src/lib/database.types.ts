@@ -535,6 +535,26 @@ export interface Database {
         Args: { p_body: string };
         Returns: undefined;
       };
+      conversation_meta: {
+        Args: { p_conversation_id: string };
+        Returns: Json;
+      };
+      report_conversation: {
+        Args: { p_conversation_id: string; p_reason: string };
+        Returns: undefined;
+      };
+      erase_conversation: {
+        Args: { p_conversation_id: string };
+        Returns: undefined;
+      };
+      record_checkin: {
+        Args: { p_conversation_id: string; p_value: string };
+        Returns: undefined;
+      };
+      seeker_block_conversation: {
+        Args: { p_reason: string };
+        Returns: undefined;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

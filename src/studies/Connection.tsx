@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   getSeekerConnection,
   sendSeekerMessage,
+  blockSeekerConnection,
   type SeekerConnection,
 } from '@/data/seeker';
 import { Button } from '@/ui/Button';
@@ -53,6 +54,22 @@ export default function Connection() {
     }
   }
 
+  async function onBlock() {
+    if (
+      !confirm(
+        'Block this conversation? They won’t be able to message you, and it will be closed.',
+      )
+    )
+      return;
+    const reason = prompt('Optionally tell us why (this goes to the church’s leaders):') ?? '';
+    try {
+      await blockSeekerConnection(reason);
+      setConvo(await getSeekerConnection());
+    } catch {
+      /* no-op; the thread will reflect state on next poll */
+    }
+  }
+
   if (convo === undefined)
     return (
       <div className="flex justify-center py-20">
@@ -79,8 +96,20 @@ export default function Connection() {
   return (
     <div className="flex min-h-[70vh] flex-col gap-4">
       <header className="border-b border-edge/70 pb-4">
-        <span className="eyebrow">your connection</span>
-        <h1 className="mt-1 font-serif text-2xl text-sage">{member.name}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <span className="eyebrow">your connection</span>
+            <h1 className="mt-1 font-serif text-2xl text-sage">{member.name}</h1>
+          </div>
+          {!closed && (
+            <button
+              onClick={onBlock}
+              className="mt-1 shrink-0 text-[12px] text-muted underline-offset-2 hover:text-sage hover:underline"
+            >
+              Block
+            </button>
+          )}
+        </div>
         {member.short_message && messages.length === 0 && (
           <p className="mt-2 text-[15px] leading-relaxed text-muted-strong">
             “{member.short_message}”

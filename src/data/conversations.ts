@@ -37,26 +37,67 @@ export async function unreadCount(): Promise<number> {
   return items.filter((i) => i.unread).length;
 }
 
+export type CheckinValue = 'yes' | 'not_yet' | 'no';
+
 export interface ConversationMeta {
   recipientFirstName: string;
   status: ConversationStatus;
+  erased: boolean;
+  lastCheckin: CheckinValue | null;
 }
 
 export async function getConversationMeta(
   conversationId: string,
 ): Promise<ConversationMeta | null> {
-  const { data, error } = await supabase
-    .from('conversations')
-    .select('status, recipient:recipients(first_name)')
-    .eq('id', conversationId)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc('conversation_meta', {
+    p_conversation_id: conversationId,
+  });
   if (error) throw error;
-  if (!data) return null;
-  const recipient = data.recipient as unknown as { first_name: string } | null;
+  const meta = data as unknown as {
+    recipient_first_name: string;
+    status: ConversationStatus;
+    erased: boolean;
+    last_checkin: CheckinValue | null;
+  } | null;
+  if (!meta) return null;
   return {
-    recipientFirstName: recipient?.first_name ?? 'Someone',
-    status: data.status,
+    recipientFirstName: meta.recipient_first_name ?? 'Someone',
+    status: meta.status,
+    erased: meta.erased,
+    lastCheckin: meta.last_checkin,
   };
+}
+
+/** Block + report a conversation (member). Both sides can no longer post. */
+export async function reportConversation(
+  conversationId: string,
+  reason: string,
+): Promise<void> {
+  const { error } = await supabase.rpc('report_conversation', {
+    p_conversation_id: conversationId,
+    p_reason: reason,
+  });
+  if (error) throw error;
+}
+
+/** Erase the recipient's data (member/leadership) — messages deleted, record redacted. */
+export async function eraseConversation(conversationId: string): Promise<void> {
+  const { error } = await supabase.rpc('erase_conversation', {
+    p_conversation_id: conversationId,
+  });
+  if (error) throw error;
+}
+
+/** Record the connection check-in ("did you connect?"). */
+export async function recordCheckin(
+  conversationId: string,
+  value: CheckinValue,
+): Promise<void> {
+  const { error } = await supabase.rpc('record_checkin', {
+    p_conversation_id: conversationId,
+    p_value: value,
+  });
+  if (error) throw error;
 }
 
 export async function getMessages(conversationId: string): Promise<Message[]> {
