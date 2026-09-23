@@ -1,0 +1,166 @@
+/*
+ * Ekklē homepage — scoped styles.
+ *
+ * The "Agora" palette (stone / stone-dim / brass / juniper / ink) blended with
+ * Ekklē's sage + cream. Every token lives on .home-root, so none of this leaks into
+ * the product design system (which keeps its sage tokens on :root).
+ */
+
+.home-root {
+  --home-stone: 241 236 225; /* #F1ECE1 — base light */
+  --home-stone-dim: 200 191 169; /* #C8BFA9 — muted support */
+  --home-brass: 169 130 76; /* #A9824C — the single warm accent */
+  --home-juniper: 56 73 62; /* #38493E — depth / shadow tone */
+  --home-ink: 35 42 46; /* #232A2E — ground + dark text */
+  --home-sage: 63 74 58; /* #3F4A3A — Ekklē sage, second green depth tone */
+  --home-cream: 253 252 248; /* #FDFCF8 — Ekklē cream, the product card */
+
+  position: relative;
+  background: rgb(var(--home-ink));
+  color: rgb(var(--home-stone));
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* Contain overscanned art without creating a scroll container (keeps pins +
+     sticky working, unlike overflow: hidden). */
+  overflow-x: clip;
+}
+
+/* Display type — Source Serif 4, 600, tight leading. */
+.home-display {
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  font-optical-sizing: auto;
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+/* Canvas/grain over everything: one fixed, tiled layer (rasterized once). */
+.home-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Edge falloff toward ink — part of the chiaroscuro on every scene. */
+.home-vignette {
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 120% 95% at 50% 45%,
+    transparent 42%,
+    rgb(var(--home-ink) / 0.88) 100%
+  );
+}
+
+/* A soft dark pool behind centered text, so type stays legible over warm art. */
+.home-scrim {
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 46% 42% at 50% 50%,
+    rgb(var(--home-ink) / 0.55),
+    rgb(var(--home-ink) / 0) 100%
+  );
+}
+
+/*
+ * Scene 3 light overlays. Only their opacity is animated (transform/opacity-only
+ * rule). Their DEFAULT opacities are the warm end-state, so without JS — or with
+ * reduced motion — Scene 3 simply shows the resolved, beheld moment.
+ */
+.home-desat {
+  /* grey + saturation blend = desaturate what's beneath (the "cold" state) */
+  background: #7b807a;
+  mix-blend-mode: saturation;
+  opacity: 0;
+}
+.home-cool {
+  background: rgb(var(--home-juniper));
+  mix-blend-mode: multiply;
+  opacity: 0;
+}
+.home-warm {
+  /* brass bleeding in from the right, where the beheld figure is lit */
+  background: radial-gradient(
+    ellipse 70% 85% at 84% 42%,
+    rgb(var(--home-brass) / 0.95),
+    rgb(var(--home-brass) / 0) 72%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0.6;
+}
+.home-bloom {
+  background: radial-gradient(
+    ellipse 30% 44% at 57% 44%,
+    rgb(214 178 120 / 0.5),
+    rgb(var(--home-brass) / 0) 72%
+  );
+  mix-blend-mode: screen;
+  opacity: 1;
+}
+
+/* Per-line brass light source in Scene 6. */
+.home-glow {
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 40% 34% at 50% 50%,
+    rgb(var(--home-brass) / 0.3),
+    rgb(var(--home-brass) / 0) 70%
+  );
+}
+
+/* Scene 6 continuous ground: dark, one warm source above. */
+.home-s6-ground {
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 8%, rgb(var(--home-brass) / 0.22), transparent 70%),
+    radial-gradient(ellipse 90% 70% at 50% 60%, rgb(var(--home-juniper) / 0.35), transparent 80%),
+    rgb(var(--home-ink));
+}
+
+/* Exit cue under the hero: a thin brass line that breathes. */
+@keyframes home-cue {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scaleX(0.55);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scaleX(1);
+  }
+}
+.home-cue {
+  animation: home-cue 2.8s ease-in-out infinite;
+}
+
+/* Visible focus for every interactive element on the page (brass). */
+.home-focus:focus-visible {
+  outline: 2px solid rgb(var(--home-brass));
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-cue {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* Lenis (desktop smooth scroll) — only present while the homepage is mounted. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}

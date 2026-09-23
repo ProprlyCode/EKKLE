@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import {
   RequireAuth,
@@ -23,7 +24,8 @@ import StudyDashboard from '@/studies/StudyDashboard';
 import StudyReader from '@/studies/StudyReader';
 import Connection from '@/studies/Connection';
 import Account from '@/studies/Account';
-import Home from '@/public/Home';
+// The cinematic homepage is code-split so GSAP/Lenis never load in the product.
+const Home = lazy(() => import('@/public/home/Home'));
 import ForChurches from '@/public/ForChurches';
 import Offer from '@/public/Offer';
 
@@ -34,7 +36,14 @@ import Offer from '@/public/Offer';
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route
+        path="/"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-[#232a2e]" />}>
+            <Home />
+          </Suspense>
+        }
+      />
       <Route path="/for-churches" element={<ForChurches />} />
       <Route path="/offer" element={<Offer />} />
       <Route path="/sign-in" element={<SignIn />} />

@@ -23,6 +23,18 @@ export default {
           DEFAULT: 'var(--color-muted)', // warm gray-brown secondary text
           strong: 'var(--color-muted-strong)',
         },
+        // Homepage-only "Agora" palette (blended with sage/cream). The channel
+        // variables are defined on .home-root only (src/public/home/home.css), so
+        // these classes do nothing outside the cinematic homepage.
+        home: {
+          stone: 'rgb(var(--home-stone) / <alpha-value>)',
+          'stone-dim': 'rgb(var(--home-stone-dim) / <alpha-value>)',
+          brass: 'rgb(var(--home-brass) / <alpha-value>)',
+          juniper: 'rgb(var(--home-juniper) / <alpha-value>)',
+          ink: 'rgb(var(--home-ink) / <alpha-value>)',
+          sage: 'rgb(var(--home-sage) / <alpha-value>)',
+          cream: 'rgb(var(--home-cream) / <alpha-value>)',
+        },
       },
       fontFamily: {
         // Wordmark / headlines — editorial serif

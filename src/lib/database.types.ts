@@ -567,6 +567,10 @@ export interface Database {
         Args: { p_report_id: string };
         Returns: undefined;
       };
+      join_waitlist: {
+        Args: { p_name: string; p_email: string; p_ministry: string };
+        Returns: undefined;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
