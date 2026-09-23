@@ -2,31 +2,29 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { joinWaitlist } from '@/data/waitlist';
 import { BrandName } from '@/components/BrandName';
-import { SceneImage } from '../SceneImage';
-import { SanctuaryArt } from '../art';
+import { COPY } from './chapters';
+import { CoverFrame, WIDE } from './frame';
+import { CafeBg } from './art';
 
 /**
- * Scene 7 — the one ask. Quiet, not salesy: a single line and "Join the waitlist".
- * Returns to the full warm palette (bookending Scene 3's resolution) and is still —
- * a simple fade-in, no parallax or 3D.
+ * Chapter 7 — the one ask, after the story ends. Still and quiet: the café in
+ * its warmest light, one line, and "Join the waitlist".
  */
-export function SceneInvitation() {
+export function Invitation() {
   return (
-    <section data-scene="s7" className="relative flex min-h-[100svh] flex-col overflow-hidden">
-      <div className="absolute inset-0">
-        <SceneImage slot="sanctuary" placeholder={<SanctuaryArt />} decorative />
+    <section id="join" data-j="join" className="relative flex min-h-[100svh] flex-col overflow-hidden">
+      <div className="j-cq absolute inset-0" aria-hidden>
+        <CoverFrame aspect={WIDE}>
+          <CafeBg golden />
+        </CoverFrame>
       </div>
-      <div className="absolute inset-0 bg-home-ink/25" aria-hidden />
+      <div className="absolute inset-0 bg-home-ink/55" aria-hidden />
       <div className="home-scrim absolute inset-0 scale-125" aria-hidden />
       <div className="home-vignette absolute inset-0" aria-hidden />
 
-      <div
-        data-anim="s7-content"
-        data-reveal
-        className="relative z-10 flex flex-1 flex-col items-center justify-center gap-10 px-6 py-24"
-      >
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-10 px-6 py-24">
         <h2 className="home-display max-w-[16ch] text-center text-[clamp(2rem,4.6vw,3.75rem)] text-home-stone">
-          a quiet place to explore — together
+          {COPY.join}
         </h2>
         <WaitlistForm />
       </div>
@@ -90,7 +88,7 @@ function WaitlistForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-home-stone/10 bg-home-ink/60 p-6 backdrop-blur-[2px] md:p-8"
+      className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl border border-home-stone/10 bg-home-ink/60 p-6 backdrop-blur-[2px] md:p-8"
     >
       <Field label="Your name" value={name} onChange={setName} autoComplete="name" required />
       <Field
@@ -160,7 +158,7 @@ function Field({
         autoComplete={autoComplete}
         inputMode={inputMode}
         required={required}
-        className="home-focus h-12 rounded-xl border border-home-stone-dim/35 bg-home-ink/55 px-4 text-[15px] text-home-stone placeholder:text-home-stone-dim/60 focus:border-home-brass/70 focus:outline-none"
+        className="home-focus h-12 appearance-none rounded-xl border border-home-stone-dim/35 bg-home-ink/55 px-4 text-[15px] text-home-stone placeholder:text-home-stone-dim/60 focus:border-home-brass/70 focus:outline-none"
       />
     </label>
   );

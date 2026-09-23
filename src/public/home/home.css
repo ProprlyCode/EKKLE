@@ -12,16 +12,16 @@
   --home-brass: 169 130 76; /* #A9824C — the single warm accent */
   --home-juniper: 56 73 62; /* #38493E — depth / shadow tone */
   --home-ink: 35 42 46; /* #232A2E — ground + dark text */
-  --home-sage: 63 74 58; /* #3F4A3A — Ekklē sage, second green depth tone */
-  --home-cream: 253 252 248; /* #FDFCF8 — Ekklē cream, the product card */
+  --home-sage: 63 74 58; /* #3F4A3A — Ekklē sage */
+  --home-cream: 253 252 248; /* #FDFCF8 — Ekklē cream, the product surfaces */
 
   position: relative;
   background: rgb(var(--home-ink));
   color: rgb(var(--home-stone));
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* Contain overscanned art without creating a scroll container (keeps pins +
-     sticky working, unlike overflow: hidden). */
+  /* Contain overscanned layers without creating a scroll container (keeps the
+     sticky stage working, unlike overflow: hidden). */
   overflow-x: clip;
 }
 
@@ -35,6 +35,31 @@
   text-wrap: balance;
 }
 
+/* Museum-caption voice: a short brass rule, then quiet serif text. */
+.j-caption {
+  max-width: 30ch;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+  line-height: 1.35;
+  color: rgb(var(--home-stone));
+  text-wrap: pretty;
+  text-shadow: 0 1px 24px rgb(0 0 0 / 0.55);
+}
+.j-caption::before {
+  content: '';
+  display: block;
+  width: 2.25rem;
+  height: 1px;
+  margin-bottom: 0.9rem;
+  background: rgb(var(--home-brass));
+}
+
+/* Big title-card lines. */
+.j-title {
+  text-shadow: 0 2px 40px rgb(0 0 0 / 0.6);
+}
+
 /* Canvas/grain over everything: one fixed, tiled layer (rasterized once). */
 .home-grain {
   position: fixed;
@@ -46,13 +71,13 @@
   background-size: 180px 180px;
 }
 
-/* Edge falloff toward ink — part of the chiaroscuro on every scene. */
+/* Edge falloff toward ink — part of the chiaroscuro. */
 .home-vignette {
   pointer-events: none;
   background: radial-gradient(
     ellipse 120% 95% at 50% 45%,
-    transparent 42%,
-    rgb(var(--home-ink) / 0.88) 100%
+    transparent 45%,
+    rgb(var(--home-ink) / 0.82) 100%
   );
 }
 
@@ -60,80 +85,114 @@
 .home-scrim {
   pointer-events: none;
   background: radial-gradient(
-    ellipse 46% 42% at 50% 50%,
-    rgb(var(--home-ink) / 0.55),
+    ellipse 50% 42% at 50% 50%,
+    rgb(var(--home-ink) / 0.6),
     rgb(var(--home-ink) / 0) 100%
   );
 }
 
-/*
- * Scene 3 light overlays. Only their opacity is animated (transform/opacity-only
- * rule). Their DEFAULT opacities are the warm end-state, so without JS — or with
- * reduced motion — Scene 3 simply shows the resolved, beheld moment.
- */
-.home-desat {
-  /* grey + saturation blend = desaturate what's beneath (the "cold" state) */
-  background: #7b807a;
-  mix-blend-mode: saturation;
-  opacity: 0;
-}
-.home-cool {
-  background: rgb(var(--home-juniper));
-  mix-blend-mode: multiply;
-  opacity: 0;
-}
-.home-warm {
-  /* brass bleeding in from the right, where the beheld figure is lit */
-  background: radial-gradient(
-    ellipse 70% 85% at 84% 42%,
-    rgb(var(--home-brass) / 0.95),
-    rgb(var(--home-brass) / 0) 72%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0.6;
-}
-.home-bloom {
-  background: radial-gradient(
-    ellipse 30% 44% at 57% 44%,
-    rgb(214 178 120 / 0.5),
-    rgb(var(--home-brass) / 0) 72%
-  );
-  mix-blend-mode: screen;
-  opacity: 1;
-}
-
-/* Per-line brass light source in Scene 6. */
-.home-glow {
+/* Golden-hour warmth that grows over the reunion (chapter 6). */
+.j-warm {
   pointer-events: none;
-  background: radial-gradient(
-    ellipse 40% 34% at 50% 50%,
-    rgb(var(--home-brass) / 0.3),
-    rgb(var(--home-brass) / 0) 70%
-  );
-}
-
-/* Scene 6 continuous ground: dark, one warm source above. */
-.home-s6-ground {
   background:
-    radial-gradient(ellipse 60% 45% at 50% 8%, rgb(var(--home-brass) / 0.22), transparent 70%),
-    radial-gradient(ellipse 90% 70% at 50% 60%, rgb(var(--home-juniper) / 0.35), transparent 80%),
-    rgb(var(--home-ink));
+    radial-gradient(ellipse 55% 60% at 50% 62%, rgb(246 205 140 / 0.28), transparent 70%),
+    radial-gradient(ellipse 90% 80% at 40% 30%, rgb(var(--home-brass) / 0.3), transparent 75%);
+  mix-blend-mode: soft-light;
 }
 
-/* Exit cue under the hero: a thin brass line that breathes. */
-@keyframes home-cue {
-  0%,
-  100% {
-    opacity: 0.25;
-    transform: scaleX(0.55);
+/* ---- Art frames: a layer is a size container; its art covers it. ---- */
+.j-cq {
+  container-type: size;
+}
+.j-cover {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100cqw, calc(100cqh * var(--a)));
+  aspect-ratio: var(--a);
+  transform: translate(-50%, -50%);
+}
+
+/* ---- Steam off the cups (its own tiny layer, so it never repaints the art). ---- */
+.j-steam {
+  width: 100%;
+  overflow: visible;
+}
+.j-steam path {
+  fill: none;
+  stroke: rgb(240 228 205 / 0.35);
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: blur(2px);
+  animation: j-steam 4.6s ease-in-out infinite;
+}
+.j-steam path:nth-child(2) {
+  animation-delay: 2.3s;
+}
+@keyframes j-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scaleY(0.85);
   }
-  50% {
-    opacity: 0.95;
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scaleY(1.1);
+  }
+}
+
+/* ---- Page loader: the Ekklē mark draws itself, then the curtain lifts. ---- */
+.j-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgb(var(--home-ink));
+  transition:
+    opacity 0.9s ease,
+    visibility 0.9s;
+}
+.j-loader.is-leaving {
+  opacity: 0;
+  visibility: hidden;
+}
+.j-loader .j-mark path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  animation: j-draw 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+.j-loader .j-mark path + path {
+  animation-delay: 0.55s;
+}
+.j-loader .j-word {
+  opacity: 0;
+  animation: j-fade 0.9s ease 1.15s forwards;
+}
+.j-loader .j-bar {
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: j-bar 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes j-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes j-fade {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes j-bar {
+  to {
     transform: scaleX(1);
   }
-}
-.home-cue {
-  animation: home-cue 2.8s ease-in-out infinite;
 }
 
 /* Visible focus for every interactive element on the page (brass). */
@@ -144,9 +203,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-cue {
+  .j-steam path,
+  .j-loader .j-mark path,
+  .j-loader .j-word,
+  .j-loader .j-bar {
     animation: none;
-    opacity: 0.6;
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: none;
   }
 }
 

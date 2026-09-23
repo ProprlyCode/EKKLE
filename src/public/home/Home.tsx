@@ -1,36 +1,43 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { BrandName } from '@/components/BrandName';
-import { setupMotion, type MotionMode } from './motion';
-import { homeLogoLight } from './images';
-import { SceneThreshold } from './scenes/SceneThreshold';
-import { SceneStatusQuo } from './scenes/SceneStatusQuo';
-import { SceneBehold } from './scenes/SceneBehold';
-import { SceneHowItWorks } from './scenes/SceneHowItWorks';
-import { SceneDemo, type DemoController } from './scenes/SceneDemo';
-import { SceneIntegrity } from './scenes/SceneIntegrity';
-import { SceneInvitation } from './scenes/SceneInvitation';
+import { useReducedMotion } from './useReducedMotion';
+import { CHAPTERS, T } from './journey/chapters';
+import { Stage } from './journey/Stage';
+import { buildJourney, type JourneyMode } from './journey/timeline';
+import { Loader } from './journey/Loader';
+import { ChapterRail } from './journey/ChapterRail';
+import { Invitation } from './journey/Invitation';
+import { JourneyStatic } from './journey/JourneyStatic';
 import './home.css';
 
 const INK = '#232a2e';
 
 /**
- * ekkle.org/ — the cinematic "Ecce Homo" homepage (docs/homepage-build.md).
+ * ekkle.org/ — "Two lives, one thread" (docs/homepage-build.md).
  *
- * Seven scenes of image and motion, one quiet ask. This component owns the page
- * chrome and the motion lifecycle: Lenis smooth scroll (desktop only), and one
- * gsap.matchMedia that sets up desktop / mobile / reduced-motion choreography and
- * reverts it all on mode change or unmount. The rest of the app never loads this
- * (the route is code-split), so GSAP/Lenis stay out of the product bundle.
+ * A layered-depth scroll journey: a café conversation cut short, a code scanned
+ * to continue it, two lives apart, one message back to the same person, and the
+ * two of them together over an open Bible. Scroll is the camera.
+ *
+ * This component owns the chrome and the motion lifecycle: the loader, Lenis
+ * smooth scroll (desktop only), the chapter rail, and one gsap.matchMedia that
+ * builds the journey timeline for desktop or phones and reverts it on change or
+ * unmount. Reduced motion renders JourneyStatic instead: every word, no motion.
+ * The route is code-split, so GSAP/Lenis never load in the product.
  */
 export default function Home() {
+  const reduced = useReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
-  const demoRef = useRef<DemoController | null>(null);
-  const demoTriggerRef = useRef<ScrollTrigger | null>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const [loaded, setLoaded] = useState(reduced);
+  const loadedRef = useRef(loaded);
+  loadedRef.current = loaded;
+  const [chapter, setChapter] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   // Dark browser chrome + dark overscroll while on the homepage; restored on leave.
   useEffect(() => {
@@ -45,39 +52,50 @@ export default function Home() {
     };
   }, []);
 
+  // The story starts at the beginning; scroll stays locked under the loader.
+  useLayoutEffect(() => {
+    if (loaded) return;
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = 'hidden';
+    lenisRef.current?.stop();
+    return () => {
+      html.style.overflow = prev;
+      lenisRef.current?.start();
+    };
+  }, [loaded]);
+
   useLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    if (!root || reduced) return;
 
     ScrollTrigger.config({ ignoreMobileResize: true });
     const mm = gsap.matchMedia();
     mm.add(
       {
-        desktop: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
-        mobile: '(max-width: 767px) and (prefers-reduced-motion: no-preference)',
-        reduce: '(prefers-reduced-motion: reduce)',
+        desktop: '(min-width: 768px)',
+        mobile: '(max-width: 767px)',
       },
       (context) => {
-        const c = context.conditions as Record<'desktop' | 'mobile' | 'reduce', boolean>;
-        const mode: MotionMode = c.desktop ? 'desktop' : c.mobile ? 'mobile' : 'reduce';
+        const mode: JourneyMode = context.conditions?.desktop ? 'desktop' : 'mobile';
 
-        // Smooth scroll on desktop only; touch keeps native momentum scrolling and
-        // reduced motion keeps plain scrolling.
+        // Smooth scroll on desktop only; touch keeps native momentum scrolling.
         let lenis: Lenis | null = null;
         const raf = (time: number) => lenis?.raf(time * 1000);
         if (mode === 'desktop') {
-          lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+          lenis = new Lenis({ duration: 1.2, smoothWheel: true });
           lenis.on('scroll', ScrollTrigger.update);
           gsap.ticker.add(raf);
           gsap.ticker.lagSmoothing(0);
           lenisRef.current = lenis;
+          if (!loadedRef.current) lenis.stop();
         }
 
-        const teardown = setupMotion(root, mode, {
-          onDemoToggle: (active) => demoRef.current?.setActive(active),
-          setDemoTrigger: (trigger) => {
-            demoTriggerRef.current = trigger;
-          },
+        const teardown = buildJourney(root, mode, {
+          onChapter: setChapter,
+          onProgress: setProgress,
         });
 
         return () => {
@@ -98,45 +116,67 @@ export default function Home() {
       live = false;
       mm.revert();
     };
+  }, [reduced]);
+
+  // Past the stage, the rail shows chapter 7 (Join).
+  useEffect(() => {
+    if (reduced) return;
+    const join = document.getElementById('join');
+    if (!join) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setChapter(CHAPTERS.length - 1);
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(join);
+    return () => io.disconnect();
+  }, [reduced]);
+
+  const onLoaded = useCallback(() => {
+    setLoaded(true);
+    const hero = rootRef.current?.querySelector('[data-j="hero-inner"]');
+    if (hero) gsap.fromTo(hero, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 1.6, ease: 'power3.out', delay: 0.25 });
   }, []);
 
-  // The demo finished by tap → release its pin by gliding just past it.
-  const releaseDemo = useCallback(() => {
-    const st = demoTriggerRef.current;
-    if (!st || !st.isActive) return;
-    const target = st.end + 2;
-    if (lenisRef.current) lenisRef.current.scrollTo(target, { duration: 1.2 });
-    else window.scrollTo({ top: target, behavior: 'smooth' });
+  const jump = useCallback((index: number) => {
+    const c = CHAPTERS[index];
+    let top: number;
+    if (c.at === null) {
+      top = (document.getElementById('join')?.getBoundingClientRect().top ?? 0) + window.scrollY;
+    } else {
+      const track = rootRef.current?.querySelector<HTMLElement>('[data-j="track"]');
+      if (!track) return;
+      const trackTop = track.getBoundingClientRect().top + window.scrollY;
+      const span = track.offsetHeight - window.innerHeight;
+      // Land just after the chapter starts, so its first words are coming in.
+      top = trackTop + ((c.at + (c.at === 0 ? 0 : 1.5)) / T) * span;
+    }
+    if (lenisRef.current) lenisRef.current.scrollTo(top, { duration: 2.2 });
+    else window.scrollTo({ top, behavior: 'smooth' });
   }, []);
 
   return (
     <div ref={rootRef} className="home-root">
-      <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
-        <Link to="/" aria-label="Ekklē home" className="home-focus">
-          {homeLogoLight ? (
-            <img src={homeLogoLight} alt="" className="h-9 w-9" />
-          ) : (
-            <BrandName className="font-serif text-xl text-home-stone" />
-          )}
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-40 flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
+        <Link to="/" aria-label="Ekklē home" className="home-focus pointer-events-auto">
+          <BrandName className="font-serif text-xl text-home-stone" />
         </Link>
         <Link
           to="/sign-in"
-          className="home-focus text-[14px] text-home-stone-dim transition-colors hover:text-home-stone"
+          className="home-focus pointer-events-auto text-[14px] text-home-stone-dim transition-colors hover:text-home-stone"
         >
           Sign in
         </Link>
       </header>
 
       <main>
-        <SceneThreshold />
-        <SceneStatusQuo />
-        <SceneBehold />
-        <SceneHowItWorks />
-        <SceneDemo controllerRef={demoRef} onComplete={releaseDemo} />
-        <SceneIntegrity />
-        <SceneInvitation />
+        {reduced ? <JourneyStatic /> : <Stage />}
+        <Invitation />
       </main>
 
+      {!reduced && <ChapterRail active={chapter} progress={progress} onJump={jump} />}
+      {!reduced && <Loader onDone={onLoaded} />}
       <div className="home-grain" aria-hidden />
     </div>
   );
