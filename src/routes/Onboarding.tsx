@@ -87,7 +87,7 @@ export default function Onboarding() {
             required
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="e.g. GATHER"
+            placeholder="6-character code"
           />
           {error && <ErrorNote>{error}</ErrorNote>}
           <Button type="submit" disabled={submitting || !name || !code}>

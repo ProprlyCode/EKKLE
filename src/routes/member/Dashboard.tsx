@@ -9,6 +9,7 @@ import { Card, Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { ErrorNote } from '@/ui/states';
+import FlowPreview from '@/recipient/FlowPreview';
 
 /**
  * Member home. The focal element is the keepsake card — the thing a member is
@@ -132,6 +133,7 @@ function FlowPicker({
 }) {
   const [flows, setFlows] = useState<Pick<Sequence, 'id' | 'title'>[]>([]);
   const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     listApprovedSequences()
@@ -151,27 +153,71 @@ function FlowPicker({
     }
   }
 
+  // No explicit pick yet → the first published flow is the effective default.
+  const effectiveId = activeSequenceId ?? flows[0]?.id ?? null;
+
   return (
     <Card className="flex flex-col gap-3">
       <div>
         <h2 className="text-base">Which invitation your code shares</h2>
         <p className="mt-1 text-sm text-muted-strong">
-          Choose the flow people see when they open your code.
+          Choose the flow people see when they open your code. Preview any of them first.
         </p>
       </div>
-      <select
-        value={activeSequenceId ?? ''}
-        disabled={saving}
-        onChange={(e) => void select(e.target.value)}
-        className="w-full rounded-lg border border-edge bg-canvas px-3 py-2 text-sm text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40 disabled:opacity-50"
-      >
-        <option value="">Default (first published)</option>
-        {flows.map((f) => (
-          <option key={f.id} value={f.id}>
-            {f.title}
-          </option>
-        ))}
-      </select>
+      <ul className="flex flex-col gap-2">
+        {flows.map((f) => {
+          const active = f.id === effectiveId;
+          return (
+            <li
+              key={f.id}
+              className={
+                'flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ' +
+                (active ? 'border-sage/50 bg-sage/[0.04]' : 'border-edge')
+              }
+            >
+              <span
+                aria-hidden
+                className={
+                  'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ' +
+                  (active ? 'border-sage' : 'border-edge')
+                }
+              >
+                {active && <span className="h-2 w-2 rounded-full bg-sage" />}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm text-sage">{f.title}</span>
+              <button
+                onClick={() => setPreview({ id: f.id, title: f.title })}
+                className="shrink-0 text-[13px] text-muted transition-colors hover:text-sage"
+              >
+                Preview
+              </button>
+              {!active && (
+                <Button
+                  variant="quiet"
+                  size="sm"
+                  disabled={saving}
+                  onClick={() => void select(f.id)}
+                >
+                  Use this
+                </Button>
+              )}
+              {active && (
+                <span className="shrink-0 text-[12px] uppercase tracking-eyebrow text-muted">
+                  Active
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      {preview && (
+        <FlowPreview
+          sequenceId={preview.id}
+          title={preview.title}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </Card>
   );
 }
