@@ -10,7 +10,7 @@ import { Stage } from './journey/Stage';
 import { buildJourney, type JourneyMode } from './journey/timeline';
 import { Loader } from './journey/Loader';
 import { ChapterRail } from './journey/ChapterRail';
-import { Invitation } from './journey/Invitation';
+import { Footer, Invitation } from './journey/Invitation';
 import { JourneyStatic } from './journey/JourneyStatic';
 import './home.css';
 
@@ -19,9 +19,10 @@ const INK = '#232a2e';
 /**
  * ekkle.org/ — "Two lives, one thread" (docs/homepage-build.md).
  *
- * A layered-depth scroll journey: a café conversation cut short, a code scanned
- * to continue it, two lives apart, one message back to the same person, and the
- * two of them together over an open Bible. Scroll is the camera.
+ * A layered-depth scroll journey: Sam and Jordan's café conversation cut short,
+ * a code scanned to continue it, two lives apart, one reply back to the same
+ * person, and the two of them together over an open Bible — then the invitation
+ * rises into that same last frame. Scroll is the camera.
  *
  * This component owns the chrome and the motion lifecycle: the loader, Lenis
  * smooth scroll (desktop only), the chapter rail, and one gsap.matchMedia that
@@ -118,21 +119,6 @@ export default function Home() {
     };
   }, [reduced]);
 
-  // Past the stage, the rail shows chapter 7 (Join).
-  useEffect(() => {
-    if (reduced) return;
-    const join = document.getElementById('join');
-    if (!join) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) setChapter(CHAPTERS.length - 1);
-      },
-      { threshold: 0.5 },
-    );
-    io.observe(join);
-    return () => io.disconnect();
-  }, [reduced]);
-
   const onLoaded = useCallback(() => {
     setLoaded(true);
     const hero = rootRef.current?.querySelector('[data-j="hero-inner"]');
@@ -141,17 +127,14 @@ export default function Home() {
 
   const jump = useCallback((index: number) => {
     const c = CHAPTERS[index];
-    let top: number;
-    if (c.at === null) {
-      top = (document.getElementById('join')?.getBoundingClientRect().top ?? 0) + window.scrollY;
-    } else {
-      const track = rootRef.current?.querySelector<HTMLElement>('[data-j="track"]');
-      if (!track) return;
-      const trackTop = track.getBoundingClientRect().top + window.scrollY;
-      const span = track.offsetHeight - window.innerHeight;
-      // Land just after the chapter starts, so its first words are coming in.
-      top = trackTop + ((c.at + (c.at === 0 ? 0 : 1.5)) / T) * span;
-    }
+    const track = rootRef.current?.querySelector<HTMLElement>('[data-j="track"]');
+    if (!track) return;
+    const trackTop = track.getBoundingClientRect().top + window.scrollY;
+    const span = track.offsetHeight - window.innerHeight;
+    // Land just after a chapter starts, so its first words are coming in; Join
+    // lands at the end, with the form settled.
+    const last = index === CHAPTERS.length - 1;
+    const top = trackTop + (last ? 1 : (c.at + (c.at === 0 ? 0 : 1.5)) / T) * span;
     if (lenisRef.current) lenisRef.current.scrollTo(top, { duration: 2.2 });
     else window.scrollTo({ top, behavior: 'smooth' });
   }, []);
@@ -171,9 +154,16 @@ export default function Home() {
       </header>
 
       <main>
-        {reduced ? <JourneyStatic /> : <Stage />}
-        <Invitation />
+        {reduced ? (
+          <>
+            <JourneyStatic />
+            <Invitation />
+          </>
+        ) : (
+          <Stage />
+        )}
       </main>
+      <Footer />
 
       {!reduced && <ChapterRail active={chapter} progress={progress} onJump={jump} />}
       {!reduced && <Loader onDone={onLoaded} />}

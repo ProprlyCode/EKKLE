@@ -19,6 +19,7 @@ import {
 } from './art';
 import { Phone } from './Phone';
 import { Dust } from './Dust';
+import { JoinContent } from './Invitation';
 
 /**
  * The journey: a tall scroll track holding one sticky, full-screen stage. Every
@@ -119,10 +120,10 @@ export function Stage() {
           />
         </div>
 
-        {/* ---- Chapter 4: inside B's phone ---- */}
+        {/* ---- Chapter 4: inside Jordan's phone ---- */}
         <div
           data-j="phone-wrap"
-          className="absolute inset-0 z-[5] flex items-center justify-center"
+          className="absolute inset-0 z-[5] flex items-center justify-center pb-[9svh] md:pb-0"
           style={{
             opacity: 0,
             visibility: 'hidden',
@@ -189,30 +190,41 @@ export function Stage() {
         <Title id="t3" low>
           {COPY.t3}
         </Title>
+        <Caption id="c3" className="bottom-[12svh] left-[6vw] md:left-[8vw]">
+          {COPY.c3}
+        </Caption>
         <Caption id="c4a" className="bottom-[calc(50%+5svh)] left-[6vw] md:bottom-[12svh] md:left-[4vw] md:max-w-[36vw]">
           {COPY.c4a}
         </Caption>
         <Caption id="c4b" className="bottom-[6svh] left-[6vw] md:bottom-[12svh] md:left-[54vw] md:max-w-[36vw]">
           {COPY.c4b}
         </Caption>
+        {/* beside the phone on desktop, under it on phones */}
+        <Caption id="c4c" className="bottom-[3svh] left-[6vw] right-[6vw] md:bottom-[12svh] md:left-[8vw] md:right-auto md:max-w-[26vw]">
+          {COPY.c4c}
+        </Caption>
         <Title id="t5">{COPY.t5}</Title>
+        <Caption id="c5" className="bottom-[12svh] left-[6vw] md:left-[8vw]">
+          {COPY.c5}
+        </Caption>
         <Caption id="c6" className="bottom-[12svh] left-[6vw] md:left-[8vw]">
           {COPY.c6}
+        </Caption>
+        <Caption id="c6b" className="bottom-[12svh] left-[6vw] md:left-[8vw]">
+          {COPY.c6b}
         </Caption>
         <Title id="t6" big>
           {COPY.t6}
         </Title>
-        {COPY.integrity.map((line, i) => (
-          <Title key={line} id={`i${i}`}>
-            {line}
-          </Title>
-        ))}
+
+        {/* ---- Chapter 7: the invitation rises into the same frame ---- */}
         <div
-          data-j="pos"
-          className="absolute inset-x-0 bottom-[14svh] z-10 flex justify-center px-6"
+          data-j="join"
+          id="join"
+          className="absolute inset-0 z-20 flex items-center justify-center overflow-y-auto px-5 pb-8 pt-24 md:pt-20"
           style={{ opacity: 0, visibility: 'hidden' }}
         >
-          <p className="j-caption text-center before:mx-auto">{COPY.positioning}</p>
+          <JoinContent />
         </div>
       </div>
     </section>

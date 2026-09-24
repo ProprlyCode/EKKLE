@@ -1,7 +1,7 @@
-import { MEMBER, SCREENS } from './chapters';
+import { FRIEND, MEMBER, SCREENS } from './chapters';
 
 /**
- * B's phone, full size — the camera dives into it in chapter 4. Inside are the
+ * Jordan's phone, full size — the camera dives into it in chapter 4. Inside are the
  * real Ekklē recipient screens in the product's own look (cream surface, sage
  * serif headlines). Scroll plays them: the journey timeline cross-fades the
  * `phone-screen-*` layers, fills the `phone-bar-*` progress, and swaps the
@@ -11,9 +11,9 @@ export function Phone({ reduced = false }: { reduced?: boolean }) {
   return (
     <div
       data-j="phone"
-      className="relative aspect-[9/19] w-[min(320px,72vw)] max-h-[82svh] rounded-[44px] bg-[#0d0f10] p-[10px] shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)]"
+      className="relative aspect-[9/19] w-[min(260px,62vw)] max-h-[74svh] md:w-[min(320px,72vw)] md:max-h-[82svh] rounded-[44px] bg-[#0d0f10] p-[10px] shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)]"
       role="img"
-      aria-label={`B's phone, showing the Ekklē message ${MEMBER} shared`}
+      aria-label={`${FRIEND}'s phone, showing the Ekklē message ${MEMBER} shared`}
     >
       <div className="relative flex h-full flex-col overflow-hidden rounded-[34px] bg-home-cream">
         <div className="mx-auto mt-2.5 h-[22px] w-[84px] rounded-full bg-[#0d0f10]" aria-hidden />

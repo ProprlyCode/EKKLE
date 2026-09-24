@@ -7,39 +7,56 @@ import { CoverFrame, WIDE } from './frame';
 import { CafeBg } from './art';
 
 /**
- * Chapter 7 — the one ask, after the story ends. Still and quiet: the café in
- * its warmest light, one line, and "Join the waitlist".
+ * Chapter 7 — the one ask, spoken to church leaders. In the journey it is the
+ * story's last shot (Stage renders JoinContent into the same frame as the
+ * table); under reduced motion, Invitation shows it as a still section.
  */
+export function JoinContent() {
+  return (
+    <div className="flex w-full flex-col items-center gap-7 md:gap-9">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <h2 className="home-display j-title max-w-[22ch] text-[clamp(1.75rem,3.6vw,3.25rem)] text-home-stone">
+          {COPY.joinTitle}
+        </h2>
+        <p className="max-w-[44ch] text-[15px] leading-relaxed text-home-stone-dim md:text-[17px]">
+          {COPY.joinSub}
+        </p>
+      </div>
+      <WaitlistForm />
+    </div>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="relative z-10 flex items-center justify-between gap-4 bg-home-ink px-6 py-8 text-[13px] text-home-stone-dim md:px-10">
+      <BrandName className="font-serif text-base text-home-stone" />
+      <nav className="flex items-center gap-6">
+        <Link to="/for-churches" className="home-focus transition-colors hover:text-home-stone">
+          For churches
+        </Link>
+        <Link to="/sign-in" className="home-focus transition-colors hover:text-home-stone">
+          Sign in
+        </Link>
+      </nav>
+    </footer>
+  );
+}
+
+/** Reduced motion: the invitation as a still section over the golden café. */
 export function Invitation() {
   return (
-    <section id="join" data-j="join" className="relative flex min-h-[100svh] flex-col overflow-hidden">
+    <section id="join" className="relative flex min-h-[100svh] flex-col overflow-hidden">
       <div className="j-cq absolute inset-0" aria-hidden>
         <CoverFrame aspect={WIDE}>
           <CafeBg golden />
         </CoverFrame>
       </div>
-      <div className="absolute inset-0 bg-home-ink/55" aria-hidden />
-      <div className="home-scrim absolute inset-0 scale-125" aria-hidden />
+      <div className="absolute inset-0 bg-home-ink/60" aria-hidden />
       <div className="home-vignette absolute inset-0" aria-hidden />
-
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-10 px-6 py-24">
-        <h2 className="home-display max-w-[16ch] text-center text-[clamp(2rem,4.6vw,3.75rem)] text-home-stone">
-          {COPY.join}
-        </h2>
-        <WaitlistForm />
+      <div className="relative z-10 flex flex-1 items-center justify-center px-6 py-24">
+        <JoinContent />
       </div>
-
-      <footer className="relative z-10 flex items-center justify-between gap-4 px-6 pb-8 text-[13px] text-home-stone-dim md:px-10">
-        <BrandName className="font-serif text-base text-home-stone" />
-        <nav className="flex items-center gap-6">
-          <Link to="/for-churches" className="home-focus transition-colors hover:text-home-stone">
-            For churches
-          </Link>
-          <Link to="/sign-in" className="home-focus transition-colors hover:text-home-stone">
-            Sign in
-          </Link>
-        </nav>
-      </footer>
     </section>
   );
 }
@@ -88,7 +105,7 @@ function WaitlistForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl border border-home-stone/10 bg-home-ink/60 p-6 backdrop-blur-[2px] md:p-8"
+      className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl border border-home-stone/10 bg-home-ink/60 p-5 backdrop-blur-[2px] md:p-8"
     >
       <Field label="Your name" value={name} onChange={setName} autoComplete="name" required />
       <Field

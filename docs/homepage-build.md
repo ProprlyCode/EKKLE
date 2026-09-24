@@ -19,18 +19,18 @@ two of them behold him together.
 
 ## The story (chapters)
 
-The whole stage is **one GSAP timeline**, `T = 114` units long. Scroll scrubs it across
-a `1500svh` track while a full-screen stage stays pinned (sticky).
+The whole stage is **one GSAP timeline**, `T = 122` units long. Scroll scrubs it across
+a `1600svh` track while a full-screen stage stays pinned (sticky).
 
 | # | Chapter | Units | What happens | Words |
 |---|---|---|---|---|
-| 1 | A conversation | 0–16 | The camera pushes through the café toward two people at a table. The foreground plant and chair rush past. | Hero: "Empowering individuals to make connections and grow them" / "It starts the way it always has — two people, one real conversation." |
-| 2 | Cut short | 16–26 | A stands up with coat and bag. | "But life interrupts." |
-| 3 | The code | 26–38 | Close on two hands: A's phone shows a code, and B's phone slides in to scan it. There's a lock flash, and the thread is born. | **"Continue the conversation."** |
-| 4 | Two lives | 38–64 | The screen splits: A in a cool dusk street, B in a warm lamp-lit room that night. The thread spans the seam. Then the camera dives into B's phone, where the real product screens play as you scroll. | "One goes back to an ordinary day." / "The other reads it that night — unhurried, alone." |
-| 5 | The thread holds | 64–76 | B taps "Message Sam" and it sends. The camera pulls back, A's phone lights up, and the thread travels back from B to A. | **"Back to the same person — not a stranger."** |
-| 6 | Together | 76–114 | The same table days later, in golden light, with an open Bible between them. Warmth grows. Then the integrity lines, one at a time, and the positioning line. | "Days later…" / **"Together, Behold Him"** / 4 integrity lines / "Ekklē is a system for churches and individuals to do ministry in a more personal way." |
-| 7 | Join | after | Still: the café at its warmest, one line, and the waitlist form. | "A quiet place to explore — together." |
+| 1 | A conversation | 0–16 | The camera pushes through the café toward Sam and Jordan at a table. The foreground rushes past. | Hero: "Empowering individuals to make connections — and grow them." / "It starts the way it always has: two people, one real conversation." |
+| 2 | Cut short | 16–26 | Sam stands up with coat and bag. | "But Sam has to go, and the conversation isn't finished." |
+| 3 | The code | 26–41.5 | Close on two hands: Sam's phone shows a code, and Jordan's phone slides in to scan it. There's a lock flash, and the thread is born. | **"The conversation doesn't have to end here."** / "Something as important as the gospel deserves personal accountability. What Sam shares carries Sam's name." |
+| 4 | Two lives | 41.5–71 | The screen splits: Sam's cool dusk street, and Jordan's lamp-lit room that night. The thread spans the seam. The camera dives into Jordan's phone, where the real product screens play as you scroll. | "Sam goes through the rest of the day." / "That night, alone and unhurried, Jordan reads what Sam shared." / "A quiet place to explore, with someone to explore it with." |
+| 5 | The thread holds | 71–88 | Jordan taps "Message Sam". The camera pulls back, Sam's phone lights up, and the thread travels back to Sam. | **"The reply goes back to Sam — not to a stranger."** / "Everything shared stays tied to the person who shared it, and open to more conversation." |
+| 6 | Together | 88–112 | The same table days later, in golden light, with an open Bible between them. | "Days later: the same table, and an open Bible between them." / "This is relational integrity: faith shared person to person, and kept." / **"Together, Behold Him"** |
+| 7 | Join | 112–122 | No cut: the camera eases back from the table, the room dims, and the invitation and form rise into the same frame. | **"Vindicating the character of God, one intentional conversation at a time."** / "Ekklē is a system for churches and individuals…" |
 
 All copy lives in `journey/chapters.ts` (`COPY`, `SCREENS`, `MEMBER = 'Sam'`).
 
@@ -47,7 +47,7 @@ All copy lives in `journey/chapters.ts` (`COPY`, `SCREENS`, `MEMBER = 'Sam'`).
 | `journey/Dust.tsx` | Canvas dust motes. The rAF loop pauses when off screen. |
 | `journey/Loader.tsx` | The arch and thread draw themselves, then the name appears and a brass bar fills. Waits for fonts, 2.1 s minimum, 4 s maximum. Scroll is locked while it shows. |
 | `journey/ChapterRail.tsx` | Desktop: a numbered rail on the right; click a chapter to jump to it. Phones: a hairline progress bar and the chapter name. |
-| `journey/Invitation.tsx` | Chapter 7: the waitlist form and footer. |
+| `journey/Invitation.tsx` | Chapter 7: `JoinContent` (headline, subline, waitlist form; rendered inside the stage as the last shot), `Footer`, and the still `Invitation` used under reduced motion. |
 | `journey/JourneyStatic.tsx` | Reduced motion: the same art and every word, as still frames. |
 
 Rules we keep:
@@ -62,44 +62,112 @@ Rules we keep:
 
 **To retime anything:** edit the unit positions in `timeline.ts`. Chapter starts are `CHAPTERS[].at` in `chapters.ts`, and the rail follows them. To make the whole journey longer or shorter, change `TRACK_VH`.
 
-## Swapping in the real footage (layer asset list)
+## Graphics manifest (every image the homepage needs)
 
-Each placeholder layer is replaced by a still or clip from the shoot. Stills and clips
-can drop into the same `<Layer>` slots (an `<img>` or a muted, inline, looping
-`<video>`), and the timeline stays unchanged.
+The story art is currently code-drawn placeholders. Each placeholder layer gets
+replaced by a real image. The scroll timing, copy and motion stay the same.
 
-**Formats:**
-- Stills: WebP at q≈80, with a JPG fallback.
-- Cut-out layers: PNG-24 or WebP with alpha.
-- Clips: MP4 (H.264) plus WebM, ≤6 s loops, no audio.
-- Size: ≤400 KB per still where possible.
+### Rules for every file
 
-**Shapes:**
-- Wide scenes are 16:9 at 2560×1440, and need a matching **9:16 phone crop (1080×1920)**.
-- Split panels are square (1600×1600), and need a phone crop at 1080×960.
+- **Layers stack like a stage set.** Every layer in a scene is exported on the **same
+  canvas size with the same framing**, as if shot from one locked camera. A
+  transparent layer is the full canvas with everything except its subject
+  transparent. Never crop it to the subject.
+- **Formats to deliver:**
+  - Opaque scenes: **JPG** (quality 90+) or PNG.
+  - Transparent layers: **PNG-24 with alpha**.
+  - I convert and compress everything to WebP/AVIF for the site, so send masters.
+- **Two shapes for wide scenes.** Desktop is **16:9**. Phones need their own
+  **9:16** version, recomposed with the subjects centred. (On a phone, a 16:9 image
+  only shows its middle quarter.)
+- **Resolution:**
+  - Wide scenes: 2560×1440 for desktop and 1080×1920 for phone.
+  - Layers the camera pushes into: 3200×1800 for desktop and 1350×2400 for phone.
+  - Two-lives panels: square, 2400×2400.
+- **People stay the same across every scene:**
+  - **Sam** (the one who shares): a **rust** scarf or accent.
+  - **Jordan** (the one who receives): a **sage** scarf or accent.
+  - Nobody looks at the camera.
+- **Light arc:** warm window light in the café; cool dusk in Sam's day; one warm
+  lamp in Jordan's night; golden hour in the reunion.
+- **Keep quiet zones for text** (darker, low detail):
+  - Captions: the bottom-left third.
+  - Titles: the centre of the frame in scenes 2, 3 and 4.
+- **Motion headroom.** Keep ~10% margin around subjects that move (noted per layer).
 
-| Layer (`data-j`) | Brief shot | Content | Shape | Notes |
+### Scene 1 — the café (chapters 1–2): 5 layers × 2 shapes = 10 files
+
+| # | File | Contents | Type | Desktop | Phone |
+|---|---|---|---|---|---|
+| 1 | `cafe-bg` | Café interior, **no Sam or Jordan** (clean plate). Window light, lamps, shelves; any other patrons small, distant and soft. | Opaque JPG | 2560×1440 | 1080×1920 |
+| 2 | `cafe-table` | The table with two cups, and **Jordan seated** on the right side, facing Sam's chair. | PNG alpha | 3200×1800 | 1350×2400 |
+| 3 | `cafe-sam-seated` | **Sam seated** on the left, leaning in, mid-conversation. | PNG alpha | 3200×1800 | 1350×2400 |
+| 4 | `cafe-sam-standing` | **Sam standing** in the same spot: coat on, bag on shoulder, about to leave. Crossfades with #3, so match position exactly. | PNG alpha | 3200×1800 | 1350×2400 |
+| 5 | `cafe-fg` | A soft, out-of-focus foreground element at the frame edges (plant, chair back, counter edge). The camera rushes past it. | PNG alpha | 2560×1440 | 1080×1920 |
+
+Camera: the background scales to 1.2× and #2–#4 scale to 1.5×, centred on the table,
+so keep the table and both people near the centre.
+
+### Scene 2 — the scan (chapter 3): 3 layers × 2 shapes = 6 files
+
+| # | File | Contents | Type | Desktop | Phone |
+|---|---|---|---|---|---|
+| 6 | `scan-bg` | Close-up background: café bokeh, no people or hands. | Opaque JPG | 2560×1440 | 1080×1920 |
+| 7 | `scan-sam-hand` | **Sam's hand** (rust sleeve) holding up a phone. The **screen shows the code**, either composited by you with the screen PNG I'll supply (#18), or left blank white for me to overlay. Left of centre. | PNG alpha | 2560×1440 | 1080×1920 |
+| 8 | `scan-jordan-hand` | **Jordan's hand** (sage sleeve) holding a phone in camera mode, aimed at Sam's screen. Right of centre. It slides in from the right, so keep the hand whole within the frame. | PNG alpha | 2560×1440 | 1080×1920 |
+
+On phones the two phones must both fit in the 9:16 frame, close together.
+
+### Scene 3 — two lives (chapters 4–5): 5 layers, square
+
+Each panel is half the screen: side by side on desktop, stacked on phones. One
+square image covers both, so keep subjects in the **centre 60%**.
+
+| # | File | Contents | Type | Size |
 |---|---|---|---|---|
-| `cafe-bg` | 1.1 | Busy café, **clean plate** (no A/B), window light | 16:9 | Background depth. Scaled 1 → 1.2. |
-| `cafe-a-seated` | 1.2 | A seated, leaning in (rust scarf), cut-out | 16:9 | Must register with the table plate. |
-| `cafe-table` | 1.2 | Table, two cups, B seated (sage scarf), cut-out | 16:9 | Steam can stay CSS. |
-| `cafe-fg` | 1.3 | Out-of-focus foreground (plant/chair edge), cut-out | 16:9 | Rushes past the lens. |
-| `cafe-a-standing` | 2.1 | A standing in coat with bag, cut-out, same framing | 16:9 | Crossfades with seated. |
-| `scan-bg` | 3.1 | Café bokeh, no people | 16:9 | |
-| `scan-a` | 3.2 | A's hand and phone, **screen dark or green** | 16:9 | We comp the real code UI. |
-| `scan-b` | 3.2 | B's hand and phone, camera view, cut-out | 16:9 | Slides in. |
-| `day-bg` | 4.1 | Dusk street, clean plate | square | |
-| `day-a-walk` / `day-a-phone` | 4.1 / 5.2 | A walking; A glancing at a lit phone | square | Two states, same framing. |
-| `night-bg` | 4.2 | B in armchair by a lamp, reading a phone | square | Phone position = `NIGHT_PHONE` in `geometry.ts` (update to match). |
-| `night-glow` | 4.2 | Phone-glow pass on B's face | square | Or keep CSS. |
-| (phone UI) | — | Real product screens, rendered in code | — | No footage needed. |
-| `tog-bg` | 6.1 | Same café, golden hour, clean plate | 16:9 | Also used behind Join. |
-| `tog-people` | 6.1 | A and B together over an open Bible, cut-out | 16:9 | Scaled 1 → 1.34. |
+| 9 | `day-bg` | City street at dusk, cool light, no Sam (clean plate). | Opaque JPG | 2400×2400 |
+| 10 | `day-sam-walking` | **Sam walking** through the day, bag on shoulder. It drifts sideways about 14% of the width, so give it room. | PNG alpha | 2400×2400 |
+| 11 | `day-sam-phone` | **Sam stopped**, looking down at a lit phone (the reply has arrived). Same position as #10. | PNG alpha | 2400×2400 |
+| 12 | `night-bg` | **Jordan at night**, in an armchair by one warm lamp, reading a phone. The camera dives into this phone at up to 4.6× zoom, so tell me where the phone sits (it may soften in the zoom; that's fine). | Opaque JPG | 2400×2400 |
+| 13 | `night-glow` | *(Optional)* A light-only pass: the phone's glow on Jordan's face and hands, for a gentle pulse when Jordan replies. | PNG alpha | 2400×2400 |
 
-When the real stills land:
-1. Put them in `public/home/`.
-2. Replace the matching art component inside the `<Layer>` in `Stage.tsx` (and in `JourneyStatic.tsx`).
-3. Update the thread anchors in `timeline.ts` (`SCAN_A`, `SCAN_B`, `DAY_A`) and `NIGHT_PHONE` to the new art's pixel positions, as fractions.
+The phone screens themselves are live code. No graphic is needed.
+
+### Scene 4 — together (chapters 6–7): 2 layers × 2 shapes = 4 files
+
+| # | File | Contents | Type | Desktop | Phone |
+|---|---|---|---|---|---|
+| 14 | `tog-bg` | **The same café, golden hour**, clean plate. It's also the background behind the waitlist form (dimmed) and on the reduced-motion page. | Opaque JPG | 2560×1440 | 1080×1920 |
+| 15 | `tog-people` | **Sam and Jordan at the same table**, days later, leaning in over an **open Bible**, with cups. Warm, unposed. | PNG alpha | 3200×1800 | 1350×2400 |
+
+The camera pushes to 1.34× into the pair, then pulls back for the invitation, so keep
+heads and the Bible well inside the centre.
+
+### Brand and sharing: 3 files
+
+| # | File | Contents | Type | Size |
+|---|---|---|---|---|
+| 16 | `logo-mark` | The Ekklē mark, light version for dark backgrounds (cream `#F1ECE1` or brass `#A9824C`). Used in the loader and header. Built from strokes (not filled outlines), so the loader can draw it. | SVG | vector |
+| 17 | `og-image` | The link preview for texts and social (the café or the together scene, plus the wordmark). Keep text inside the centre 1000×500. | JPG | 1200×630 |
+| 18 | `scan-screen` | *(I supply this.)* The Ekklē code screen, for compositing onto Sam's phone in #7. | PNG | 1170×2532 |
+
+### Totals
+
+- **15 art layers**, which is **26 files** once phone versions are counted (#1–15).
+- **2 brand files** (#16–17).
+- **1 file from me** (#18).
+
+Optional: #13. Not needed: steam, dust, the gold thread, grain, the loader animation
+and the phone UI are all code.
+
+### When files arrive
+
+1. Put the masters in `public/home/` (names above, suffixed `-d` / `-m` for the
+   desktop and phone versions).
+2. I swap each placeholder in `journey/art.tsx` for `<picture>` sources.
+3. I re-measure the anchor points from the real art: the thread endpoints
+   (`SCAN_A`, `SCAN_B`, `DAY_A`), Jordan's phone (`NIGHT_PHONE`), and the steam over
+   the cups.
 
 ## Checks
 

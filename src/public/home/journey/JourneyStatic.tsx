@@ -36,6 +36,7 @@ export function JourneyStatic() {
       </Frame>
       <Frame layers={[<ScanBg key="b" />, <ScanA key="a" />, <ScanB key="c" />]} center>
         <p className="home-display text-[clamp(2rem,4.4vw,3.75rem)] text-home-stone">{COPY.t3}</p>
+        <p className="j-caption mx-auto mt-8 text-center before:mx-auto">{COPY.c3}</p>
       </Frame>
 
       <section className="relative grid md:grid-cols-2">
@@ -45,22 +46,19 @@ export function JourneyStatic() {
 
       <section className="flex flex-col items-center gap-10 bg-home-ink px-6 py-20">
         <Phone reduced />
+        <p className="j-caption mx-auto text-center before:mx-auto">{COPY.c4c}</p>
         <p className="home-display max-w-[18ch] text-center text-[clamp(2rem,4.4vw,3.75rem)] text-home-stone">
           {COPY.t5}
         </p>
+        <p className="j-caption mx-auto text-center before:mx-auto">{COPY.c5}</p>
       </section>
 
       <Frame layers={[<CafeBg key="b" golden />, <Together key="t" />]}>
         <p className="j-caption">{COPY.c6}</p>
+        <p className="j-caption mt-8">{COPY.c6b}</p>
       </Frame>
-      <section className="flex flex-col items-center gap-14 bg-home-ink px-6 py-24 text-center">
+      <section className="flex justify-center bg-home-ink px-6 py-24 text-center">
         <p className="home-display text-[clamp(2.75rem,7vw,6rem)] text-home-stone">{COPY.t6}</p>
-        {COPY.integrity.map((line) => (
-          <p key={line} className="home-display max-w-[24ch] text-[clamp(1.5rem,3vw,2.5rem)] text-home-stone">
-            {line}
-          </p>
-        ))}
-        <p className="j-caption mx-auto text-center before:mx-auto">{COPY.positioning}</p>
       </section>
     </div>
   );
