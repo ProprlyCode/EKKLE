@@ -6,6 +6,11 @@ project_id = "ekkle"
 port = 54322
 major_version = 17
 
+[db.seed]
+enabled = true
+# The pilot data plus Study 1, so CI and local stacks have a real study to open.
+sql_paths = ["./seed.sql", "./seed_study_01.sql"]
+
 [api]
 enabled = true
 port = 54321
@@ -19,4 +24,4 @@ port = 54323
 enabled = true
 # Real site URL comes from env in deployed environments.
 site_url = "http://localhost:5173"
-additional_redirect_urls = ["http://localhost:5173"]
+additional_redirect_urls = ["http://localhost:5173", "http://localhost:5173/**"]
