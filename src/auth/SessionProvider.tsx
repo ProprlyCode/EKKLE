@@ -61,10 +61,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       if (mounted) setReady(true);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_e, next) => {
+    // Keep this callback synchronous. supabase-js runs it while holding its
+    // auth lock, so awaiting another Supabase call here can stall every
+    // request after it (e.g. a seeker arriving from a magic link sat on a
+    // spinner). Defer the membership load until the lock is released.
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, next) => {
       if (!mounted) return;
       setSession(next);
-      await loadMembership(next);
+      setTimeout(() => {
+        if (mounted) void loadMembership(next);
+      }, 0);
     });
 
     return () => {

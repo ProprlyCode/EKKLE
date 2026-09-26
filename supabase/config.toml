@@ -28,6 +28,10 @@ additional_redirect_urls = ["http://localhost:5173", "http://localhost:5173/**"]
 
 # Sign-in emails carry both a link and a 6-digit code (code sign-in works in
 # in-app browsers). Production uses the same template, set by CI.
+[auth.rate_limit]
+# Local/CI only: several e2e tests send sign-in emails in one run.
+email_sent = 100
+
 [auth.email]
 enable_signup = true
 enable_confirmations = false
