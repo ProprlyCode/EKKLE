@@ -14,17 +14,16 @@
 # Pushes to main only, once both pass:
 #   deploy-db   — `supabase db push` applies any new migrations to the live
 #                 project. Migrations only reach Supabase through this job.
-#   deploy-site — then triggers Vercel's production deploy of main (deploy
-#                 hook) and waits until it is live, so the site never goes live
+#   deploy-site — then asks Vercel (REST API) to deploy exactly the commit CI
+#                 tested and waits until it is live, so the site never goes live
 #                 ahead of the database it needs. (Vercel's own auto-deploy for
 #                 main is off in vercel.json.)
 #
 # Repository secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_ACCESS_TOKEN  — a Supabase personal access token
 #   SUPABASE_DB_PASSWORD   — the project's database password
-#   VERCEL_DEPLOY_HOOK     — the ekkle project's deploy hook URL for main
-#   VERCEL_TOKEN           — a Vercel token that can read the ekkle project
-#                            (used only to watch the deploy)
+#   VERCEL_TOKEN           — a Vercel token for the Ekkle team (creates and
+#                            watches the production deployment)
 
 name: CI
 
@@ -169,31 +168,39 @@ jobs:
       group: deploy-site
       cancel-in-progress: false
     env:
-      VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
-      - name: Check secrets are set
+      - name: Check secret is set
         run: |
-          if [ -z "$VERCEL_DEPLOY_HOOK" ] || [ -z "$VERCEL_TOKEN" ]; then
-            echo "::error::Add VERCEL_DEPLOY_HOOK and VERCEL_TOKEN in Settings → Secrets and variables → Actions."
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Add VERCEL_TOKEN in Settings → Secrets and variables → Actions."
             exit 1
           fi
-      # Vercel builds main with the project's own settings and env; CI only
-      # decides when (after the checks and the database), then watches it.
-      - name: Trigger the production deploy
+      # Ask Vercel to build exactly the commit CI just tested, with the
+      # project's own build settings and environment variables.
+      - name: Start the production deploy of this commit
         run: |
-          echo "SINCE=$(( $(date +%s) * 1000 - 5000 ))" >> "$GITHUB_ENV"
-          curl -fsS -X POST "$VERCEL_DEPLOY_HOOK" > /dev/null
-          echo "Deploy requested for main."
+          body=$(jq -n --arg p "$VERCEL_PROJECT_ID" --arg sha "$GITHUB_SHA" \
+            --arg org "${GITHUB_REPOSITORY%%/*}" --arg repo "${GITHUB_REPOSITORY##*/}" \
+            '{name: "ekkle", project: $p, target: "production",
+              gitSource: {type: "github", org: $org, repo: $repo, ref: "main", sha: $sha}}')
+          code=$(curl -sS -o /tmp/dep.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
+            "https://api.vercel.com/v13/deployments?teamId=$VERCEL_ORG_ID" -d "$body")
+          if [ "$code" -ge 300 ]; then
+            echo "::error::Vercel refused the deploy (HTTP $code): $(jq -c '.error' /tmp/dep.json)"
+            exit 1
+          fi
+          echo "DEPLOY_ID=$(jq -r .id /tmp/dep.json)" >> "$GITHUB_ENV"
+          echo "Started $(jq -r .url /tmp/dep.json) for ${GITHUB_SHA:0:7}"
       - name: Wait for it to go live
         run: |
-          api="https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_ORG_ID&target=production&since=$SINCE&limit=1"
           for i in $(seq 1 90); do
-            dep=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" "$api" | jq -c '.deployments[0] // empty')
-            state=$(echo "$dep" | jq -r '.state // .readyState // empty')
-            echo "[$i] ${state:-waiting for Vercel to start}"
+            state=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v13/deployments/$DEPLOY_ID?teamId=$VERCEL_ORG_ID" | jq -r '.readyState')
+            echo "[$i] $state"
             case "$state" in
-              READY) echo "Live: https://$(echo "$dep" | jq -r .url)"; exit 0 ;;
+              READY) echo "Live."; exit 0 ;;
               ERROR|CANCELED) echo "::error::Vercel deploy $state — see the ekkle project's Deployments page."; exit 1 ;;
             esac
             sleep 10
