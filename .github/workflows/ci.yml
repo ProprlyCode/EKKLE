@@ -3,15 +3,16 @@
 # Every push and pull request:
 #   app       — typecheck, lint, unit tests, production build
 #   database  — boots a fresh local Supabase (Postgres 17) and applies every
-#               migration in supabase/migrations plus supabase/seed.sql, then
-#               lints the SQL. A migration that won't apply cleanly fails here,
-#               before it can reach the live database.
+#               migration in supabase/migrations plus supabase/seed.sql, lints
+#               the SQL, then runs the access-rule tests in supabase/tests. A
+#               migration that won't apply, or that breaks a safeguarding rule,
+#               fails here before it can reach the live database.
 #
 # Pushes to main only, once both pass:
 #   deploy-db — `supabase db push` applies any new migrations to the live
 #               project. Migrations only reach Supabase through this job.
 #
-# Needs two repository secrets (Settings → Secrets and variables → Actions):
+# Repository secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_ACCESS_TOKEN  — a Supabase personal access token
 #   SUPABASE_DB_PASSWORD   — the project's database password
 
@@ -61,6 +62,8 @@ jobs:
         run: supabase db start
       - name: Lint SQL
         run: supabase db lint --level error --fail-on error
+      - name: Database security tests
+        run: supabase test db
       - name: Stop
         if: always()
         run: supabase stop --no-backup
@@ -94,3 +97,4 @@ jobs:
         run: supabase db push --dry-run --password "$SUPABASE_DB_PASSWORD"
       - name: Apply migrations
         run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+
