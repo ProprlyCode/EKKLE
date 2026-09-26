@@ -24,6 +24,8 @@
 #   SUPABASE_DB_PASSWORD   — the project's database password
 #   VERCEL_TOKEN           — a Vercel token for the Ekkle team (creates and
 #                            watches the production deployment)
+#   RESEND_API_KEY         — optional; turns on email (notifications + sign-in
+#                            email through Resend) — see the deploy-db job
 
 name: CI
 
@@ -153,6 +155,52 @@ jobs:
         run: supabase db push --dry-run --password "$SUPABASE_DB_PASSWORD"
       - name: Apply migrations
         run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+      # Email: off until the RESEND_API_KEY secret exists. Then, on every deploy:
+      # functions + their secrets, the trigger's config row, and Supabase Auth
+      # sending through Resend with the link + 6-digit-code template.
+      - name: Email notifications and sign-in email
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          if [ -z "$RESEND_API_KEY" ]; then
+            echo "::notice::RESEND_API_KEY is not set, so email stays off. Add it to turn notifications on."
+            exit 0
+          fi
+          export PGPASSWORD="$SUPABASE_DB_PASSWORD"
+          DB="host=aws-0-us-west-2.pooler.supabase.com port=5432 dbname=postgres user=postgres.$SUPABASE_PROJECT_ID sslmode=require"
+
+          # One shared secret between the trigger and the functions; reuse it.
+          SECRET=$(psql "$DB" -tAc "select secret from private.notify_config limit 1")
+          [ -n "$SECRET" ] || SECRET=$(openssl rand -hex 32)
+          echo "::add-mask::$SECRET"
+
+          supabase secrets set --project-ref "$SUPABASE_PROJECT_ID" \
+            RESEND_API_KEY="$RESEND_API_KEY" NOTIFY_FROM="Ekklē <hello@ekkle.org>" \
+            SITE_URL="https://ekkle.org" NOTIFY_SECRET="$SECRET"
+          supabase functions deploy notify notify-report \
+            --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt
+
+          psql "$DB" -v ON_ERROR_STOP=1 -c "insert into private.notify_config (id, base_url, secret)
+            values (true, 'https://$SUPABASE_PROJECT_ID.supabase.co', '$SECRET')
+            on conflict (id) do update set base_url = excluded.base_url, secret = excluded.secret"
+
+          jq -n --arg key "$RESEND_API_KEY" --rawfile tpl supabase/templates/sign_in.html '{
+            smtp_host: "smtp.resend.com", smtp_port: "465", smtp_user: "resend",
+            smtp_pass: $key, smtp_admin_email: "hello@ekkle.org", smtp_sender_name: "Ekklē",
+            mailer_otp_length: 6, rate_limit_email_sent: 100,
+            mailer_subjects_magic_link: "Your Ekklē sign-in",
+            mailer_templates_magic_link_content: $tpl,
+            mailer_subjects_confirmation: "Your Ekklē sign-in",
+            mailer_templates_confirmation_content: $tpl
+          }' > /tmp/auth.json
+          code=$(curl -sS -o /tmp/auth-out.json -w '%{http_code}' -X PATCH \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/config/auth" -d @/tmp/auth.json)
+          if [ "$code" -ge 300 ]; then
+            echo "::error::Supabase refused the auth email settings (HTTP $code): $(head -c 400 /tmp/auth-out.json)"
+            exit 1
+          fi
+          echo "Email is on: notifications deployed, sign-in email sends through Resend."
 
   deploy-site:
     name: Deploy site to Vercel

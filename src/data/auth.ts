@@ -12,6 +12,20 @@ export async function sendMagicLink(email: string): Promise<void> {
   if (error) throw error;
 }
 
+/**
+ * Sign in with the 6-digit code from the sign-in email — the alternative to
+ * tapping the link. Works where links don't: inside Instagram / Facebook /
+ * camera in-app browsers, or when the email is opened on another device.
+ */
+export async function verifyEmailCode(email: string, code: string): Promise<void> {
+  const { error } = await supabase.auth.verifyOtp({
+    email: email.trim(),
+    token: code.replace(/\s/g, ''),
+    type: 'email',
+  });
+  if (error) throw error;
+}
+
 /** Email + password sign-in (admins + seekers who set a password). */
 export async function signInWithPassword(
   email: string,

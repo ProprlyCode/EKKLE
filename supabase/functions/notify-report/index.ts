@@ -1,13 +1,14 @@
 // Ekklē notify-report — email church leaders when a conversation is reported.
 //
-// Wired as a Supabase Database Webhook on INSERT into public.reports. Emails the
+// Called by the reports_notify trigger (migration 0019) on INSERT into public.reports. Emails the
 // org's leaders a metadata-only alert (who reported, which member/recipient, the
 // note) — never message contents. No-ops cleanly when RESEND_API_KEY is absent.
 //
-// Secrets (Edge Function config): RESEND_API_KEY, NOTIFY_FROM, SITE_URL.
+// Secrets (set by CI): RESEND_API_KEY, NOTIFY_FROM, SITE_URL, NOTIFY_SECRET.
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { fromOurTrigger, sendEmail, SITE_URL } from '../_shared/email.ts';
 
 interface ReportRecord {
   id: string;
@@ -16,28 +17,13 @@ interface ReportRecord {
   reason: string;
 }
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
-const NOTIFY_FROM = Deno.env.get('NOTIFY_FROM') ?? 'Ekklē <hello@ekkle.org>';
-const SITE_URL = Deno.env.get('SITE_URL') ?? '';
-
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
 );
 
-async function sendEmail(to: string, subject: string, text: string) {
-  if (!RESEND_API_KEY || !to) return;
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ from: NOTIFY_FROM, to, subject, text }),
-  }).catch((e) => console.error('resend error', e));
-}
-
 Deno.serve(async (req) => {
+  if (!fromOurTrigger(req)) return new Response('unauthorized', { status: 401 });
   try {
     const payload = await req.json();
     const record: ReportRecord | undefined = payload.record;

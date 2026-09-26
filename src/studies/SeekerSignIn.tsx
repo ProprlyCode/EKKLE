@@ -6,6 +6,7 @@ import { Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { ErrorNote } from '@/ui/states';
+import { EmailCode } from '@/ui/EmailCode';
 
 /**
  * Seeker sign-in — the gate on /studies for returning study-takers. Magic link
@@ -86,11 +87,13 @@ export default function SeekerSignIn() {
                 </>
               ) : (
                 <>
-                  We sent a sign-in link to <span className="text-sage">{email}</span>. Open it
-                  on this device to reach your studies.
+                  We sent a sign-in link and a 6-digit code to{' '}
+                  <span className="text-sage">{email}</span>. Open the link, or enter the
+                  code here.
                 </>
               )}
             </p>
+            {sentKind === 'link' && <EmailCode email={email} />}
             <button
               onClick={() => setStatus('idle')}
               className="mt-6 text-[13px] text-muted underline-offset-2 hover:text-sage hover:underline"

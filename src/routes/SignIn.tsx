@@ -7,6 +7,7 @@ import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { Marker } from '@/ui/Card';
 import { CenterLayout, ErrorNote, FullPageLoading } from '@/ui/states';
+import { EmailCode } from '@/ui/EmailCode';
 
 /**
  * Sign-in. Magic link is the default for everyone; a quiet "use a password"
@@ -92,11 +93,13 @@ export default function SignIn() {
                 </>
               ) : (
                 <>
-                  We sent a sign-in link to <span className="text-sage">{email}</span>.
-                  Open it on this device to continue.
+                  We sent a sign-in link and a 6-digit code to{' '}
+                  <span className="text-sage">{email}</span>. Open the link, or enter the
+                  code here.
                 </>
               )}
             </p>
+            {sentKind === 'link' && <EmailCode email={email} />}
             <Button variant="ghost" size="sm" onClick={() => setStatus('idle')} className="mt-1">
               Use a different email
             </Button>

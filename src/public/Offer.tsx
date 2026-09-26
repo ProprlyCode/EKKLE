@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { sendStudyMagicLink } from '@/data/auth';
 import { BrandName } from '@/components/BrandName';
 import { Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { ErrorNote } from '@/ui/states';
+import { EmailCode } from '@/ui/EmailCode';
 
 /**
  * /offer — a standalone one-page conversion landing. No header nav, no other
@@ -15,6 +16,7 @@ import { ErrorNote } from '@/ui/states';
 export default function Offer() {
   const [params] = useSearchParams();
   const ref = params.get('ref');
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -46,9 +48,10 @@ export default function Offer() {
           </div>
           <h1 className="font-serif text-3xl leading-tight text-sage">Check your email</h1>
           <p className="mx-auto mt-4 max-w-sm text-[16px] leading-relaxed text-muted-strong">
-            We sent a link to <span className="text-sage">{email}</span>. Open it on
-            this device and your studies will be ready.
+            We sent a link and a 6-digit code to <span className="text-sage">{email}</span>.
+            Open the link, or enter the code here, and your studies will be ready.
           </p>
+          <EmailCode email={email} onVerified={() => navigate('/studies')} />
           <p className="mt-6 text-[13px] text-muted">
             Didn’t get it? Check spam, or{' '}
             <button

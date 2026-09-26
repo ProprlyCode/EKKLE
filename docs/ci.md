@@ -30,4 +30,13 @@ off (`vercel.json`), so nothing skips the line.
 
 ## Secrets (repo → Settings → Secrets and variables → Actions)
 
-`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `VERCEL_TOKEN` (Ekkle team).
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `VERCEL_TOKEN` (Ekkle team),
+and `RESEND_API_KEY` (optional — turns email on: see below).
+
+## Email
+
+With `RESEND_API_KEY` set, the deploy-db job also deploys the notification
+functions (`supabase/functions/notify*`), gives them their secrets, writes the
+trigger config (migration 0019) and points Supabase Auth at Resend with the
+sign-in template (`supabase/templates/sign_in.html`: link + 6-digit code).
+Without it, email is simply off and everything else still works.

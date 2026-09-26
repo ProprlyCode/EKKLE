@@ -1,19 +1,16 @@
 // Ekklē notify — email on new messages.
 //
-// Wired as a Supabase Database Webhook on INSERT into public.messages. For each
-// new message it emails the right person via Resend:
-//   * recipient's message  → email the member (+ a metadata-only awareness note
-//     to the org's leaders on the FIRST message of a conversation)
-//   * member's reply        → email the recipient
+// Called by the messages_notify trigger (migration 0019) on INSERT into
+// public.messages. Emails the right person via Resend:
+//   * recipient's message → the member (+ a metadata-only awareness note to the
+//     church's leaders on the FIRST message of a conversation)
+//   * member's reply       → the recipient, with a link back into the thread
 //
-// Secrets (Edge Function config): RESEND_API_KEY, NOTIFY_FROM (e.g.
-// "Ekklē <hello@ekkle.org>"), SITE_URL. SUPABASE_URL and
-// SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
-//
-// If RESEND_API_KEY is absent the function no-ops cleanly, so the app works
-// before email is configured.
+// Secrets (set by CI): RESEND_API_KEY, NOTIFY_FROM, SITE_URL, NOTIFY_SECRET.
+// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { fromOurTrigger, sendEmail, SITE_URL } from '../_shared/email.ts';
 
 interface MessageRecord {
   id: string;
@@ -22,28 +19,13 @@ interface MessageRecord {
   body: string;
 }
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
-const NOTIFY_FROM = Deno.env.get('NOTIFY_FROM') ?? 'Ekklē <hello@ekkle.org>';
-const SITE_URL = Deno.env.get('SITE_URL') ?? '';
-
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
 );
 
-async function sendEmail(to: string, subject: string, text: string) {
-  if (!RESEND_API_KEY || !to) return;
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ from: NOTIFY_FROM, to, subject, text }),
-  }).catch((e) => console.error('resend error', e));
-}
-
 Deno.serve(async (req) => {
+  if (!fromOurTrigger(req)) return new Response('unauthorized', { status: 401 });
   try {
     const payload = await req.json();
     const record: MessageRecord | undefined = payload.record;
@@ -55,23 +37,28 @@ Deno.serve(async (req) => {
     const { data: convo } = await supabase
       .from('conversations')
       .select(
-        'id, org_id, member:users(name, email), recipient:recipients(first_name, email)',
+        'id, org_id, member:users(name, email, code_slug), recipient:recipients(first_name, email, auth_uid)',
       )
       .eq('id', record.conversation_id)
       .single();
     if (!convo) return new Response('no conversation', { status: 200 });
 
-    const member = convo.member as unknown as { name: string; email: string | null };
+    const member = convo.member as unknown as {
+      name: string;
+      email: string | null;
+      code_slug: string;
+    };
     const recipient = convo.recipient as unknown as {
       first_name: string;
       email: string | null;
+      auth_uid: string | null;
     };
     const appLink = SITE_URL ? `${SITE_URL}/app/messages` : '';
 
     if (record.sender_type === 'recipient') {
       // Notify the member.
       await sendEmail(
-        member.email ?? '',
+        member.email,
         `${recipient.first_name || 'Someone'} messaged you on Ekklē`,
         `${recipient.first_name || 'Someone'} you shared with just reached out:\n\n` +
           `“${record.body}”\n\n` +
@@ -102,11 +89,18 @@ Deno.serve(async (req) => {
       }
     } else {
       // Member replied → notify the recipient.
+      // Seekers with an account read it in their studies area; everyone else
+      // through the member's link (which resumes the conversation).
+      const back = !SITE_URL
+        ? ''
+        : recipient.auth_uid
+          ? `${SITE_URL}/studies/connection`
+          : `${SITE_URL}/r/${member.code_slug}`;
       await sendEmail(
-        recipient.email ?? '',
+        recipient.email,
         `${member.name} replied`,
         `${member.name} sent you a message:\n\n“${record.body}”\n\n` +
-          `Open the link they shared with you to reply.`,
+          (back ? `Read and reply: ${back}\n` : 'Open the link they shared with you to reply.\n'),
       );
     }
 

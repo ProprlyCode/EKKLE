@@ -25,3 +25,18 @@ enabled = true
 # Real site URL comes from env in deployed environments.
 site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://localhost:5173", "http://localhost:5173/**"]
+
+# Sign-in emails carry both a link and a 6-digit code (code sign-in works in
+# in-app browsers). Production uses the same template, set by CI.
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+otp_length = 6
+
+[auth.email.template.magic_link]
+subject = "Your Ekklē sign-in"
+content_path = "./supabase/templates/sign_in.html"
+
+[auth.email.template.confirmation]
+subject = "Your Ekklē sign-in"
+content_path = "./supabase/templates/sign_in.html"

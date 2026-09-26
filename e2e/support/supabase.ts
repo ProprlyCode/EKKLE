@@ -32,6 +32,30 @@ export function uniqueEmail(prefix: string) {
 
 const MAILPIT = process.env.MAILPIT_URL || 'http://127.0.0.1:54324';
 
+async function latestEmailBody(to: string, timeoutMs: number): Promise<string> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const res = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`);
+    if (res.ok) {
+      const { messages } = (await res.json()) as { messages?: { ID: string }[] };
+      if (messages && messages.length) {
+        const msg = await fetch(`${MAILPIT}/api/v1/message/${messages[0].ID}`).then((r) => r.json());
+        return `${msg.Text || ''}\n${msg.HTML || ''}`;
+      }
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(`No email for ${to} within ${timeoutMs}ms`);
+}
+
+/** The 6-digit sign-in code in the newest email sent to `to`. */
+export async function latestEmailCode(to: string, timeoutMs = 20_000): Promise<string> {
+  const body = await latestEmailBody(to, timeoutMs);
+  const code = body.match(/\b(\d{6})\b/);
+  if (!code) throw new Error(`No 6-digit code in the email to ${to}`);
+  return code[1];
+}
+
 /**
  * The newest link in the newest email sent to `to`, read from the local mail
  * catcher (Mailpit) that the Supabase CLI runs for auth emails.
