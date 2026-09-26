@@ -1,3 +1,5 @@
+[![CI](https://github.com/ProprlyCode/EKKLE/actions/workflows/ci.yml/badge.svg)](https://github.com/ProprlyCode/EKKLE/actions/workflows/ci.yml)
+
 # Ekklē
 
 A quiet platform for personal invitation and follow-through. A church member
