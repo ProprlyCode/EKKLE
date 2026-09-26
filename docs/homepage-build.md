@@ -153,7 +153,8 @@ heads and the Bible well inside the centre.
 
 ### Totals
 
-- **15 art layers**, which is **26 files** once phone versions are counted (#1–15).
+- **15 art layers**, which is **25 files** once phone versions are counted (#1–15).
+- **27 files in all from you** (26 if you skip the optional #13).
 - **2 brand files** (#16–17).
 - **1 file from me** (#18).
 
