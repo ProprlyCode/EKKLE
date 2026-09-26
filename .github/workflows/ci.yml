@@ -180,6 +180,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Show what the token can reach
+        run: |
+          npx vercel@latest whoami --token="$VERCEL_TOKEN"
+          npx vercel@latest teams ls --token="$VERCEL_TOKEN" || true
+          npx vercel@latest project ls --scope "$VERCEL_ORG_ID" --token="$VERCEL_TOKEN" || true
       - name: Pull production settings and env
         run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
       - name: Build
