@@ -180,11 +180,19 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Show what the token can reach
+      - name: Check the token against Vercel's API
+        # Diagnostics only — prints lengths, HTTP statuses and Vercel's error
+        # codes, never the token itself.
         run: |
-          npx vercel@latest whoami --token="$VERCEL_TOKEN"
-          npx vercel@latest teams ls --token="$VERCEL_TOKEN" || true
-          npx vercel@latest project ls --scope "$VERCEL_ORG_ID" --token="$VERCEL_TOKEN" || true
+          t="$VERCEL_TOKEN"
+          echo "token length: ${#t}"
+          case "$t" in *[[:space:]]*) echo "::warning::token contains whitespace/newlines";; esac
+          api() {
+            code=$(curl -s -o /tmp/vercel.json -w '%{http_code}' -H "Authorization: Bearer $t" "$1")
+            echo "$2 -> HTTP $code $(jq -c '{error: .error.code, message: .error.message, user: .user.username, name: .name}' /tmp/vercel.json 2>/dev/null)"
+          }
+          api "https://api.vercel.com/v2/user" "who is this token"
+          api "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID" "ekkle project in Ekkle team"
       - name: Pull production settings and env
         run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
       - name: Build
