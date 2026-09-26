@@ -10,6 +10,11 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # 0.5 requires ESLint 9+; the project is on ESLint 8. Revisit with the
+      # ESLint 9 upgrade.
+      - dependency-name: eslint-plugin-react-refresh
+        versions: [">=0.5.0"]
     groups:
       npm-minor-and-patch:
         update-types: [minor, patch]
