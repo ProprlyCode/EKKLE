@@ -1,0 +1,24 @@
+# Weekly dependency updates, opened as pull requests. Each PR runs the full CI
+# (app checks, database + security tests, end-to-end) but never deploys —
+# deploys only happen from main. Minor and patch bumps are grouped into one PR
+# per ecosystem to keep the noise down; major versions come one at a time.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        update-types: [minor, patch, major]

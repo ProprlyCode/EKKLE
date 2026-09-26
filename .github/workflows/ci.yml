@@ -2,7 +2,7 @@
 #
 # Every push and pull request:
 #   app       — typecheck, lint, unit tests, production build
-#   e2e       — (advisory for now) boots the full local Supabase stack and
+#   e2e       — boots the full local Supabase stack and
 #               drives the real app in a browser with Playwright: waitlist,
 #               recipient → member → reply, seeker sign-up → first study.
 #   database  — boots a fresh local Supabase (Postgres 17) and applies every
@@ -11,7 +11,7 @@
 #               migration that won't apply, or that breaks a safeguarding rule,
 #               fails here before it can reach the live database.
 #
-# Pushes to main only, once both pass:
+# Pushes to main only, once all three pass:
 #   deploy-db   — `supabase db push` applies any new migrations to the live
 #                 project. Migrations only reach Supabase through this job.
 #   deploy-site — then asks Vercel (REST API) to deploy exactly the commit CI
@@ -80,12 +80,8 @@ jobs:
         run: supabase stop --no-backup
 
   e2e:
-    name: End-to-end (advisory)
+    name: End-to-end
     runs-on: ubuntu-latest
-    # Advisory while the suite settles in: a failure is reported but doesn't
-    # block deploys. Flip to required (drop this and add to deploy-db's needs)
-    # once it has run clean for a while.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -130,7 +126,7 @@ jobs:
 
   deploy-db:
     name: Deploy migrations to Supabase
-    needs: [app, database]
+    needs: [app, database, e2e]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
@@ -206,3 +202,32 @@ jobs:
             sleep 10
           done
           echo "::error::Timed out waiting for the Vercel deploy."; exit 1
+
+  # One open issue while main is red, assigned to the repo owner (GitHub emails
+  # it); a comment on each further failure; closed automatically once green.
+  alert:
+    name: Alert when main is red
+    needs: [app, database, e2e, deploy-db, deploy-site]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          FAILED: ${{ contains(needs.*.result, 'failure') }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="CI is failing on main"
+          open=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number -q '.[0].number')
+          short="${GITHUB_SHA:0:7}"
+          if [ "$FAILED" = "true" ]; then
+            body="Commit \`$short\` by @$GITHUB_ACTOR failed CI — the run shows which step and what (if anything) was deployed. Run: $RUN_URL"
+            if [ -n "$open" ]; then
+              gh issue comment "$open" -R "$GITHUB_REPOSITORY" --body "$body"
+            else
+              gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body "$body" --assignee "$GITHUB_REPOSITORY_OWNER"
+            fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" -R "$GITHUB_REPOSITORY" --comment "Green again at \`$short\` and deployed. $RUN_URL"
+          fi
