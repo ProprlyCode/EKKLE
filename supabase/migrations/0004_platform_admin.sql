@@ -56,4 +56,10 @@ select
   'Would love to talk whenever you’re ready.'
 where not exists (
   select 1 from users where lower(email) = 'jwoodhall24@gmail.com'
+)
+-- Only where the pilot org already exists (it does in production). On a fresh
+-- database (CI, local) the org only arrives later via seed.sql, so there the
+-- founder row is simply skipped — migrations must never depend on seed data.
+and exists (
+  select 1 from organizations where id = '00000000-0000-0000-0000-0000000000a1'
 );
