@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { SessionProvider } from './auth/SessionProvider';
+import { StagingBanner } from './components/StagingBanner';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -10,6 +11,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <SessionProvider>
         <App />
+        <StagingBanner />
       </SessionProvider>
     </BrowserRouter>
   </React.StrictMode>,

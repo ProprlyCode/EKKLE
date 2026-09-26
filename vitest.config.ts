@@ -13,6 +13,6 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     // Browser tests run under Playwright (e2e/), not Vitest.
-    exclude: [...configDefaults.exclude, 'e2e/**'],
+    exclude: [...configDefaults.exclude, 'e2e/**', 'e2e-staging/**'],
   },
 });

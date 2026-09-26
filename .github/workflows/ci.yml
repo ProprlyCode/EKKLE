@@ -12,6 +12,9 @@
 #               fails here before it can reach the live database.
 #
 # Pushes to main only, once all three pass:
+#   staging     — deploys the same commit to the staging database (migrations
+#                 + demo seed + demo logins) and staging.ekkle.org, then runs
+#                 the smoke tests in e2e-staging/ there. Production waits on it.
 #   deploy-db   — `supabase db push` applies any new migrations to the live
 #                 project. Migrations only reach Supabase through this job.
 #   deploy-site — then asks Vercel (REST API) to deploy exactly the commit CI
@@ -24,6 +27,8 @@
 #   SUPABASE_DB_PASSWORD   — the project's database password
 #   VERCEL_TOKEN           — a Vercel token for the Ekkle team (creates and
 #                            watches the production deployment)
+#   STAGING_DB_PASSWORD    — the ekkle-staging project's database password
+#   STAGING_DEMO_PASSWORD  — password for the demo logins on staging
 #   RESEND_API_KEY         — optional; turns on email (notifications + sign-in
 #                            email through Resend) — see the deploy-db job
 
@@ -126,9 +131,142 @@ jobs:
         if: always()
         run: supabase stop --no-backup
 
+  # Staging: the same commit, deployed to a separate demo database and site
+  # (staging.ekkle.org), then smoke-tested there as real personas. Production
+  # only deploys once this passes. Skipped (with a notice) until the staging
+  # secrets exist.
+  staging:
+    name: Deploy + test staging
+    needs: [app, database, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: staging
+      cancel-in-progress: false
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+      DEMO_PASSWORD: ${{ secrets.STAGING_DEMO_PASSWORD }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      STAGING_REF: twxosrcbxidqmbjlzkga
+      STAGING_HOST: staging.ekkle.org
+    steps:
+      - name: Check staging secrets
+        id: gate
+        run: |
+          if [ -z "$STAGING_DB_PASSWORD" ] || [ -z "$DEMO_PASSWORD" ]; then
+            echo "::notice::Staging is off: add STAGING_DB_PASSWORD and STAGING_DEMO_PASSWORD to turn it on."
+            echo "on=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "on=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.gate.outputs.on == 'true'
+        uses: actions/checkout@v7
+      - if: steps.gate.outputs.on == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.gate.outputs.on == 'true'
+        run: npm ci
+      - if: steps.gate.outputs.on == 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.118.0
+      - name: Staging database — migrations + demo seed
+        if: steps.gate.outputs.on == 'true'
+        run: |
+          supabase link --project-ref "$STAGING_REF" --password "$STAGING_DB_PASSWORD"
+          supabase db push --include-seed --password "$STAGING_DB_PASSWORD"
+      - name: Staging auth settings + demo personas
+        if: steps.gate.outputs.on == 'true'
+        run: |
+          jq -n --arg host "$STAGING_HOST" --rawfile tpl supabase/templates/sign_in.html '{
+            site_url: ("https://" + $host),
+            uri_allow_list: ("https://" + $host + "/**"),
+            mailer_otp_length: 6,
+            mailer_subjects_magic_link: "Your Ekklē sign-in (staging)",
+            mailer_templates_magic_link_content: $tpl,
+            mailer_subjects_confirmation: "Your Ekklē sign-in (staging)",
+            mailer_templates_confirmation_content: $tpl
+          }' > /tmp/auth.json
+          code=$(curl -sS -o /tmp/auth-out.json -w '%{http_code}' -X PATCH \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+            "https://api.supabase.com/v1/projects/$STAGING_REF/config/auth" -d @/tmp/auth.json)
+          if [ "$code" -ge 300 ]; then
+            echo "::error::Supabase refused the staging auth settings (HTTP $code): $(head -c 400 /tmp/auth-out.json)"
+            exit 1
+          fi
+          KEY=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            "https://api.supabase.com/v1/projects/$STAGING_REF/api-keys?reveal=true" \
+            | jq -r '.[] | select(.name == "service_role") | .api_key')
+          echo "::add-mask::$KEY"
+          SUPABASE_URL="https://$STAGING_REF.supabase.co" SUPABASE_SERVICE_ROLE_KEY="$KEY" \
+            node scripts/staging/personas.mjs
+      # A preview deploy of this commit: Vercel's Preview environment variables
+      # point it at the staging database. Then staging.ekkle.org → it.
+      - name: Staging site
+        if: steps.gate.outputs.on == 'true'
+        run: |
+          body=$(jq -n --arg p "$VERCEL_PROJECT_ID" --arg sha "$GITHUB_SHA" \
+            --arg org "${GITHUB_REPOSITORY%%/*}" --arg repo "${GITHUB_REPOSITORY##*/}" \
+            '{name: "ekkle", project: $p,
+              gitSource: {type: "github", org: $org, repo: $repo, ref: "main", sha: $sha}}')
+          code=$(curl -sS -o /tmp/dep.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
+            "https://api.vercel.com/v13/deployments?teamId=$VERCEL_ORG_ID" -d "$body")
+          if [ "$code" -ge 300 ]; then
+            echo "::error::Vercel refused the staging deploy (HTTP $code): $(jq -c '.error' /tmp/dep.json)"
+            exit 1
+          fi
+          id=$(jq -r .id /tmp/dep.json)
+          if [ "$(jq -r '.target // "preview"' /tmp/dep.json)" = "production" ]; then
+            curl -sS -X PATCH -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v12/deployments/$id/cancel?teamId=$VERCEL_ORG_ID" > /dev/null
+            echo "::error::Vercel made the staging deploy a production one; cancelled it."
+            exit 1
+          fi
+          for i in $(seq 1 90); do
+            state=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v13/deployments/$id?teamId=$VERCEL_ORG_ID" | jq -r '.readyState')
+            echo "[$i] $state"
+            case "$state" in
+              READY) break ;;
+              ERROR|CANCELED) echo "::error::Staging deploy $state."; exit 1 ;;
+            esac
+            [ "$i" = 90 ] && { echo "::error::Timed out waiting for the staging deploy."; exit 1; }
+            sleep 10
+          done
+          code=$(curl -sS -o /tmp/alias.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
+            "https://api.vercel.com/v2/deployments/$id/aliases?teamId=$VERCEL_ORG_ID" \
+            -d "{\"alias\":\"$STAGING_HOST\"}")
+          if [ "$code" -ge 300 ]; then
+            echo "::error::Could not point $STAGING_HOST at the deploy (HTTP $code): $(head -c 400 /tmp/alias.json)"
+            exit 1
+          fi
+          echo "https://$STAGING_HOST now serves ${GITHUB_SHA:0:7}"
+      - name: Install browser
+        if: steps.gate.outputs.on == 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Smoke tests on staging
+        if: steps.gate.outputs.on == 'true'
+        run: npx playwright test -c playwright.staging.config.ts
+        env:
+          STAGING_URL: https://${{ env.STAGING_HOST }}
+      - name: Keep the report
+        if: failure() && steps.gate.outputs.on == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: staging-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
   deploy-db:
     name: Deploy migrations to Supabase
-    needs: [app, database, e2e]
+    needs: [app, database, e2e, staging]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
@@ -255,7 +393,7 @@ jobs:
   # it); a comment on each further failure; closed automatically once green.
   alert:
     name: Alert when main is red
-    needs: [app, database, e2e, deploy-db, deploy-site]
+    needs: [app, database, e2e, staging, deploy-db, deploy-site]
     if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
