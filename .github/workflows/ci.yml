@@ -187,16 +187,32 @@ jobs:
           supabase db push --include-seed --db-url "postgresql://${pooler%%@*}:$pw@${pooler#*@}:5432/postgres"
       - name: Staging auth settings + demo personas
         if: steps.gate.outputs.on == 'true'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        # Supabase only allows custom email templates with custom SMTP, so the
+        # branded link + code email turns on here once RESEND_API_KEY exists.
         run: |
-          jq -n --arg host "$STAGING_HOST" --rawfile tpl supabase/templates/sign_in.html '{
-            site_url: ("https://" + $host),
-            uri_allow_list: ("https://" + $host + "/**"),
-            mailer_otp_length: 6,
-            mailer_subjects_magic_link: "Your Ekklē sign-in (staging)",
-            mailer_templates_magic_link_content: $tpl,
-            mailer_subjects_confirmation: "Your Ekklē sign-in (staging)",
-            mailer_templates_confirmation_content: $tpl
-          }' > /tmp/auth.json
+          if [ -n "$RESEND_API_KEY" ]; then
+            jq -n --arg host "$STAGING_HOST" --arg key "$RESEND_API_KEY" \
+              --rawfile tpl supabase/templates/sign_in.html '{
+              site_url: ("https://" + $host),
+              uri_allow_list: ("https://" + $host + "/**"),
+              smtp_host: "smtp.resend.com", smtp_port: "465", smtp_user: "resend",
+              smtp_pass: $key, smtp_admin_email: "hello@ekkle.org",
+              smtp_sender_name: "Ekklē (staging)",
+              mailer_otp_length: 6, rate_limit_email_sent: 100,
+              mailer_subjects_magic_link: "Your Ekklē sign-in (staging)",
+              mailer_templates_magic_link_content: $tpl,
+              mailer_subjects_confirmation: "Your Ekklē sign-in (staging)",
+              mailer_templates_confirmation_content: $tpl
+            }' > /tmp/auth.json
+          else
+            jq -n --arg host "$STAGING_HOST" '{
+              site_url: ("https://" + $host),
+              uri_allow_list: ("https://" + $host + "/**"),
+              mailer_otp_length: 6
+            }' > /tmp/auth.json
+          fi
           code=$(curl -sS -o /tmp/auth-out.json -w '%{http_code}' -X PATCH \
             -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
             "https://api.supabase.com/v1/projects/$STAGING_REF/config/auth" -d @/tmp/auth.json)
