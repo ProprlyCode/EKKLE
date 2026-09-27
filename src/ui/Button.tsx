@@ -20,12 +20,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const base =
   'inline-flex items-center justify-center gap-2 rounded-lg font-medium ' +
   'transition-[transform,background-color,color] duration-150 ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40 ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ' +
   'active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 ' +
   'motion-reduce:active:scale-100 motion-reduce:transition-none';
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-sage text-canvas hover:bg-sage-soft',
+  primary: 'bg-accent text-canvas hover:bg-accent-soft',
   quiet: 'bg-transparent text-sage hover:bg-sage/5',
   ghost: 'bg-transparent text-muted-strong hover:text-sage hover:bg-sage/5',
 };

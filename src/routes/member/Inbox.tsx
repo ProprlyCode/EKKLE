@@ -47,7 +47,7 @@ export default function Inbox() {
                   {it.unread ? (
                     <span
                       aria-label="unread"
-                      className="h-2 w-2 shrink-0 rounded-full bg-sage"
+                      className="h-2 w-2 shrink-0 rounded-full bg-accent"
                     />
                   ) : (
                     <span className="h-2 w-2 shrink-0" />

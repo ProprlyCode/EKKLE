@@ -61,7 +61,7 @@ export default function ResourcesLibrary() {
               className={
                 'rounded-full border px-3 py-1 text-[13px] transition-colors ' +
                 (topic === t
-                  ? 'border-sage bg-sage text-canvas'
+                  ? 'border-accent bg-accent text-canvas'
                   : 'border-edge text-muted-strong hover:border-sage/50')
               }
             >

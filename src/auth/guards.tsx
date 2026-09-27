@@ -91,6 +91,7 @@ export function AuthedLayout() {
               { to: '/leadership/content', label: 'Content' },
               { to: '/leadership/resources', label: 'Resources' },
               { to: '/leadership/people', label: 'People', dot: openReports > 0 },
+              { to: '/leadership/account', label: 'Account' },
             ]
           : []),
         ...(isPlatformAdmin(membership?.role) ? [{ to: '/platform', label: 'Platform' }] : []),

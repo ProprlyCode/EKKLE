@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { supabase } from '@/lib/supabase';
 import { isSupabaseConfigured } from '@/lib/env';
 import { isPlatformHost } from './address';
+import { applyBranding } from './branding';
 
 export interface Account {
   id: string;
@@ -9,6 +10,8 @@ export interface Account {
   subdomain: string;
   custom_domain: string | null;
   kind: 'church' | 'personal_ministry';
+  accent_color: string | null;
+  logo_path: string | null;
 }
 
 export type AccountState =
@@ -18,6 +21,7 @@ export type AccountState =
   | { status: 'unknown' }; // an address no account uses
 
 const AccountContext = createContext<AccountState>({ status: 'loading' });
+const UpdateContext = createContext<(account: Account) => void>(() => {});
 
 /**
  * Which account is this address? Resolved once at start-up from the hostname.
@@ -47,7 +51,24 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     };
   }, [state.status]);
 
-  return <AccountContext.Provider value={state}>{children}</AccountContext.Provider>;
+  // Every page on the address wears the account's name, logo and accent.
+  const account = state.status === 'account' ? state.account : null;
+  useEffect(() => {
+    if (account) applyBranding(account);
+  }, [account]);
+
+  return (
+    <AccountContext.Provider value={state}>
+      <UpdateContext.Provider value={(a) => setState({ status: 'account', account: a })}>
+        {children}
+      </UpdateContext.Provider>
+    </AccountContext.Provider>
+  );
+}
+
+/** Settings: show saved branding straight away, without a reload. */
+export function useUpdateAccount() {
+  return useContext(UpdateContext);
 }
 
 export function useAccount(): AccountState {

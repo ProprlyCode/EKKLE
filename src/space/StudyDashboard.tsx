@@ -68,7 +68,7 @@ export default function StudyDashboard() {
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-edge">
               <div
-                className="h-full rounded-full bg-sage transition-[width] duration-500"
+                className="h-full rounded-full bg-accent transition-[width] duration-500"
                 style={{ width: `${total ? (done / total) * 100 : 0}%` }}
               />
             </div>
@@ -86,7 +86,7 @@ export default function StudyDashboard() {
               )}
               <Link
                 to={`/space/studies/${resume.id}`}
-                className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-sage px-5 text-sm font-medium text-canvas transition-colors hover:bg-sage-soft"
+                className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-accent px-5 text-sm font-medium text-canvas transition-colors hover:bg-accent-soft"
               >
                 {resume.started ? 'Continue study' : 'Start study'}
               </Link>
@@ -131,7 +131,7 @@ function StudyRow({ study, index }: { study: StudySummary; index: number }) {
         className={
           'flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-serif text-lg ' +
           (study.completed
-            ? 'bg-sage text-canvas'
+            ? 'bg-accent text-canvas'
             : study.locked
               ? 'border border-edge text-muted'
               : 'border border-sage/40 text-sage')

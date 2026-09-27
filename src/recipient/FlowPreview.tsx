@@ -145,7 +145,7 @@ function ConnectPreview({ connect }: { connect: ConnectConfig }) {
             key={i}
             className={
               'inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium ' +
-              (i === 0 ? 'bg-sage text-canvas' : 'border border-edge text-sage')
+              (i === 0 ? 'bg-accent text-canvas' : 'border border-edge text-sage')
             }
           >
             {cta.label || (cta.kind === 'link' ? 'Open' : 'Message')}

@@ -52,7 +52,7 @@ export function ResourceView({ resource }: { resource: SeekerResource }) {
           href={safeHref(resource.url)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-10 items-center justify-center self-start rounded-lg bg-sage px-5 text-sm font-medium text-canvas transition-colors hover:bg-sage-soft"
+          className="inline-flex h-10 items-center justify-center self-start rounded-lg bg-accent px-5 text-sm font-medium text-canvas transition-colors hover:bg-accent-soft"
         >
           Open ↗
         </a>

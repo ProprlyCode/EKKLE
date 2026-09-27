@@ -34,6 +34,7 @@ import SpaceHome from '@/space/SpaceHome';
 import ResourcesLibrary from '@/space/ResourcesLibrary';
 import ResourcePage from '@/space/ResourcePage';
 import Resources from '@/routes/leadership/Resources';
+import AccountSettings from '@/routes/leadership/AccountSettings';
 // The cinematic homepage is code-split so GSAP/Lenis never load in the product.
 const Home = lazy(() => import('@/public/home/Home'));
 import ForChurches from '@/public/ForChurches';
@@ -139,6 +140,7 @@ function AccountRoutes() {
               <Route path="/leadership/content" element={<Content />} />
               <Route path="/leadership/resources" element={<Resources />} />
               <Route path="/leadership/people" element={<People />} />
+              <Route path="/leadership/account" element={<AccountSettings />} />
             </Route>
 
             <Route element={<RequirePlatformAdmin />}>

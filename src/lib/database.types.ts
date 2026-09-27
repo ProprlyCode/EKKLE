@@ -41,6 +41,8 @@ export interface Database {
           subdomain: string;
           custom_domain: string | null;
           kind: 'church' | 'personal_ministry';
+          accent_color: string | null;
+          logo_path: string | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -54,6 +56,8 @@ export interface Database {
           subdomain?: string;
           custom_domain?: string | null;
           kind?: 'church' | 'personal_ministry';
+          accent_color?: string | null;
+          logo_path?: string | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -540,6 +544,10 @@ export interface Database {
       };
       resolve_account: {
         Args: { p_host: string };
+        Returns: Json;
+      };
+      set_account_branding: {
+        Args: { p_name: string; p_accent_color: string | null; p_logo_path: string | null };
         Returns: Json;
       };
       member_account: {

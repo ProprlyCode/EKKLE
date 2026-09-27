@@ -20,6 +20,12 @@ export default {
           DEFAULT: 'var(--color-sage)',
           soft: 'var(--color-sage-soft)',
         },
+        // The account's accent (buttons, active tabs, highlights). Ekklē's sage
+        // unless the account picked its own (src/account/branding.ts).
+        accent: {
+          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+          soft: 'rgb(var(--accent-soft) / <alpha-value>)',
+        },
         // Warm neutrals
         canvas: 'var(--color-canvas)', // warm off-white background
         card: 'var(--color-card)', // soft cream card surface

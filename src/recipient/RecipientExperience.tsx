@@ -20,6 +20,7 @@ import { TextInput, TextArea } from '@/ui/Field';
 import { Spinner } from '@/ui/states';
 import { MessageList } from '@/components/MessageList';
 import { SequenceScreenContent } from './SequenceScreenContent';
+import { AccountLogo } from '@/account/AccountMark';
 
 /**
  * The recipient experience (/r/:slug) — no login.
@@ -190,6 +191,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-full bg-canvas">
       <div className="mx-auto flex min-h-full max-w-md flex-col px-5 py-10">
+        <AccountLogo className="h-8 self-start" uploadedOnly />
         {children}
       </div>
     </div>
@@ -222,7 +224,7 @@ function Intro({
         {inSpace && (
           <Link
             to="/space/messages"
-            className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-sage text-sm font-medium text-canvas transition-colors hover:bg-sage-soft"
+            className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-accent text-sm font-medium text-canvas transition-colors hover:bg-accent-soft"
           >
             Continue in your space
           </Link>
@@ -341,7 +343,7 @@ function Connect({
               className={
                 'inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-colors ' +
                 (i === 0
-                  ? 'bg-sage text-canvas hover:bg-sage-soft'
+                  ? 'bg-accent text-canvas hover:bg-accent-soft'
                   : 'text-sage hover:bg-sage/5')
               }
             >

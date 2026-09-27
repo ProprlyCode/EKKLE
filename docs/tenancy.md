@@ -51,8 +51,16 @@ it's live (SSL is automatic). Sign-in is allowed on it automatically.
    links, public lookups scoped by the request's Origin. Hosting: `*.ekkle.org`
    on the live project; `*.staging.ekkle.org` aliased to each staging build.
    Locally, accounts are `http://<sub>.localhost:5173`.
-2. **Branding** — name, logo upload, accent colour; per-account app icon/name;
-   emails in the account's name.
+2. **Branding** — *built.* Leaders → Account (0024): name, logo upload (PNG,
+   JPG, WebP or SVG, ≤ 2 MB, public `branding` bucket, own folder only) and an
+   accent colour that must reach 4.5:1 contrast with the page (checked in the
+   page and in the database). The accent drives buttons, active tabs and
+   highlights (`accent` in tailwind.config.ts, sage by default); the logo
+   shows in the headers of the front door, offer, member links, Your space and
+   the app. The home-screen app takes the account's name and icons generated
+   from the logo at upload. Notification emails come from
+   "<Account> via Ekklē". (Sign-in codes are sent by Supabase Auth, still as
+   Ekklē.)
 3. **Custom domains** — connect / verify / remove from account settings.
 4. **Platform console** — create accounts, pick their subdomain, see them all;
    "find your church" on ekkle.org.
@@ -60,6 +68,6 @@ it's live (SSL is automatic). Sign-in is allowed on it automatically.
 ## Open
 
 - Jonathan's test account "Storyline" is now his personal ministry at
-  `jonathan.ekkle.org` (kind: personal ministry); rename it in settings.
+  `jonathan.ekkle.org` (kind: personal ministry); rename it in Account.
 - Visit us card (on hold) fits here once accounts have types (church,
   personal ministry…).

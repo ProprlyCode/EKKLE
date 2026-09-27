@@ -1,8 +1,8 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
-import { Wordmark } from '@/components/Wordmark';
 import { FullPageLoading } from '@/ui/states';
 import { useAccount } from './AccountProvider';
+import { AccountLogo } from './AccountMark';
 
 /**
  * The front door of an account's address (<sub>.ekkle.org/). Signed-in
@@ -21,7 +21,7 @@ export default function AccountHome() {
 
   return (
     <main className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-10 px-5 py-16">
-      <Wordmark />
+      <AccountLogo className="h-14 self-start" />
       <div className="flex flex-col gap-3">
         <span className="eyebrow">welcome</span>
         <h1 className="font-serif text-4xl leading-tight text-sage">{name}</h1>
@@ -33,7 +33,7 @@ export default function AccountHome() {
       <div className="flex flex-col gap-3">
         <Link
           to="/offer"
-          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-sage text-[15px] font-medium text-canvas transition-colors hover:bg-sage-soft"
+          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-accent text-[15px] font-medium text-canvas transition-colors hover:bg-accent-soft"
         >
           Start free Bible studies
         </Link>

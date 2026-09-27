@@ -17,6 +17,9 @@
   --color-edge: #e4dfd1;
   --color-muted: #8a8676;
   --color-muted-strong: #6b6754;
+  /* The account's accent as RGB channels (sage by default; see branding.ts). */
+  --accent: 63 74 58;
+  --accent-soft: 77 89 69;
 }
 
 @layer base {

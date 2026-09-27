@@ -10,7 +10,7 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { accountBase, fromOurTrigger, sendEmail } from '../_shared/email.ts';
+import { accountInfo, fromAccount, fromOurTrigger, sendEmail } from '../_shared/email.ts';
 
 interface MessageRecord {
   id: string;
@@ -53,7 +53,8 @@ Deno.serve(async (req) => {
       email: string | null;
       auth_uid: string | null;
     };
-    const base = await accountBase(supabase, convo.org_id);
+    const { base, name: accountName } = await accountInfo(supabase, convo.org_id);
+    const from = fromAccount(accountName);
     const appLink = base ? `${base}/app/messages` : '';
 
     if (record.sender_type === 'recipient') {
@@ -64,6 +65,7 @@ Deno.serve(async (req) => {
         `${recipient.first_name || 'Someone'} you shared with just reached out:\n\n` +
           `“${record.body}”\n\n` +
           (appLink ? `Reply here: ${appLink}\n` : ''),
+        from,
       );
 
       // First message of the conversation → lightweight awareness to leaders.
@@ -85,6 +87,7 @@ Deno.serve(async (req) => {
             'A new connection on Ekklē',
             `${recipient.first_name || 'Someone'} connected with ${member.name}. ` +
               `This is just for your awareness — no action needed.`,
+            from,
           );
         }
       }
@@ -102,6 +105,7 @@ Deno.serve(async (req) => {
         `${member.name} replied`,
         `${member.name} sent you a message:\n\n“${record.body}”\n\n` +
           (back ? `Read and reply: ${back}\n` : 'Open the link they shared with you to reply.\n'),
+        from,
       );
     }
 

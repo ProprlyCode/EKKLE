@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { sendStudyMagicLink, signInWithPassword, sendPasswordReset } from '@/data/auth';
-import { BrandName } from '@/components/BrandName';
+import { AccountFooter } from '@/account/AccountMark';
 import { Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
@@ -184,7 +184,7 @@ export default function SeekerSignIn() {
       </div>
 
       <footer className="py-6 text-center">
-        <BrandName className="font-serif text-sm font-medium text-muted" />
+        <AccountFooter />
       </footer>
     </div>
   );

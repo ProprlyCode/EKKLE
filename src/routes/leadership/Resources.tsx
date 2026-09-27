@@ -233,7 +233,7 @@ function ResourceEditor({
                   className={
                     'rounded-lg border px-3 py-1.5 text-sm transition-colors ' +
                     (draft.kind === k
-                      ? 'border-sage bg-sage text-canvas'
+                      ? 'border-accent bg-accent text-canvas'
                       : 'border-edge text-muted-strong hover:border-sage/50')
                   }
                 >

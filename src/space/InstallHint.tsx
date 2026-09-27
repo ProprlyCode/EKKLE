@@ -83,7 +83,7 @@ export function InstallHint() {
                 if (outcome === 'accepted') setHidden(true);
                 setPrompt(null);
               }}
-              className="rounded-lg bg-sage px-3 py-1.5 text-[13px] font-medium text-canvas hover:bg-sage-soft"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas hover:bg-accent-soft"
             >
               Add to home screen
             </button>

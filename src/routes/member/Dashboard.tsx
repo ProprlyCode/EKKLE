@@ -182,7 +182,7 @@ function FlowPicker({
                   (active ? 'border-sage' : 'border-edge')
                 }
               >
-                {active && <span className="h-2 w-2 rounded-full bg-sage" />}
+                {active && <span className="h-2 w-2 rounded-full bg-accent" />}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm text-sage">{f.title}</span>
               <button

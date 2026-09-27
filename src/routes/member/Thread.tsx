@@ -241,7 +241,7 @@ function CheckinPrompt({
               className={
                 'rounded-lg border px-3 py-1 text-[13px] transition-colors ' +
                 (value === o.v
-                  ? 'border-sage bg-sage text-canvas'
+                  ? 'border-accent bg-accent text-canvas'
                   : 'border-edge text-muted-strong hover:border-sage/40')
               }
             >

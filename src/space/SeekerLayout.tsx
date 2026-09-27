@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { AccountLogo } from '@/account/AccountMark';
 
 /**
  * Chrome for Your space (/space) — a seeker's own signed-in home: their
@@ -20,7 +21,7 @@ export default function SeekerLayout() {
     <div className="min-h-full bg-canvas">
       <header className="sticky top-0 z-10 border-b border-edge/70 bg-canvas/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-5 py-3">
-          <img src="/logo.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
+          <AccountLogo className="h-7 shrink-0" />
           <span className="font-serif text-[17px] text-sage sm:hidden">Your space</span>
           <nav aria-label="Your space" className="hidden items-center gap-1 sm:flex">
             {TABS.map((t) => (
@@ -63,7 +64,7 @@ export default function SeekerLayout() {
                 <>
                   <span
                     aria-hidden
-                    className={'h-1 w-5 rounded-full ' + (isActive ? 'bg-sage' : 'bg-transparent')}
+                    className={'h-1 w-5 rounded-full ' + (isActive ? 'bg-accent' : 'bg-transparent')}
                   />
                   {t.label}
                 </>

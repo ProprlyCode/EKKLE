@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { sendStudyMagicLink } from '@/data/auth';
-import { BrandName } from '@/components/BrandName';
+import { AccountFooter, AccountLogo } from '@/account/AccountMark';
 import { Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
@@ -43,7 +43,7 @@ export default function Offer() {
       <div className="flex min-h-full flex-col bg-canvas">
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 py-12 text-center">
           <div className="mb-8 flex flex-col items-center gap-3">
-            <img src="/logo.png" alt="" width={44} height={44} className="h-11 w-11" />
+            <AccountLogo className="h-11" />
             <Marker />
           </div>
           <h1 className="font-serif text-3xl leading-tight text-sage">Check your email</h1>
@@ -67,7 +67,7 @@ export default function Offer() {
           </p>
         </div>
         <footer className="py-6 text-center">
-          <BrandName className="font-serif text-sm font-medium text-muted" />
+          <AccountFooter />
         </footer>
       </div>
     );
@@ -77,7 +77,7 @@ export default function Offer() {
     <div className="flex min-h-full flex-col bg-canvas">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 py-12">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <img src="/logo.png" alt="" width={44} height={44} className="h-11 w-11" />
+          <AccountLogo className="h-11" />
           <span className="eyebrow">free bible studies</span>
           <Marker />
         </div>
@@ -119,8 +119,9 @@ export default function Offer() {
       </div>
 
       <footer className="py-6 text-center">
-        <BrandName className="font-serif text-sm font-medium text-muted" />
+        <AccountFooter />
       </footer>
     </div>
   );
 }
+

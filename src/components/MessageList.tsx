@@ -30,7 +30,7 @@ export function MessageList({
               className={cn(
                 'max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-[15px] leading-relaxed',
                 isMine
-                  ? 'bg-sage text-canvas'
+                  ? 'bg-accent text-canvas'
                   : 'border border-edge bg-card text-sage',
               )}
             >

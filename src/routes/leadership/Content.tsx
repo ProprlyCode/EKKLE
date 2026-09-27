@@ -503,7 +503,7 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
                     key={i}
                     className={
                       'inline-flex h-9 items-center justify-center rounded-lg px-3 text-[13px] font-medium ' +
-                      (i === 0 ? 'bg-sage text-canvas' : 'text-sage')
+                      (i === 0 ? 'bg-accent text-canvas' : 'text-sage')
                     }
                   >
                     {cta.label || (cta.kind === 'link' ? 'Open' : 'Message the member')}

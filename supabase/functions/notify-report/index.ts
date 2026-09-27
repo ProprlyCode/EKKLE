@@ -8,7 +8,7 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { accountBase, fromOurTrigger, sendEmail } from '../_shared/email.ts';
+import { accountInfo, fromAccount, fromOurTrigger, sendEmail } from '../_shared/email.ts';
 
 interface ReportRecord {
   id: string;
@@ -39,7 +39,8 @@ Deno.serve(async (req) => {
     const member = convo.member as unknown as { name: string };
     const recipient = convo.recipient as unknown as { first_name: string };
     const who = record.reporter_type === 'member' ? member.name : 'a recipient';
-    const base = await accountBase(supabase, convo.org_id);
+    const { base, name: accountName } = await accountInfo(supabase, convo.org_id);
+    const from = fromAccount(accountName);
     const link = base ? `${base}/leadership/people` : '';
 
     const { data: leaders } = await supabase
@@ -59,6 +60,7 @@ Deno.serve(async (req) => {
           (record.reason ? `Note: “${record.reason}”\n` : '') +
           `\nReview it${link ? `: ${link}` : ' in the People area.'}\n\n` +
           `You’ll only ever see this summary — never the messages themselves.`,
+        from,
       );
     }
 
