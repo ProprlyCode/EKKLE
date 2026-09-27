@@ -32,7 +32,7 @@ been deployed, and sign-in emails use Supabase's built-in, rate-limited sender.
 lists → create an API key → add GitHub secret `RESEND_API_KEY`. Then paste
 Resend's SMTP details into Supabase → Auth → SMTP.
 
-## Your space (seekers) — in progress (Sep 2026)
+## Your space (seekers) — built (Sep 2026)
 
 One gated home for everyone reached through Ekklē, at `ekkle.org/space`
 (signed out → sign-in, then back to the page they asked for).
@@ -46,7 +46,10 @@ One gated home for everyone reached through Ekklē, at `ekkle.org/space`
   by topic. Leaders manage them at Leadership → Resources (live preview,
   draft/published); seekers see only their church's published ones.
 - **Account** — email, password, delete-my-data, sign out.
-- **Installable** (add to home screen) opens straight to Your space. *(slice 4)*
+- **Installable** — an app manifest + icons; Home offers "Add to home screen"
+  (the browser's prompt on Android/Chrome, Share → Add to Home Screen on
+  iPhone). It opens straight to Your space. No service worker (no offline
+  cache to go stale).
 
 From a member's link: the first message sends instantly, then "Keep this
 conversation" emails a code; confirming it opens Your space → Messages with

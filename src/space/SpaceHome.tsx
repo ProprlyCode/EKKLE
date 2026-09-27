@@ -4,6 +4,7 @@ import { getSeekerConnection, type SeekerConnection } from '@/data/seeker';
 import { listStudies, type StudySummary } from '@/data/studies';
 import { listSeekerResources, type SeekerResourceSummary } from '@/data/resources';
 import { Spinner } from '@/ui/states';
+import { InstallHint } from './InstallHint';
 
 /**
  * Your space — home (/space). The seeker's own place: the person they're
@@ -118,6 +119,8 @@ export default function SpaceHome() {
           </ul>
         </section>
       )}
+
+      <InstallHint />
     </div>
   );
 }

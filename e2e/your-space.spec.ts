@@ -71,3 +71,14 @@ async function signInWithPassword(page: Page, email: string, password: string) {
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL('**/app**');
 }
+
+test('Your space can be installed: the app manifest opens it', async ({ request }) => {
+  const res = await request.get('/manifest.webmanifest');
+  expect(res.ok()).toBe(true);
+  const manifest = await res.json();
+  expect(manifest.start_url).toBe('/space');
+  expect(manifest.display).toBe('standalone');
+  for (const icon of manifest.icons) {
+    expect((await request.get(icon.src)).ok()).toBe(true);
+  }
+});
