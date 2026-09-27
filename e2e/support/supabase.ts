@@ -25,6 +25,13 @@ export const DAVID = {
   password: 'e2e-david-password-1',
 };
 
+/** Seeded leader (Sarah, leadership) — manages content and resources. */
+export const SARAH = {
+  userId: '00000000-0000-0000-0000-0000000000b1',
+  email: 'sarah@e2e.test',
+  password: 'e2e-sarah-password-1',
+};
+
 /** A unique address per run so repeated runs never collide. */
 export function uniqueEmail(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@e2e.test`;

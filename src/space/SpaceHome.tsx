@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getSeekerConnection, type SeekerConnection } from '@/data/seeker';
 import { listStudies, type StudySummary } from '@/data/studies';
+import { listSeekerResources, type SeekerResourceSummary } from '@/data/resources';
 import { Spinner } from '@/ui/states';
 
 /**
  * Your space — home (/space). The seeker's own place: the person they're
  * talking with, where they are in the studies, and what's next. Everything
- * here is theirs; nothing is forced.
+ * here is theirs; nothing is forced. A few resources close the page.
  */
 export default function SpaceHome() {
   const [convo, setConvo] = useState<SeekerConnection | null | undefined>(undefined);
   const [studies, setStudies] = useState<StudySummary[] | null | undefined>(undefined);
+  const [resources, setResources] = useState<SeekerResourceSummary[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -21,6 +23,9 @@ export default function SpaceHome() {
     listStudies()
       .then((s) => active && setStudies(s))
       .catch(() => active && setStudies(null));
+    listSeekerResources()
+      .then((r) => active && setResources(r))
+      .catch(() => undefined); // optional on Home
     return () => {
       active = false;
     };
@@ -88,6 +93,30 @@ export default function SpaceHome() {
             {resume ? (resume.started ? ` · page ${resume.last_page}` : ' · start when you’re ready') : ''}
           </span>
         </Link>
+      )}
+
+      {resources.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between">
+            <span className="eyebrow">for the journey</span>
+            <Link to="/space/resources" className="text-[13px] text-muted hover:text-sage">
+              All resources →
+            </Link>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {resources.slice(0, 3).map((r) => (
+              <li key={r.id}>
+                <Link
+                  to={`/space/resources/${r.id}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-edge bg-card px-4 py-3 text-[15px] text-sage transition-colors hover:border-sage/40"
+                >
+                  <span className="truncate">{r.title}</span>
+                  <span aria-hidden className="text-muted">→</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

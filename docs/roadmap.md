@@ -42,8 +42,9 @@ One gated home for everyone reached through Ekklē, at `ekkle.org/space`
   designated responder if they came in without a member's link).
 - **Studies** — the library and reader (moved from `/studies`; old links
   redirect).
-- **Resources** — church-approved reading / video / links, with a simple
-  leader editor. *(slice 3)*
+- **Resources** — church-approved reading / video (YouTube, Vimeo) / links,
+  by topic. Leaders manage them at Leadership → Resources (live preview,
+  draft/published); seekers see only their church's published ones.
 - **Account** — email, password, delete-my-data, sign out.
 - **Installable** (add to home screen) opens straight to Your space. *(slice 4)*
 

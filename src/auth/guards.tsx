@@ -80,6 +80,7 @@ export function AuthedLayout() {
     ...(leader
       ? [
           { to: '/leadership/content', label: 'Content' },
+          { to: '/leadership/resources', label: 'Resources' },
           { to: '/leadership/people', label: 'People', dot: openReports > 0 },
         ]
       : []),

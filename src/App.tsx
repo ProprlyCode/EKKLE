@@ -25,6 +25,9 @@ import StudyReader from '@/space/StudyReader';
 import Connection from '@/space/Connection';
 import Account from '@/space/Account';
 import SpaceHome from '@/space/SpaceHome';
+import ResourcesLibrary from '@/space/ResourcesLibrary';
+import ResourcePage from '@/space/ResourcePage';
+import Resources from '@/routes/leadership/Resources';
 // The cinematic homepage is code-split so GSAP/Lenis never load in the product.
 const Home = lazy(() => import('@/public/home/Home'));
 import ForChurches from '@/public/ForChurches';
@@ -62,6 +65,8 @@ export default function App() {
           <Route path="/space" element={<SpaceHome />} />
           <Route path="/space/messages" element={<Connection />} />
           <Route path="/space/studies" element={<StudyDashboard />} />
+          <Route path="/space/resources" element={<ResourcesLibrary />} />
+          <Route path="/space/resources/:resourceId" element={<ResourcePage />} />
           <Route path="/space/account" element={<Account />} />
         </Route>
       </Route>
@@ -82,6 +87,7 @@ export default function App() {
 
             <Route element={<RequireLeadership />}>
               <Route path="/leadership/content" element={<Content />} />
+              <Route path="/leadership/resources" element={<Resources />} />
               <Route path="/leadership/people" element={<People />} />
             </Route>
 

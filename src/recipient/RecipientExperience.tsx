@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
 import { sendStudyMagicLink } from '@/data/auth';
 import { EmailCode } from '@/ui/EmailCode';
+import { safeHref } from '@/lib/video';
 import {
   getLanding,
   logEvent,
@@ -510,15 +511,6 @@ function KeepConversation({
       </button>
     </div>
   );
-}
-
-/** Only allow http(s) link destinations; add https:// if the scheme is missing. */
-function safeHref(url: string | null): string {
-  const raw = (url ?? '').trim();
-  if (!raw) return '#';
-  if (/^https?:\/\//i.test(raw)) return raw;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) return '#'; // some other scheme (javascript:, data:, …)
-  return `https://${raw}`;
 }
 
 function RecipientThread({

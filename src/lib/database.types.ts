@@ -25,6 +25,7 @@ export type ConversationStatus = 'active' | 'blocked';
 export type SenderType = 'member' | 'recipient';
 export type CheckinValue = 'yes' | 'not_yet' | 'no';
 export type ResourceStatus = 'draft' | 'approved';
+export type ResourceKind = 'text' | 'video' | 'link';
 
 export interface Database {
   public: {
@@ -341,6 +342,8 @@ export interface Database {
           blurb: string;
           body: string;
           status: ResourceStatus;
+          kind: ResourceKind;
+          url: string | null;
           sort_order: number;
           offers_connect: boolean;
           file_path: string | null;
@@ -354,6 +357,8 @@ export interface Database {
           blurb?: string;
           body?: string;
           status?: ResourceStatus;
+          kind?: ResourceKind;
+          url?: string | null;
           sort_order?: number;
           offers_connect?: boolean;
           file_path?: string | null;
@@ -525,6 +530,18 @@ export interface Database {
       };
       seeker_complete_study: {
         Args: { p_study_id: string; p_answers: Json };
+        Returns: undefined;
+      };
+      seeker_resources: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      seeker_resource: {
+        Args: { p_resource_id: string };
+        Returns: Json;
+      };
+      set_resource_topics: {
+        Args: { p_resource_id: string; p_names: string[] };
         Returns: undefined;
       };
       seeker_connection: {
