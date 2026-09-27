@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { admin, uniqueEmail } from './support/supabase';
+import { admin, PLATFORM, uniqueEmail } from './support/supabase';
 
 // The homepage's one ask. Reduced motion renders the still version of the
 // story, so the form is reachable without scrolling through the animation.
@@ -8,7 +8,7 @@ test.use({ reducedMotion: 'reduce' });
 test('a ministry leader can join the waitlist from the homepage', async ({ page }) => {
   const email = uniqueEmail('waitlist');
 
-  await page.goto('/');
+  await page.goto(PLATFORM); // the homepage is Ekklē itself, on ekkle.org
   await page.getByLabel('Your name').fill('Test Leader');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Church or ministry').fill('Test Fellowship');

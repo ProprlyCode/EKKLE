@@ -17,6 +17,9 @@ export function admin() {
   });
 }
 
+/** Ekklē itself (ekkle.org) locally; accounts live at <sub>.localhost. */
+export const PLATFORM = 'http://localhost:5173/';
+
 /** Seeded pilot member (supabase/seed.sql) whose link is /r/david. */
 export const DAVID = {
   userId: '00000000-0000-0000-0000-0000000000b2',

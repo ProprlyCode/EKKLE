@@ -1,4 +1,4 @@
-# Accounts on their own addresses (plan — Sep 2026)
+# Accounts on their own addresses (Sep 2026)
 
 Every church or ministry account lives at its own address. Seekers, members
 and leaders never need to see ekkle.org.
@@ -46,9 +46,11 @@ it's live (SSL is automatic). Sign-in is allowed on it automatically.
 
 ## Build phases (each through CI → staging → production)
 
-1. **Accounts by address** — subdomain per account, address → account lookup,
-   ekkle.org as platform-only, redirects for old links, all public lookups
-   scoped to the account. Staging gets `*.staging.ekkle.org`.
+1. **Accounts by address** — *built.* Subdomain per account (0023),
+   address → account lookup, ekkle.org as platform-only, redirects for old
+   links, public lookups scoped by the request's Origin. Hosting: `*.ekkle.org`
+   on the live project; `*.staging.ekkle.org` aliased to each staging build.
+   Locally, accounts are `http://<sub>.localhost:5173`.
 2. **Branding** — name, logo upload, accent colour; per-account app icon/name;
    emails in the account's name.
 3. **Custom domains** — connect / verify / remove from account settings.
@@ -57,8 +59,7 @@ it's live (SSL is automatic). Sign-in is allowed on it automatically.
 
 ## Open
 
-- Storyline's subdomain (e.g. `storyline.ekkle.org`).
-- Jonathan's personal ministry as its own account (planned earlier) — create
-  it in phase 4.
+- Jonathan's test account "Storyline" is now his personal ministry at
+  `jonathan.ekkle.org` (kind: personal ministry); rename it in settings.
 - Visit us card (on hold) fits here once accounts have types (church,
   personal ministry…).

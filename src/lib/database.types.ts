@@ -38,6 +38,9 @@ export interface Database {
           join_code: string;
           default_member_id: UUID | null;
           offer_enabled: boolean;
+          subdomain: string;
+          custom_domain: string | null;
+          kind: 'church' | 'personal_ministry';
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -48,6 +51,9 @@ export interface Database {
           join_code: string;
           default_member_id?: UUID | null;
           offer_enabled?: boolean;
+          subdomain?: string;
+          custom_domain?: string | null;
+          kind?: 'church' | 'personal_ministry';
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -531,6 +537,18 @@ export interface Database {
       seeker_complete_study: {
         Args: { p_study_id: string; p_answers: Json };
         Returns: undefined;
+      };
+      resolve_account: {
+        Args: { p_host: string };
+        Returns: Json;
+      };
+      member_account: {
+        Args: { p_slug: string };
+        Returns: Json;
+      };
+      find_accounts: {
+        Args: { p_query: string };
+        Returns: Json;
       };
       seeker_resources: {
         Args: Record<string, never>;

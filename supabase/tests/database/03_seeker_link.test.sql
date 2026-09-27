@@ -12,7 +12,7 @@ insert into auth.users (id, email) values
 -- The race: the other call's row lands between this call's checks and its
 -- insert (simulated by a row it can't find by auth_uid or email).
 insert into recipients (org_id, first_name, session_token)
-  select id, 'Winner', 'seeker:70000000-0000-0000-0000-000000000002'
+  select id, 'Winner', 'seeker:70000000-0000-0000-0000-000000000002@' || id::text
   from organizations order by created_at limit 1;
 
 set local role authenticated;
@@ -27,7 +27,7 @@ select lives_ok($$ select link_seeker_account('Kit', null) $$,
 
 reset role;
 select is(
-  (select count(*)::int from recipients where session_token = 'seeker:70000000-0000-0000-0000-000000000001'),
+  (select count(*)::int from recipients where auth_uid = '70000000-0000-0000-0000-000000000001'),
   1, 'still exactly one recipient row for the seeker');
 
 select * from finish();

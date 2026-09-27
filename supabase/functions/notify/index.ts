@@ -10,7 +10,7 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { fromOurTrigger, sendEmail, SITE_URL } from '../_shared/email.ts';
+import { accountBase, fromOurTrigger, sendEmail } from '../_shared/email.ts';
 
 interface MessageRecord {
   id: string;
@@ -53,7 +53,8 @@ Deno.serve(async (req) => {
       email: string | null;
       auth_uid: string | null;
     };
-    const appLink = SITE_URL ? `${SITE_URL}/app/messages` : '';
+    const base = await accountBase(supabase, convo.org_id);
+    const appLink = base ? `${base}/app/messages` : '';
 
     if (record.sender_type === 'recipient') {
       // Notify the member.
@@ -89,13 +90,13 @@ Deno.serve(async (req) => {
       }
     } else {
       // Member replied → notify the recipient.
-      // Seekers with an account read it in their studies area; everyone else
+      // Seekers with an account read it in Your space; everyone else
       // through the member's link (which resumes the conversation).
-      const back = !SITE_URL
+      const back = !base
         ? ''
         : recipient.auth_uid
-          ? `${SITE_URL}/space/messages`
-          : `${SITE_URL}/r/${member.code_slug}`;
+          ? `${base}/space/messages`
+          : `${base}/r/${member.code_slug}`;
       await sendEmail(
         recipient.email,
         `${member.name} replied`,

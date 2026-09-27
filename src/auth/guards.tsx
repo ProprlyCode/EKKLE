@@ -8,6 +8,8 @@ import { AppShell, type NavItem } from '@/ui/AppShell';
 import { Button } from '@/ui/Button';
 import { CenterLayout, FullPageLoading } from '@/ui/states';
 import { Wordmark } from '@/components/Wordmark';
+import { useAccount } from '@/account/AccountProvider';
+import FindAccount from '@/account/FindAccount';
 
 /**
  * Route guards. Order of checks: Supabase configured → signed in → is a member →
@@ -28,9 +30,13 @@ export function RequireAuth() {
 
 export function RequireMembership() {
   const { ready, session, membership } = useSession();
+  const account = useAccount();
   if (!ready) return <FullPageLoading />;
   if (!session) return <Navigate to="/sign-in" replace />;
   if (!membership) return <Navigate to="/welcome" replace />;
+  // Signed in on another account's address: point them to their own.
+  if (account.status === 'account' && membership.org_id !== account.account.id)
+    return <FindAccount />;
   return <Outlet />;
 }
 
@@ -74,18 +80,21 @@ export function AuthedLayout() {
     };
   }, [leader]);
 
-  const nav: NavItem[] = [
-    { to: '/app', label: 'Your code' },
-    { to: '/app/messages', label: 'Messages', dot: unread > 0 },
-    ...(leader
-      ? [
-          { to: '/leadership/content', label: 'Content' },
-          { to: '/leadership/resources', label: 'Resources' },
-          { to: '/leadership/people', label: 'People', dot: openReports > 0 },
-        ]
-      : []),
-    ...(isPlatformAdmin(membership?.role) ? [{ to: '/platform', label: 'Platform' }] : []),
-  ];
+  const onPlatform = useAccount().status === 'platform';
+  const nav: NavItem[] = onPlatform
+    ? [{ to: '/platform', label: 'Platform' }] // ekkle.org: only the console
+    : [
+        { to: '/app', label: 'Your code' },
+        { to: '/app/messages', label: 'Messages', dot: unread > 0 },
+        ...(leader
+          ? [
+              { to: '/leadership/content', label: 'Content' },
+              { to: '/leadership/resources', label: 'Resources' },
+              { to: '/leadership/people', label: 'People', dot: openReports > 0 },
+            ]
+          : []),
+        ...(isPlatformAdmin(membership?.role) ? [{ to: '/platform', label: 'Platform' }] : []),
+      ];
 
   return (
     <AppShell

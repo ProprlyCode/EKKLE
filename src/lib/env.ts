@@ -9,16 +9,18 @@
 interface AppEnv {
   supabaseUrl: string;
   supabaseAnonKey: string;
-  /** Public site origin, used to build shareable /r/:slug links and QR codes. */
+  /**
+   * This page's own origin — an account's address (or ekkle.org). Shareable
+   * /r/:slug links, QR codes and sign-in links are built from it, so they
+   * always point back to the account they belong to.
+   */
   siteUrl: string;
 }
 
 function readEnv(): AppEnv {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
-  const siteUrl =
-    import.meta.env.VITE_SITE_URL ??
-    (typeof window !== 'undefined' ? window.location.origin : '');
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   return { supabaseUrl, supabaseAnonKey, siteUrl };
 }

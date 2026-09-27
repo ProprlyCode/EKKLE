@@ -19,7 +19,9 @@ export default defineConfig({
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   globalSetup: './e2e/global-setup.ts',
   use: {
-    baseURL: 'http://localhost:5173',
+    // Tests run on the seeded account's address (docs/tenancy.md); Chromium
+    // resolves *.localhost to this machine. Ekklē itself is http://localhost:5173.
+    baseURL: 'http://pilot.localhost:5173',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

@@ -8,6 +8,11 @@ import {
   AuthedLayout,
 } from '@/auth/guards';
 import { Wordmark } from '@/components/Wordmark';
+import { FullPageLoading } from '@/ui/states';
+import { useAccount } from '@/account/AccountProvider';
+import FindAccount from '@/account/FindAccount';
+import { LegacyMemberLink, ToPlatform } from '@/account/Redirects';
+import { platformUrl } from '@/account/address';
 import SignIn from '@/routes/SignIn';
 import ResetPassword from '@/routes/ResetPassword';
 import Onboarding from '@/routes/Onboarding';
@@ -34,10 +39,20 @@ import ForChurches from '@/public/ForChurches';
 import Offer from '@/public/Offer';
 
 /**
- * Route map. Public: /sign-in and the recipient view /r/:slug (Sprint 3).
- * Authed member area and leadership tools sit behind guards + the shared shell.
+ * Route map (docs/tenancy.md). The address decides which set applies:
+ *  - ekkle.org (platform): Ekklē itself — the homepage story, For churches,
+ *    the platform console. Old account links are sent on to their account.
+ *  - an account's address (<sub>.ekkle.org or its own domain): member links,
+ *    the offer page, Your space, and the members' & leaders' app.
  */
 export default function App() {
+  const account = useAccount();
+  if (account.status === 'loading') return <FullPageLoading />;
+  if (account.status === 'unknown') return <UnknownAddress />;
+  return account.status === 'platform' ? <PlatformRoutes /> : <AccountRoutes />;
+}
+
+function PlatformRoutes() {
   return (
     <Routes>
       <Route
@@ -49,6 +64,37 @@ export default function App() {
         }
       />
       <Route path="/for-churches" element={<ForChurches />} />
+      <Route path="/sign-in" element={<SignIn />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* The platform console lives on ekkle.org. */}
+      <Route element={<RequireAuth />}>
+        <Route element={<RequireMembership />}>
+          <Route element={<AuthedLayout />}>
+            <Route element={<RequirePlatformAdmin />}>
+              <Route path="/platform" element={<PlatformConsole />} />
+            </Route>
+          </Route>
+        </Route>
+      </Route>
+
+      {/* Account pages opened on ekkle.org → that account's address. */}
+      <Route path="/r/:slug" element={<LegacyMemberLink />} />
+      <Route path="/offer" element={<LegacyMemberLink />} />
+      {['/space/*', '/studies/*', '/app/*', '/leadership/*', '/welcome'].map((path) => (
+        <Route key={path} path={path} element={<FindAccount />} />
+      ))}
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+function AccountRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/offer" replace />} />
+      <Route path="/for-churches" element={<ToPlatform />} />
       <Route path="/offer" element={<Offer />} />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -58,7 +104,7 @@ export default function App() {
 
       {/* Your space — a seeker's own gated home. Signed out → the seeker sign-in
           (then back to the page they asked for); signed in → home, messages,
-          studies (with the immersive reader), and account. */}
+          studies (with the immersive reader), resources, and account. */}
       <Route element={<SeekerGate />}>
         <Route path="/space/studies/:studyId" element={<StudyReader />} />
         <Route element={<SeekerLayout />}>
@@ -100,6 +146,23 @@ export default function App() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
+  );
+}
+
+function UnknownAddress() {
+  return (
+    <main className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-6 px-4 py-16 text-center">
+      <Wordmark />
+      <div className="card w-full px-6 py-8">
+        <h1 className="text-xl">This address isn’t set up</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-strong">
+          No church or ministry uses it yet. Check the link you were given.
+        </p>
+        <a href={platformUrl('/')} className="mt-4 inline-block text-sm text-sage underline-offset-2 hover:underline">
+          Go to Ekklē
+        </a>
+      </div>
+    </main>
   );
 }
 

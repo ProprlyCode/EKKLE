@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
+import { useAccount } from '@/account/AccountProvider';
 import { sendMagicLink, signInWithPassword, sendPasswordReset } from '@/data/auth';
 import { Wordmark } from '@/components/Wordmark';
 import { Button } from '@/ui/Button';
@@ -16,6 +17,7 @@ import { EmailCode } from '@/ui/EmailCode';
  */
 export default function SignIn() {
   const { ready, configured, session } = useSession();
+  const account = useAccount();
   const [mode, setMode] = useState<'magic' | 'password'>('magic');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +33,8 @@ export default function SignIn() {
       </CenterLayout>
     );
   if (!ready) return <FullPageLoading />;
-  if (session) return <Navigate to="/app" replace />;
+  // Signed in: the app on an account's address; the console on ekkle.org.
+  if (session) return <Navigate to={account.status === 'platform' ? '/platform' : '/app'} replace />;
 
   async function onMagicSubmit(e: FormEvent) {
     e.preventDefault();

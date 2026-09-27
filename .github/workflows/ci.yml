@@ -196,7 +196,7 @@ jobs:
             jq -n --arg host "$STAGING_HOST" --arg key "$RESEND_API_KEY" \
               --rawfile tpl supabase/templates/sign_in.html '{
               site_url: ("https://" + $host),
-              uri_allow_list: ("https://" + $host + "/**"),
+              uri_allow_list: ("https://" + $host + "/**,https://*." + $host + "/**"),
               smtp_host: "smtp.resend.com", smtp_port: "465", smtp_user: "resend",
               smtp_pass: $key, smtp_admin_email: "hello@ekkle.org",
               smtp_sender_name: "Ekklē (staging)",
@@ -209,7 +209,7 @@ jobs:
           else
             jq -n --arg host "$STAGING_HOST" '{
               site_url: ("https://" + $host),
-              uri_allow_list: ("https://" + $host + "/**"),
+              uri_allow_list: ("https://" + $host + "/**,https://*." + $host + "/**"),
               mailer_otp_length: 6
             }' > /tmp/auth.json
           fi
@@ -260,15 +260,19 @@ jobs:
             [ "$i" = 90 ] && { echo "::error::Timed out waiting for the staging deploy."; exit 1; }
             sleep 10
           done
-          code=$(curl -sS -o /tmp/alias.json -w '%{http_code}' -X POST \
-            -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
-            "https://api.vercel.com/v2/deployments/$id/aliases?teamId=$VERCEL_ORG_ID" \
-            -d "{\"alias\":\"$STAGING_HOST\"}")
-          if [ "$code" -ge 300 ]; then
-            echo "::error::Could not point $STAGING_HOST at the deploy (HTTP $code): $(head -c 400 /tmp/alias.json)"
-            exit 1
-          fi
-          echo "https://$STAGING_HOST now serves ${GITHUB_SHA:0:7}"
+          # staging.ekkle.org (Ekklē itself) and every account's address on
+          # staging (*.staging.ekkle.org — docs/tenancy.md) serve this build.
+          for alias in "$STAGING_HOST" "*.$STAGING_HOST"; do
+            code=$(curl -sS -o /tmp/alias.json -w '%{http_code}' -X POST \
+              -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
+              "https://api.vercel.com/v2/deployments/$id/aliases?teamId=$VERCEL_ORG_ID" \
+              -d "{\"alias\":\"$alias\"}")
+            if [ "$code" -ge 300 ]; then
+              echo "::error::Could not point $alias at the deploy (HTTP $code): $(head -c 400 /tmp/alias.json)"
+              exit 1
+            fi
+          done
+          echo "https://$STAGING_HOST and https://*.$STAGING_HOST now serve ${GITHUB_SHA:0:7}"
       - name: Install browser
         if: steps.gate.outputs.on == 'true'
         run: npx playwright install --with-deps chromium
@@ -276,7 +280,8 @@ jobs:
         if: steps.gate.outputs.on == 'true'
         run: npx playwright test -c playwright.staging.config.ts
         env:
-          STAGING_URL: https://${{ env.STAGING_HOST }}
+          STAGING_URL: https://pilot.${{ env.STAGING_HOST }}
+          STAGING_PLATFORM_URL: https://${{ env.STAGING_HOST }}
       - name: Keep the report
         if: failure() && steps.gate.outputs.on == 'true'
         uses: actions/upload-artifact@v7
@@ -346,6 +351,8 @@ jobs:
             on conflict (id) do update set base_url = excluded.base_url, secret = excluded.secret"
 
           jq -n --arg key "$RESEND_API_KEY" --rawfile tpl supabase/templates/sign_in.html '{
+            site_url: "https://ekkle.org",
+            uri_allow_list: "https://ekkle.org/**,https://*.ekkle.org/**",
             smtp_host: "smtp.resend.com", smtp_port: "465", smtp_user: "resend",
             smtp_pass: $key, smtp_admin_email: "hello@ekkle.org", smtp_sender_name: "Ekklē",
             mailer_otp_length: 6, rate_limit_email_sent: 100,

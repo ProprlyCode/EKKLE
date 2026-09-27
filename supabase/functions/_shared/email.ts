@@ -7,6 +7,25 @@ const NOTIFY_SECRET = Deno.env.get('NOTIFY_SECRET') ?? '';
 
 export const SITE_URL = (Deno.env.get('SITE_URL') ?? '').replace(/\/$/, '');
 
+/**
+ * The account's own address (docs/tenancy.md): its connected domain, else
+ * <subdomain>.<the site's domain>. Links in emails always point back to the
+ * church or ministry the person belongs to, never to ekkle.org itself.
+ */
+// deno-lint-ignore no-explicit-any
+export async function accountBase(supabase: any, orgId: string): Promise<string> {
+  if (!SITE_URL) return '';
+  const { data } = await supabase
+    .from('organizations')
+    .select('subdomain, custom_domain')
+    .eq('id', orgId)
+    .single();
+  if (!data) return SITE_URL;
+  if (data.custom_domain) return `https://${data.custom_domain}`;
+  const root = new URL(SITE_URL);
+  return `${root.protocol}//${data.subdomain}.${root.host}`;
+}
+
 /** Only the database trigger knows the secret; everyone else gets a 401. */
 export function fromOurTrigger(req: Request): boolean {
   return NOTIFY_SECRET !== '' && req.headers.get('x-ekkle-secret') === NOTIFY_SECRET;

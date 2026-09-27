@@ -8,7 +8,7 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { fromOurTrigger, sendEmail, SITE_URL } from '../_shared/email.ts';
+import { accountBase, fromOurTrigger, sendEmail } from '../_shared/email.ts';
 
 interface ReportRecord {
   id: string;
@@ -39,7 +39,8 @@ Deno.serve(async (req) => {
     const member = convo.member as unknown as { name: string };
     const recipient = convo.recipient as unknown as { first_name: string };
     const who = record.reporter_type === 'member' ? member.name : 'a recipient';
-    const link = SITE_URL ? `${SITE_URL}/leadership/people` : '';
+    const base = await accountBase(supabase, convo.org_id);
+    const link = base ? `${base}/leadership/people` : '';
 
     const { data: leaders } = await supabase
       .from('users')

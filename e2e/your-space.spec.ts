@@ -73,12 +73,12 @@ async function signInWithPassword(page: Page, email: string, password: string) {
 }
 
 test('Your space can be installed: the app manifest opens it', async ({ request }) => {
-  const res = await request.get('/manifest.webmanifest');
+  const res = await request.get('http://localhost:5173/manifest.webmanifest');
   expect(res.ok()).toBe(true);
   const manifest = await res.json();
   expect(manifest.start_url).toBe('/space');
   expect(manifest.display).toBe('standalone');
   for (const icon of manifest.icons) {
-    expect((await request.get(icon.src)).ok()).toBe(true);
+    expect((await request.get(`http://localhost:5173${icon.src}`)).ok()).toBe(true);
   }
 });

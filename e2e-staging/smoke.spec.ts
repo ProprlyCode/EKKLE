@@ -11,6 +11,13 @@ async function signInWithPassword(page: Page, email: string) {
   await page.waitForURL('**/app**');
 }
 
+test('staging.ekkle.org (Ekklē itself) sends old member links on to the account', async ({ page }) => {
+  const platform = process.env.STAGING_PLATFORM_URL || 'https://staging.ekkle.org';
+  await page.goto(`${platform}/r/david`);
+  await page.waitForURL(/pilot\.staging\.ekkle\.org\/r\/david/);
+  await expect(page.getByRole('button', { name: 'Begin' })).toBeVisible();
+});
+
 test('staging is clearly marked and serves the public pages', async ({ page }) => {
   await page.goto('/offer');
   await expect(page.getByText('Staging · demo data only')).toBeVisible();
