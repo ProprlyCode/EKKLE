@@ -266,18 +266,20 @@ function Connect({
   onMessage,
   onKeepReading,
 }: {
-  connect: RecipientLanding['connect'];
+  connect: RecipientLanding['connect'] | undefined;
   memberName: string;
   onMessage: () => void;
   onKeepReading: () => void;
 }) {
-  const headline = connect.headline?.trim() || 'someone here would love to talk';
+  // The ending is optional data: a missing block or list falls back to the
+  // defaults rather than leaving the seeker on a blank screen.
+  const headline = connect?.headline?.trim() || 'someone here would love to talk';
   const body =
-    connect.body?.trim() ||
+    connect?.body?.trim() ||
     `${memberName} shared this with you and would genuinely welcome a conversation — no pressure, no script. Or you can sit with it a while. Both are okay.`;
   // Default to a single "message the member" action if nothing is configured.
   const ctas =
-    connect.ctas.length > 0
+    Array.isArray(connect?.ctas) && connect.ctas.length > 0
       ? connect.ctas
       : [{ label: `Message ${memberName}`, kind: 'message' as const, url: null }];
 
