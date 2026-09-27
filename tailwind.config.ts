@@ -9,6 +9,11 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      screens: {
+        // Short viewports (small phones, phones in Safari with its toolbars).
+        short: { raw: '(max-height: 720px)' },
+        tiny: { raw: '(max-height: 620px)' },
+      },
       colors: {
         // Deep sage green — primary text / dark accent
         sage: {

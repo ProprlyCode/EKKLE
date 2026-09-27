@@ -13,12 +13,12 @@ import { CafeBg } from './art';
  */
 export function JoinContent() {
   return (
-    <div className="flex w-full flex-col items-center gap-7 md:gap-9">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <h2 className="home-display j-title max-w-[22ch] text-[clamp(1.75rem,3.6vw,3.25rem)] text-home-stone">
+    <div className="flex w-full flex-col items-center gap-7 md:gap-9 short:gap-4">
+      <div className="flex flex-col items-center gap-4 text-center short:gap-2">
+        <h2 className="home-display j-title max-w-[22ch] text-[clamp(1.75rem,3.6vw,3.25rem)] text-home-stone short:text-[clamp(1.375rem,3vw,2.25rem)] tiny:text-[1.25rem]">
           {COPY.joinTitle}
         </h2>
-        <p className="max-w-[44ch] text-[15px] leading-relaxed text-home-stone-dim md:text-[17px]">
+        <p className="max-w-[44ch] text-[15px] leading-relaxed text-home-stone-dim md:text-[17px] short:text-[14px] short:leading-snug">
           {COPY.joinSub}
         </p>
       </div>
@@ -102,7 +102,7 @@ function WaitlistForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl border border-home-stone/10 bg-home-ink/60 p-5 backdrop-blur-[2px] md:p-8"
+      className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl border border-home-stone/10 bg-home-ink/60 p-5 backdrop-blur-[2px] md:p-8 short:gap-2.5 short:p-4"
     >
       <Field label="Your name" value={name} onChange={setName} autoComplete="name" required />
       <Field
@@ -137,7 +137,7 @@ function WaitlistForm() {
       <button
         type="submit"
         disabled={status === 'sending' || !name.trim() || !email.trim()}
-        className="home-focus mt-2 h-12 rounded-xl bg-home-brass px-6 text-[15px] font-medium text-home-ink transition-colors hover:bg-[#b8915a] disabled:opacity-60"
+        className="home-focus mt-2 h-12 rounded-xl short:mt-1 short:h-11 bg-home-brass px-6 text-[15px] font-medium text-home-ink transition-colors hover:bg-[#b8915a] disabled:opacity-60"
       >
         {status === 'sending' ? 'Joining…' : 'Join the waitlist'}
       </button>
@@ -163,7 +163,7 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <label className="flex flex-col gap-1.5">
+    <label className="flex flex-col gap-1.5 short:gap-1">
       <span className="text-[13px] text-home-stone-dim">{label}</span>
       <input
         type={type}
@@ -172,7 +172,7 @@ function Field({
         autoComplete={autoComplete}
         inputMode={inputMode}
         required={required}
-        className="home-focus h-12 appearance-none rounded-xl border border-home-stone-dim/35 bg-home-ink/55 px-4 text-[15px] text-home-stone placeholder:text-home-stone-dim/60 focus:border-home-brass/70 focus:outline-none"
+        className="home-focus h-12 appearance-none short:h-10 rounded-xl border border-home-stone-dim/35 bg-home-ink/55 px-4 text-[15px] text-home-stone placeholder:text-home-stone-dim/60 focus:border-home-brass/70 focus:outline-none"
       />
     </label>
   );

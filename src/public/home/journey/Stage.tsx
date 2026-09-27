@@ -217,11 +217,14 @@ export function Stage() {
           {COPY.t6}
         </Title>
 
-        {/* ---- Chapter 7: the invitation rises into the same frame ---- */}
+        {/* ---- Chapter 7: the invitation rises into the same frame ----
+            Not a scroll container: on phones a swipe must always move the page
+            (an inner scroller here swallowed swipes in iOS Safari and the story
+            stopped before the invitation). The content is sized to fit instead. */}
         <div
           data-j="join"
           id="join"
-          className="absolute inset-0 z-20 flex items-center justify-center overflow-y-auto px-5 pb-8 pt-24 md:pt-20"
+          className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden px-5 pb-6 pt-20 md:pt-20 short:pb-3 short:pt-14"
           style={{ opacity: 0, visibility: 'hidden' }}
         >
           <JoinContent />
