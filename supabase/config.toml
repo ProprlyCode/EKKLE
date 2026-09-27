@@ -9,7 +9,7 @@ major_version = 17
 [db.seed]
 enabled = true
 # The pilot data plus Study 1, so CI and local stacks have a real study to open.
-sql_paths = ["./seed.sql", "./seed_study_01.sql"]
+sql_paths = ["./seed.sql", "./seed_study_01.sql", "./seed_resources.sql"]
 
 [api]
 enabled = true
