@@ -175,9 +175,16 @@ jobs:
           version: 2.118.0
       - name: Staging database — migrations + demo seed
         if: steps.gate.outputs.on == 'true'
+        # Through the project's IPv4 pooler (session mode): GitHub runners have
+        # no IPv6, which the direct db.<ref>.supabase.co host needs.
         run: |
-          supabase link --project-ref "$STAGING_REF" --password "$STAGING_DB_PASSWORD"
-          supabase db push --include-seed --password "$STAGING_DB_PASSWORD"
+          pooler=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            "https://api.supabase.com/v1/projects/$STAGING_REF/config/database/pooler" \
+            | jq -r '[.[] | select(.database_type == "PRIMARY")][0] | "\(.db_user)@\(.db_host)"')
+          [ -n "$pooler" ] && [ "$pooler" != "null@null" ] || { echo "::error::Could not look up the staging pooler address."; exit 1; }
+          pw=$(jq -rn --arg p "$STAGING_DB_PASSWORD" '$p|@uri')
+          echo "::add-mask::$pw"
+          supabase db push --include-seed --db-url "postgresql://${pooler%%@*}:$pw@${pooler#*@}:5432/postgres"
       - name: Staging auth settings + demo personas
         if: steps.gate.outputs.on == 'true'
         run: |
