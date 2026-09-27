@@ -55,8 +55,19 @@ Demo logins (password = `STAGING_DEMO_PASSWORD`), made by
 | `seeker@demo.ekkle.org` | a seeker (`/studies`, "I have a password") |
 
 A seeker with no account is just anyone opening `/offer` or `/r/david`.
-Staging sign-in email uses Supabase's built-in sender (a few per hour), so
-prefer the password logins there.
+Sign-in email on staging goes through Resend too (subject ends "(staging)");
+notification functions are production-only for now.
+
+How it's wired:
+- **Database:** `supabase db push --include-seed` through the project's IPv4
+  pooler (GitHub runners have no IPv6).
+- **Site:** a Vercel *preview* deploy of the commit, then `staging.ekkle.org`
+  is aliased to it. The domain is not a project domain (that would follow
+  production); its SSL certificate was issued once in Vercel and auto-renews.
+- **Access:** Vercel's login wall is off for previews, so staging is public
+  (demo data only, `X-Robots-Tag: noindex` from `vercel.json`).
+- **Token:** one Supabase access token with full permissions
+  (`SUPABASE_ACCESS_TOKEN`) serves staging and production.
 
 ## Email
 
