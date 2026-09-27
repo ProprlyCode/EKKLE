@@ -37,7 +37,7 @@ export default function ResetPassword() {
             fresh one and try again.
           </p>
           <Link
-            to={src === 'seeker' ? '/studies' : '/sign-in'}
+            to={src === 'seeker' ? '/space' : '/sign-in'}
             className="mt-4 inline-block text-sm text-sage underline-offset-2 hover:underline"
           >
             Back to sign in
@@ -78,7 +78,7 @@ export default function ResetPassword() {
           </p>
           <Button
             className="mt-5"
-            onClick={() => navigate(src === 'seeker' ? '/studies' : '/app', { replace: true })}
+            onClick={() => navigate(src === 'seeker' ? '/space' : '/app', { replace: true })}
           >
             Continue
           </Button>

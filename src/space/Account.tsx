@@ -6,7 +6,7 @@ import { TextInput } from '@/ui/Field';
 import { ErrorNote } from '@/ui/states';
 
 /**
- * Seeker account (/studies/account). The email that signs them in, an optional
+ * Seeker account (/space/account). The email that signs them in, an optional
  * password to set (magic link always works too), and sign out.
  */
 export default function Account() {

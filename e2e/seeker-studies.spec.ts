@@ -15,7 +15,7 @@ test('a seeker signs up by email and opens their first study', async ({ page }) 
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible();
 
   await page.goto(await latestEmailLink(email));
-  await page.waitForURL('**/studies**');
+  await page.waitForURL('**/space/studies**');
 
   const study = page.getByRole('link', { name: /The Logic of Love/ }).first();
   await expect(study).toBeVisible();

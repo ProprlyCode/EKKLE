@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import {
   RequireAuth,
   RequireMembership,
@@ -18,12 +18,13 @@ import People from '@/routes/leadership/People';
 import Content from '@/routes/leadership/Content';
 import PlatformConsole from '@/routes/platform/Console';
 import RecipientExperience from '@/recipient/RecipientExperience';
-import SeekerGate from '@/studies/SeekerGate';
-import SeekerLayout from '@/studies/SeekerLayout';
-import StudyDashboard from '@/studies/StudyDashboard';
-import StudyReader from '@/studies/StudyReader';
-import Connection from '@/studies/Connection';
-import Account from '@/studies/Account';
+import SeekerGate from '@/space/SeekerGate';
+import SeekerLayout from '@/space/SeekerLayout';
+import StudyDashboard from '@/space/StudyDashboard';
+import StudyReader from '@/space/StudyReader';
+import Connection from '@/space/Connection';
+import Account from '@/space/Account';
+import SpaceHome from '@/space/SpaceHome';
 // The cinematic homepage is code-split so GSAP/Lenis never load in the product.
 const Home = lazy(() => import('@/public/home/Home'));
 import ForChurches from '@/public/ForChurches';
@@ -52,16 +53,23 @@ export default function App() {
       {/* Recipient experience (no login) */}
       <Route path="/r/:slug" element={<RecipientExperience />} />
 
-      {/* Seeker study account — gated. Signed out → seeker sign-in; signed in →
-          the student dashboard, the immersive reader, messages, and account. */}
+      {/* Your space — a seeker's own gated home. Signed out → the seeker sign-in
+          (then back to the page they asked for); signed in → home, messages,
+          studies (with the immersive reader), and account. */}
       <Route element={<SeekerGate />}>
-        <Route path="/studies/:studyId" element={<StudyReader />} />
+        <Route path="/space/studies/:studyId" element={<StudyReader />} />
         <Route element={<SeekerLayout />}>
-          <Route path="/studies" element={<StudyDashboard />} />
-          <Route path="/studies/connection" element={<Connection />} />
-          <Route path="/studies/account" element={<Account />} />
+          <Route path="/space" element={<SpaceHome />} />
+          <Route path="/space/messages" element={<Connection />} />
+          <Route path="/space/studies" element={<StudyDashboard />} />
+          <Route path="/space/account" element={<Account />} />
         </Route>
       </Route>
+      {/* Old study-area links (emails already sent, bookmarks). */}
+      <Route path="/studies" element={<Navigate to="/space/studies" replace />} />
+      <Route path="/studies/connection" element={<Navigate to="/space/messages" replace />} />
+      <Route path="/studies/account" element={<Navigate to="/space/account" replace />} />
+      <Route path="/studies/:studyId" element={<StudyRedirect />} />
 
       <Route element={<RequireAuth />}>
         <Route path="/welcome" element={<Onboarding />} />
@@ -87,6 +95,11 @@ export default function App() {
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
+}
+
+function StudyRedirect() {
+  const { studyId = '' } = useParams();
+  return <Navigate to={`/space/studies/${studyId}`} replace />;
 }
 
 function NotFound() {

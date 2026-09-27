@@ -114,7 +114,7 @@ export default function StudyReader() {
               ? 'It may have moved. Head back to the library to keep going.'
               : 'Finish the study before this one, and it opens up next.'}
           </p>
-          <Button variant="quiet" onClick={() => navigate('/studies')} className="mt-2">
+          <Button variant="quiet" onClick={() => navigate('/space/studies')} className="mt-2">
             Back to studies
           </Button>
         </div>
@@ -135,7 +135,7 @@ export default function StudyReader() {
     setSubmitting(true);
     try {
       await completeStudy(study.id, answers);
-      navigate('/studies', { state: { completed: study.id } });
+      navigate('/space/studies', { state: { completed: study.id } });
     } catch {
       setSubmitting(false);
     }

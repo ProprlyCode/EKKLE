@@ -30,6 +30,9 @@ test('recipient messages the member who shared, and the member replies', async (
   await recipient.getByLabel('Email').fill(uniqueEmail('recipient'));
   await recipient.getByLabel('Your message').fill(note);
   await recipient.getByRole('button', { name: 'Send' }).click();
+  // They're offered Your space; this test stays on the link.
+  await expect(recipient.getByRole('heading', { name: 'Keep this conversation' })).toBeVisible();
+  await recipient.getByRole('button', { name: /continue here/ }).click();
   await expect(recipient.getByText(note)).toBeVisible();
 
   // ---- David: sign in, find the conversation, reply ----

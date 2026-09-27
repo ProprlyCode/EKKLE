@@ -10,7 +10,15 @@ import { ErrorNote } from '@/ui/states';
  * finish signing in right where they are (in-app browsers, another device).
  * On success the auth state changes and the caller's page moves on.
  */
-export function EmailCode({ email, onVerified }: { email: string; onVerified?: () => void }) {
+export function EmailCode({
+  email,
+  onVerified,
+  label = 'Or enter the code from the email',
+}: {
+  email: string;
+  onVerified?: () => void;
+  label?: string;
+}) {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'checking'>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +40,7 @@ export function EmailCode({ email, onVerified }: { email: string; onVerified?: (
   return (
     <form onSubmit={onSubmit} className="mx-auto mt-6 flex w-full max-w-xs flex-col gap-3 text-left">
       <TextInput
-        label="Or enter the code from the email"
+        label={label}
         inputMode="numeric"
         autoComplete="one-time-code"
         pattern="[0-9 ]*"

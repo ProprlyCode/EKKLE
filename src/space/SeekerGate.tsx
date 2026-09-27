@@ -7,7 +7,7 @@ import { Wordmark } from '@/components/Wordmark';
 import SeekerSignIn from './SeekerSignIn';
 
 /**
- * Gate for the seeker study area (/studies/*). Not signed in → the seeker
+ * Gate for the seeker area, Your space (/space/*). Not signed in → the seeker
  * sign-in. Signed in → ensure the account (recipient row) exists, then render.
  *
  * Deliberately separate from the member/leadership guards: a seeker has a

@@ -18,7 +18,7 @@ test('a seeker can start their studies with the emailed code', async ({ page }) 
   await page.getByLabel('Or enter the code from the email').fill(await latestEmailCode(email));
   await page.getByRole('button', { name: 'Continue' }).click();
 
-  await page.waitForURL('**/studies**');
+  await page.waitForURL('**/space/studies**');
   await expect(page.getByRole('link', { name: /The Logic of Love/ }).first()).toBeVisible();
 });
 

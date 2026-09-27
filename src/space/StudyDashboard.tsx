@@ -85,7 +85,7 @@ export default function StudyDashboard() {
                 </p>
               )}
               <Link
-                to={`/studies/${resume.id}`}
+                to={`/space/studies/${resume.id}`}
                 className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-sage px-5 text-sm font-medium text-canvas transition-colors hover:bg-sage-soft"
               >
                 {resume.started ? 'Continue study' : 'Start study'}
@@ -162,7 +162,7 @@ function StudyRow({ study, index }: { study: StudySummary; index: number }) {
   return (
     <li>
       <Link
-        to={`/studies/${study.id}`}
+        to={`/space/studies/${study.id}`}
         className="card block px-5 py-4 transition-colors hover:border-sage/40 hover:bg-sage/[0.03]"
       >
         {inner}

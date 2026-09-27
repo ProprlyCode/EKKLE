@@ -11,7 +11,7 @@ import { Spinner } from '@/ui/states';
 import { MessageList } from '@/components/MessageList';
 
 /**
- * The seeker's connection (/studies/connection) — a 1:1 thread with the person
+ * The seeker's connection (/space/messages) — a 1:1 thread with the person
  * who invited them (or the church's designated responder). The warm, contained
  * space where a real conversation can begin.
  */

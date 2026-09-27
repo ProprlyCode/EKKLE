@@ -60,7 +60,7 @@ for (const who of ['leader', 'admin']) {
 }
 
 test('seeker persona reaches their studies', async ({ page }) => {
-  await page.goto('/studies');
+  await page.goto('/space/studies');
   await page.getByRole('button', { name: 'I have a password' }).click();
   await page.getByLabel('Email').fill('seeker@demo.ekkle.org');
   await page.getByLabel('Password').fill(PASSWORD);

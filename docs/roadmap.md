@@ -32,6 +32,31 @@ been deployed, and sign-in emails use Supabase's built-in, rate-limited sender.
 lists → create an API key → add GitHub secret `RESEND_API_KEY`. Then paste
 Resend's SMTP details into Supabase → Auth → SMTP.
 
+## Your space (seekers) — in progress (Sep 2026)
+
+One gated home for everyone reached through Ekklē, at `ekkle.org/space`
+(signed out → sign-in, then back to the page they asked for).
+
+- **Home** — their person (last message), where they are in the studies.
+- **Messages** — the conversation with the member who shared (or the church's
+  designated responder if they came in without a member's link).
+- **Studies** — the library and reader (moved from `/studies`; old links
+  redirect).
+- **Resources** — church-approved reading / video / links, with a simple
+  leader editor. *(slice 3)*
+- **Account** — email, password, delete-my-data, sign out.
+- **Installable** (add to home screen) opens straight to Your space. *(slice 4)*
+
+From a member's link: the first message sends instantly, then "Keep this
+conversation" emails a code; confirming it opens Your space → Messages with
+the conversation already there (any device, verified email). Skipping keeps
+them on the link. Revisiting the link while signed in → "Continue in your
+space". Reply emails link to Your space.
+
+On hold: **Visit us** card (must fit different account owners — church,
+personal ministry — think through first). Later: Your person photo card,
+email preferences.
+
 ## N2 — Follow-through
 
 - Unanswered-message nudges: 24h email to the member, 48h metadata-only alert to

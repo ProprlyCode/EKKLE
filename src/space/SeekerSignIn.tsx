@@ -28,7 +28,7 @@ export default function SeekerSignIn() {
     setError(null);
     setStatus('sending');
     try {
-      await sendStudyMagicLink({ email, ref });
+      await sendStudyMagicLink({ email, ref, next: window.location.pathname });
       setSentKind('link');
       setStatus('sent');
     } catch {

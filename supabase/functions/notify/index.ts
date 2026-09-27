@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       const back = !SITE_URL
         ? ''
         : recipient.auth_uid
-          ? `${SITE_URL}/studies/connection`
+          ? `${SITE_URL}/space/messages`
           : `${SITE_URL}/r/${member.code_slug}`;
       await sendEmail(
         recipient.email,

@@ -42,13 +42,15 @@ const SEEKER_INTAKE_KEY = 'ekkle_seeker_intake';
 
 /**
  * Seeker magic link — used by /offer (new) and the seeker sign-in (returning).
- * Redirects back to /studies, where the account is linked. The first name and
+ * Redirects back into Your space (/space), where the account is linked. The first name and
  * any ?ref are stashed locally to apply once they return verified.
  */
 export async function sendStudyMagicLink(input: {
   email: string;
   firstName?: string;
   ref?: string | null;
+  /** Where in Your space the link lands (default: Your space home). */
+  next?: string;
 }): Promise<void> {
   const redirectTo = env.siteUrl || window.location.origin;
   try {
@@ -64,7 +66,7 @@ export async function sendStudyMagicLink(input: {
   }
   const { error } = await supabase.auth.signInWithOtp({
     email: input.email.trim(),
-    options: { emailRedirectTo: `${redirectTo}/studies` },
+    options: { emailRedirectTo: `${redirectTo}${input.next ?? '/space'}` },
   });
   if (error) throw error;
 }

@@ -30,7 +30,7 @@ export default function Offer() {
     try {
       // Verify before access: send a sign-in link (carrying name + attribution),
       // which lands them in /studies once confirmed.
-      await sendStudyMagicLink({ email, firstName, ref });
+      await sendStudyMagicLink({ email, firstName, ref, next: '/space/studies' });
       setSent(true);
     } catch {
       setSubmitting(false);
@@ -51,7 +51,7 @@ export default function Offer() {
             We sent a link and a 6-digit code to <span className="text-sage">{email}</span>.
             Open the link, or enter the code here, and your studies will be ready.
           </p>
-          <EmailCode email={email} onVerified={() => navigate('/studies')} />
+          <EmailCode email={email} onVerified={() => navigate('/space/studies')} />
           <p className="mt-6 text-[13px] text-muted">
             Didn’t get it? Check spam, or{' '}
             <button

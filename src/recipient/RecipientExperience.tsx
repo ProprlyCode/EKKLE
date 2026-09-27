@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useSession } from '@/auth/SessionProvider';
+import { sendStudyMagicLink } from '@/data/auth';
+import { EmailCode } from '@/ui/EmailCode';
 import {
   getLanding,
   logEvent,
@@ -30,11 +33,13 @@ type Step =
   | { kind: 'screen'; index: number }
   | { kind: 'connect' }
   | { kind: 'message' }
+  | { kind: 'keep'; conversationId: string; email: string; firstName: string }
   | { kind: 'thread'; conversationId: string }
   | { kind: 'closing' };
 
 export default function RecipientExperience() {
   const { slug = '' } = useParams();
+  const { session, membership } = useSession();
   const [landing, setLanding] = useState<RecipientLanding | null | undefined>(
     undefined,
   );
@@ -100,6 +105,7 @@ export default function RecipientExperience() {
       {step.kind === 'intro' && (
         <Intro
           member={member}
+          inSpace={Boolean(session && !membership)}
           onBegin={() =>
             goTo(
               screens.length > 0
@@ -150,8 +156,20 @@ export default function RecipientExperience() {
         <MessageForm
           slug={slug}
           memberName={member.name}
-          onSent={(conversationId) => goTo({ kind: 'thread', conversationId })}
+          onSent={(conversationId, email, firstName) =>
+            goTo({ kind: 'keep', conversationId, email, firstName })
+          }
           onCancel={() => goTo({ kind: 'connect' })}
+        />
+      )}
+
+      {step.kind === 'keep' && (
+        <KeepConversation
+          slug={slug}
+          email={step.email}
+          firstName={step.firstName}
+          memberName={member.name}
+          onSkip={() => goTo({ kind: 'thread', conversationId: step.conversationId })}
         />
       )}
 
@@ -179,10 +197,13 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Intro({
   member,
+  inSpace,
   onBegin,
   onResume,
 }: {
   member: RecipientLanding['member'];
+  /** A signed-in seeker: their conversation lives in Your space. */
+  inSpace: boolean;
   onBegin: () => void;
   onResume?: () => void;
 }) {
@@ -197,10 +218,18 @@ function Intro({
         )}
       </div>
       <div className="flex flex-col gap-3">
-        <Button onClick={onBegin} className="w-full">
+        {inSpace && (
+          <Link
+            to="/space/messages"
+            className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-sage text-sm font-medium text-canvas transition-colors hover:bg-sage-soft"
+          >
+            Continue in your space
+          </Link>
+        )}
+        <Button onClick={onBegin} variant={inSpace ? 'quiet' : 'primary'} className="w-full">
           Begin
         </Button>
-        {onResume && (
+        {onResume && !inSpace && (
           <Button variant="quiet" onClick={onResume} className="w-full">
             Continue your conversation with {member.name}
           </Button>
@@ -335,7 +364,7 @@ function MessageForm({
 }: {
   slug: string;
   memberName: string;
-  onSent: (conversationId: string) => void;
+  onSent: (conversationId: string, email: string, firstName: string) => void;
   onCancel: () => void;
 }) {
   const lead = savedLead();
@@ -351,7 +380,7 @@ function MessageForm({
     setSending(true);
     try {
       const conversationId = await startConversation({ slug, firstName, email, body });
-      onSent(conversationId);
+      onSent(conversationId, email.trim(), firstName.trim());
     } catch {
       setSending(false);
       setError('That didn’t send. Please try again in a moment.');
@@ -415,6 +444,70 @@ function MessageForm({
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+/**
+ * Straight after the first message: offer to keep the conversation. A code
+ * (and link) goes to the email they just gave; confirming it opens Your space
+ * with this conversation already in it — on any device, and with replies
+ * emailed to an address we know is theirs. Skipping keeps them here.
+ */
+function KeepConversation({
+  slug,
+  email,
+  firstName,
+  memberName,
+  onSkip,
+}: {
+  slug: string;
+  email: string;
+  firstName: string;
+  memberName: string;
+  onSkip: () => void;
+}) {
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<'sending' | 'sent' | 'failed'>('sending');
+  const sentRef = useRef(false);
+
+  useEffect(() => {
+    if (sentRef.current) return;
+    sentRef.current = true;
+    sendStudyMagicLink({ email, firstName, ref: slug, next: '/space/messages' })
+      .then(() => setStatus('sent'))
+      .catch(() => setStatus('failed'));
+  }, [email, firstName, slug]);
+
+  return (
+    <div className="flex flex-1 flex-col justify-center gap-6 py-10 text-center">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted">Your message is on its way to {memberName}.</p>
+        <h1 className="font-serif text-2xl leading-tight text-sage">Keep this conversation</h1>
+        <p className="text-[15px] leading-relaxed text-muted-strong">
+          {status === 'failed'
+            ? 'We couldn’t send the code just now. You can carry on here, and try again from the next email we send.'
+            : <>We’ve emailed a 6-digit code to <span className="font-medium text-ink">{email}</span>. It opens your own space, where this conversation will wait for you on any device.</>}
+        </p>
+      </div>
+      {status === 'sent' && (
+        <EmailCode
+          email={email}
+          label="Enter the code from the email"
+          onVerified={() => navigate('/space/messages')}
+        />
+      )}
+      {status === 'sending' && (
+        <div className="flex justify-center">
+          <Spinner className="h-5 w-5" />
+        </div>
+      )}
+      <button
+        onClick={onSkip}
+        className="mx-auto text-[13px] text-muted underline-offset-2 transition-colors hover:text-sage hover:underline"
+      >
+        {status === 'failed' ? 'Continue here' : 'Not now — continue here'}
+      </button>
     </div>
   );
 }
