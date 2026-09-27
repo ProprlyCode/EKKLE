@@ -55,8 +55,10 @@ Demo logins (password = `STAGING_DEMO_PASSWORD`), made by
 | `seeker@demo.ekkle.org` | a seeker (`/studies`, "I have a password") |
 
 A seeker with no account is just anyone opening `/offer` or `/r/david`.
-Sign-in email on staging goes through Resend too (subject ends "(staging)");
-notification functions are production-only for now.
+Sign-in email on staging goes through the same Send Email Hook as production
+(`send-auth-email`, sent as "<Account> via Ekklē"); a smoke test sends one to
+Resend's test inbox (`delivered@resend.dev`). Notification functions are
+production-only for now.
 
 How it's wired:
 - **Database:** `supabase db push --include-seed` through the project's IPv4
@@ -75,4 +77,9 @@ With `RESEND_API_KEY` set, the deploy-db job also deploys the notification
 functions (`supabase/functions/notify*`), gives them their secrets, writes the
 trigger config (migration 0019) and points Supabase Auth at Resend with the
 sign-in template (`supabase/templates/sign_in.html`: link + 6-digit code).
-Without it, email is simply off and everything else still works.
+It also deploys `send-auth-email` and turns on Supabase Auth's Send Email Hook,
+so sign-in emails are sent in each account's name with its logo and colour
+(the SMTP template stays as the fallback if the hook is ever switched off).
+The hook's signing secret is derived from the project's service-role key, so
+every deploy sets the same value on both sides. Without `RESEND_API_KEY`,
+email is simply off and everything else still works.

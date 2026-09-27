@@ -74,3 +74,16 @@ test('seeker persona reaches their studies', async ({ page }) => {
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByRole('link', { name: /The Logic of Love/ }).first()).toBeVisible();
 });
+
+// Sign-in emails go through our Send Email Hook (send-auth-email), which sends
+// them in the account's name. If the hook fails, Supabase refuses the request
+// and the page shows an error instead of "Check your email". Resend's test
+// inbox accepts the email without delivering it anywhere.
+test('sign-in email is sent through the account-branded hook', async ({ page }) => {
+  test.skip(process.env.SIGN_IN_EMAIL !== 'on', 'Sign-in email is off until Resend is set up.');
+  await page.goto('/offer');
+  await page.getByLabel('First name').fill('Smoke');
+  await page.getByLabel('Email').fill('delivered@resend.dev');
+  await page.getByRole('button', { name: 'Email me a link to begin' }).click();
+  await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+});

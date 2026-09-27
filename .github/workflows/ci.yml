@@ -191,10 +191,26 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         # Supabase only allows custom email templates with custom SMTP, so the
         # branded link + code email turns on here once RESEND_API_KEY exists.
+        # With it, sign-in emails go through our Send Email Hook
+        # (send-auth-email): sent in the account's name, from its address.
         run: |
+          KEY=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            "https://api.supabase.com/v1/projects/$STAGING_REF/api-keys?reveal=true" \
+            | jq -r '.[] | select(.name == "service_role") | .api_key')
+          echo "::add-mask::$KEY"
           if [ -n "$RESEND_API_KEY" ]; then
-            jq -n --arg host "$STAGING_HOST" --arg key "$RESEND_API_KEY" \
+            # The hook's signing secret, derived so every deploy agrees with the last.
+            HOOK="v1,whsec_$(printf 'ekkle-send-email-hook:%s' "$KEY" | openssl dgst -sha256 -binary | base64)"
+            echo "::add-mask::$HOOK"
+            supabase secrets set --project-ref "$STAGING_REF" \
+              RESEND_API_KEY="$RESEND_API_KEY" NOTIFY_FROM="Ekklē (staging) <hello@ekkle.org>" \
+              SEND_EMAIL_HOOK_SECRET="$HOOK"
+            supabase functions deploy send-auth-email --project-ref "$STAGING_REF" --no-verify-jwt
+            jq -n --arg host "$STAGING_HOST" --arg key "$RESEND_API_KEY" --arg hook "$HOOK" \
+              --arg uri "https://$STAGING_REF.supabase.co/functions/v1/send-auth-email" \
               --rawfile tpl supabase/templates/sign_in.html '{
+              hook_send_email_enabled: true, hook_send_email_uri: $uri,
+              hook_send_email_secrets: $hook,
               site_url: ("https://" + $host),
               uri_allow_list: ("https://" + $host + "/**,https://*." + $host + "/**"),
               smtp_host: "smtp.resend.com", smtp_port: "465", smtp_user: "resend",
@@ -220,10 +236,6 @@ jobs:
             echo "::error::Supabase refused the staging auth settings (HTTP $code): $(head -c 400 /tmp/auth-out.json)"
             exit 1
           fi
-          KEY=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-            "https://api.supabase.com/v1/projects/$STAGING_REF/api-keys?reveal=true" \
-            | jq -r '.[] | select(.name == "service_role") | .api_key')
-          echo "::add-mask::$KEY"
           SUPABASE_URL="https://$STAGING_REF.supabase.co" SUPABASE_SERVICE_ROLE_KEY="$KEY" \
             node scripts/staging/personas.mjs
       # A preview deploy of this commit: Vercel's Preview environment variables
@@ -282,6 +294,8 @@ jobs:
         env:
           STAGING_URL: https://pilot.${{ env.STAGING_HOST }}
           STAGING_PLATFORM_URL: https://${{ env.STAGING_HOST }}
+          # The sign-in email hook is on exactly when Resend is set up.
+          SIGN_IN_EMAIL: ${{ secrets.RESEND_API_KEY != '' && 'on' || '' }}
       - name: Keep the report
         if: failure() && steps.gate.outputs.on == 'true'
         uses: actions/upload-artifact@v7
@@ -340,17 +354,30 @@ jobs:
           [ -n "$SECRET" ] || SECRET=$(openssl rand -hex 32)
           echo "::add-mask::$SECRET"
 
+          # Sign-in emails go through our Send Email Hook (send-auth-email), in the
+          # account's name; its signing secret is derived so deploys agree.
+          KEY=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_ID/api-keys?reveal=true" \
+            | jq -r '.[] | select(.name == "service_role") | .api_key')
+          echo "::add-mask::$KEY"
+          HOOK="v1,whsec_$(printf 'ekkle-send-email-hook:%s' "$KEY" | openssl dgst -sha256 -binary | base64)"
+          echo "::add-mask::$HOOK"
+
           supabase secrets set --project-ref "$SUPABASE_PROJECT_ID" \
             RESEND_API_KEY="$RESEND_API_KEY" NOTIFY_FROM="Ekklē <hello@ekkle.org>" \
-            SITE_URL="https://ekkle.org" NOTIFY_SECRET="$SECRET"
-          supabase functions deploy notify notify-report \
+            SITE_URL="https://ekkle.org" NOTIFY_SECRET="$SECRET" SEND_EMAIL_HOOK_SECRET="$HOOK"
+          supabase functions deploy notify notify-report send-auth-email \
             --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt
 
           psql "$DB" -v ON_ERROR_STOP=1 -c "insert into private.notify_config (id, base_url, secret)
             values (true, 'https://$SUPABASE_PROJECT_ID.supabase.co', '$SECRET')
             on conflict (id) do update set base_url = excluded.base_url, secret = excluded.secret"
 
-          jq -n --arg key "$RESEND_API_KEY" --rawfile tpl supabase/templates/sign_in.html '{
+          jq -n --arg key "$RESEND_API_KEY" --arg hook "$HOOK" \
+            --arg uri "https://$SUPABASE_PROJECT_ID.supabase.co/functions/v1/send-auth-email" \
+            --rawfile tpl supabase/templates/sign_in.html '{
+            hook_send_email_enabled: true, hook_send_email_uri: $uri,
+            hook_send_email_secrets: $hook,
             site_url: "https://ekkle.org",
             uri_allow_list: "https://ekkle.org/**,https://*.ekkle.org/**",
             smtp_host: "smtp.resend.com", smtp_port: "465", smtp_user: "resend",
@@ -368,7 +395,7 @@ jobs:
             echo "::error::Supabase refused the auth email settings (HTTP $code): $(head -c 400 /tmp/auth-out.json)"
             exit 1
           fi
-          echo "Email is on: notifications deployed, sign-in email sends through Resend."
+          echo "Email is on: notifications deployed; sign-in email sends in each account's name."
 
   deploy-site:
     name: Deploy site to Vercel

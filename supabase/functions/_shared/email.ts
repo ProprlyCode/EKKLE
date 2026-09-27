@@ -59,3 +59,23 @@ export async function sendEmail(
   });
   if (res && !res.ok) console.error('resend rejected', res.status, await res.text());
 }
+
+/**
+ * Sends or throws — for sign-in emails, where a failure must reach the person
+ * ("try again") rather than vanish.
+ */
+export async function sendEmailOrThrow(
+  to: string,
+  subject: string,
+  text: string,
+  from: string = NOTIFY_FROM,
+  html?: string,
+) {
+  if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY is not set');
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to, subject, text, ...(html ? { html } : {}) }),
+  });
+  if (!res.ok) throw new Error(`resend rejected ${res.status}: ${await res.text()}`);
+}

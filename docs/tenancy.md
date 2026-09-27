@@ -60,8 +60,23 @@ it's live (SSL is automatic). Sign-in is allowed on it automatically.
    the app. The home-screen app takes the account's name and icons generated
    from the logo at upload. Notification emails come from
    "<Account> via Ekklē". (Sign-in codes are sent by Supabase Auth, still as
-   Ekklē.)
-3. **Custom domains** — connect / verify / remove from account settings.
+   Ekklē — until phase 2b.)
+2b. **Sign-in emails in the account's name** — *built.* Supabase Auth's Send
+   Email Hook hands every sign-in email (code + link, password reset, invite)
+   to our `send-auth-email` function. It finds the account from the address
+   the person started on and sends through Resend as "<Account> via Ekklē",
+   with the account's logo and colour; the link returns to that address.
+   CI turns it on (staging first, smoke-tested with Resend's test inbox) when
+   RESEND_API_KEY is set. Locally it stays off, so tests read the email from
+   Mailpit.
+3. **Custom domains** — *on hold (optional, later).* Connect / verify /
+   remove from account settings; subdomains only (e.g. space.theirchurch.org,
+   one CNAME). Because sign-in emails build their own links (2b), a custom
+   domain won't need adding to Supabase's redirect list: the app asks for the
+   account's ekkle.org subdomain and the hook links to the custom domain.
+   Open: where the Vercel token lives (a Supabase function vs a scheduled
+   GitHub sync). Later still: sending from the church's own domain (verified
+   in Resend).
 4. **Platform console** — create accounts, pick their subdomain, see them all;
    "find your church" on ekkle.org.
 
