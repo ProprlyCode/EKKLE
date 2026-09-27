@@ -17,20 +17,24 @@ export default function SeekerGate() {
   const { ready, configured, session } = useSession();
   const [linked, setLinked] = useState(false);
   const [error, setError] = useState(false);
+  // Keyed on the person, not the session object: token refreshes and the
+  // several auth events after a sign-in link must not re-link each time.
+  const userId = session?.user.id;
 
   useEffect(() => {
-    if (!session) {
+    if (!userId) {
       setLinked(false);
       return;
     }
     let active = true;
+    setError(false);
     linkSeekerAccount()
       .then(() => active && setLinked(true))
       .catch(() => active && setError(true));
     return () => {
       active = false;
     };
-  }, [session]);
+  }, [userId]);
 
   if (!configured)
     return (
