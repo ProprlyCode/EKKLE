@@ -65,8 +65,11 @@ function PlatformRoutes() {
         }
       />
       <Route path="/for-churches" element={<ForChurches />} />
+      {/* Not linked from the marketing pages: platform admins use /sign-in;
+          members and seekers sign in on their account's own address. */}
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/find" element={<FindAccount />} />
 
       {/* The platform console lives on ekkle.org. */}
       <Route element={<RequireAuth />}>

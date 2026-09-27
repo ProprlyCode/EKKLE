@@ -35,9 +35,6 @@ export function Footer() {
         <Link to="/for-churches" className="home-focus transition-colors hover:text-home-stone">
           For churches
         </Link>
-        <Link to="/sign-in" className="home-focus transition-colors hover:text-home-stone">
-          Sign in
-        </Link>
       </nav>
     </footer>
   );

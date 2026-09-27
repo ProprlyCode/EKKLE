@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
 import { useAccount } from '@/account/AccountProvider';
 import { sendMagicLink, signInWithPassword, sendPasswordReset } from '@/data/auth';
@@ -189,6 +189,11 @@ export default function SignIn() {
           </form>
         )}
       </div>
+      {account.status === 'platform' && (
+        <Link to="/find" className="text-center text-[13px] text-muted hover:text-sage">
+          Looking for your church or ministry?
+        </Link>
+      )}
     </CenterLayout>
   );
 }

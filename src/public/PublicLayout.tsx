@@ -22,12 +22,6 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             >
               For churches
             </Link>
-            <Link
-              to="/sign-in"
-              className="text-muted-strong transition-colors hover:text-sage"
-            >
-              Sign in
-            </Link>
           </nav>
         </div>
       </header>

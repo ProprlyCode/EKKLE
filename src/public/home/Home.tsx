@@ -145,12 +145,6 @@ export default function Home() {
         <Link to="/" aria-label="Ekklē home" className="home-focus pointer-events-auto">
           <BrandName className="font-serif text-xl text-home-stone" />
         </Link>
-        <Link
-          to="/sign-in"
-          className="home-focus pointer-events-auto text-[14px] text-home-stone-dim transition-colors hover:text-home-stone"
-        >
-          Sign in
-        </Link>
       </header>
 
       <main>
