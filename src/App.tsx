@@ -11,6 +11,7 @@ import { Wordmark } from '@/components/Wordmark';
 import { FullPageLoading } from '@/ui/states';
 import { useAccount } from '@/account/AccountProvider';
 import FindAccount from '@/account/FindAccount';
+import AccountHome from '@/account/AccountHome';
 import { LegacyMemberLink, ToPlatform } from '@/account/Redirects';
 import { platformUrl } from '@/account/address';
 import SignIn from '@/routes/SignIn';
@@ -93,7 +94,7 @@ function PlatformRoutes() {
 function AccountRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/offer" replace />} />
+      <Route path="/" element={<AccountHome />} />
       <Route path="/for-churches" element={<ToPlatform />} />
       <Route path="/offer" element={<Offer />} />
       <Route path="/sign-in" element={<SignIn />} />

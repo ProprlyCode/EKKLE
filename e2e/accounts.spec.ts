@@ -21,8 +21,10 @@ test('account pages on ekkle.org lead to "Find your church"', async ({ page }) =
   await expect(link).toHaveAttribute('href', `${ACCOUNT}/space`);
 });
 
-test('an account\'s address has no homepage — it opens on the offer', async ({ page }) => {
+test('an account\'s front door welcomes visitors with the ways in', async ({ page }) => {
   await page.goto(`${ACCOUNT}/`);
+  await expect(page.getByRole('heading', { name: 'Grace Chapel (pilot)' })).toBeVisible();
+  await page.getByRole('link', { name: 'Start free Bible studies' }).click();
   await page.waitForURL(`${ACCOUNT}/offer`);
   await expect(page.getByLabel('First name')).toBeVisible();
 });
@@ -30,4 +32,15 @@ test('an account\'s address has no homepage — it opens on the offer', async ({
 test('an address no account uses says so', async ({ page }) => {
   await page.goto('http://nobody-here.localhost:5173/space');
   await expect(page.getByRole('heading', { name: 'This address isn’t set up' })).toBeVisible();
+});
+
+test('a signed-in member opening the front door goes to the app', async ({ page }) => {
+  await page.goto(`${ACCOUNT}/sign-in`);
+  await page.getByRole('button', { name: 'Use a password instead' }).click();
+  await page.getByLabel('Email').fill(DAVID.email);
+  await page.getByLabel('Password').fill(DAVID.password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.waitForURL('**/app**');
+  await page.goto(`${ACCOUNT}/`);
+  await page.waitForURL(`${ACCOUNT}/app`);
 });
