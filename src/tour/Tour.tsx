@@ -47,7 +47,7 @@ export function Tour({ steps, onClose, label }: { steps: TourStep[]; onClose: ()
       const r = el.getBoundingClientRect();
       const bottomRoom = window.innerWidth < 640 ? window.innerHeight * 0.45 : 0;
       if (r.top < 60 || r.bottom > window.innerHeight - bottomRoom) {
-        el.scrollIntoView({ block: 'center' });
+        el.scrollIntoView({ block: r.height > window.innerHeight * 0.5 ? 'start' : 'center' });
       }
     }
     measure();
@@ -81,14 +81,12 @@ export function Tour({ steps, onClose, label }: { steps: TourStep[]; onClose: ()
   if (!narrow) {
     const w = 340;
     if (rect) {
-      const below = rect.bottom + PAD + 12;
-      const fitsBelow = below + 220 < window.innerHeight;
-      cardStyle = {
-        width: w,
-        left: Math.min(Math.max(16, rect.left), window.innerWidth - w - 16),
-        top: fitsBelow ? below : undefined,
-        bottom: fitsBelow ? undefined : window.innerHeight - rect.top + PAD + 12,
-      };
+      // Below it, else above it, else (a tall target) at the bottom of the screen.
+      const room = 240;
+      const left = Math.min(Math.max(16, rect.left), window.innerWidth - w - 16);
+      if (window.innerHeight - rect.bottom - PAD >= room) cardStyle = { width: w, left, top: rect.bottom + PAD + 12 };
+      else if (rect.top - PAD >= room) cardStyle = { width: w, left, bottom: window.innerHeight - rect.top + PAD + 12 };
+      else cardStyle = { width: w, right: 16, bottom: 16 };
     } else {
       cardStyle = { width: w, left: (window.innerWidth - w) / 2, top: window.innerHeight * 0.3 };
     }

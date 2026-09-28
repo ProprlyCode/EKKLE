@@ -1,11 +1,15 @@
 import { expect, test } from '@playwright/test';
-import { DAVID } from './support/supabase';
+import { admin, DAVID } from './support/supabase';
 
 /**
  * The built-in Bible (members' app): read a chapter, switch translation,
  * highlight a verse with a note (kept after a reload, listed in Notes), search.
  */
 test('read, switch translation, highlight with a note, search', async ({ page }) => {
+  // Start from the default translation (a run before this one may have left KJV).
+  const db = admin();
+  const { data: david } = await db.from('users').select('auth_uid').eq('id', DAVID.userId).single();
+  await db.from('bible_state').delete().eq('auth_uid', david!.auth_uid);
   await page.goto('/sign-in');
   await page.getByRole('button', { name: 'Use a password instead' }).click();
   await page.getByLabel('Email').fill(DAVID.email);

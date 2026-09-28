@@ -8,12 +8,14 @@ import { admin as service, DAVID, SARAH } from './support/supabase';
 test('get started checklists for a member and an Admin', async ({ browser }) => {
   const db = service();
   const { data: david } = await db.from('users').select('auth_uid').eq('id', DAVID.userId).single();
+  // Start fresh (an earlier test may have opened the wallet cards).
+  await db.from('getting_started').delete().eq('auth_uid', david!.auth_uid);
   try {
     const page = await (await browser.newContext()).newPage();
     await signIn(page, DAVID.email, DAVID.password);
     await page.goto('/app');
     const card = page.getByRole('region', { name: 'Get started' });
-    await expect(card).toContainText('Print wallet cards to carry(to do)');
+    await expect(card).toContainText('Add your photo(to do)');
     await card.getByRole('link', { name: /Print wallet cards/ }).click();
     await page.waitForURL('**/app/wallet-cards');
     await page.getByRole('link', { name: '← Back' }).click();
