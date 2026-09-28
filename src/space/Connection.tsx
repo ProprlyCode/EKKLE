@@ -9,6 +9,7 @@ import { Button } from '@/ui/Button';
 import { TextArea } from '@/ui/Field';
 import { Spinner } from '@/ui/states';
 import { MessageList } from '@/components/MessageList';
+import { PersonPhoto, TalkingTo } from '@/components/TalkingTo';
 
 /**
  * The seeker's connection (/space/messages) — a 1:1 thread with the person
@@ -97,9 +98,12 @@ export default function Connection() {
     <div className="flex min-h-[70vh] flex-col gap-4">
       <header className="border-b border-edge/70 pb-4">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <span className="eyebrow">your connection</span>
-            <h1 className="mt-1 font-serif text-2xl text-sage">{member.name}</h1>
+          <div className="flex items-center gap-3">
+            <PersonPhoto name={member.name} photo={member.photo} size={44} />
+            <div>
+              <span className="eyebrow">your connection</span>
+              <h1 className="mt-1 font-serif text-2xl text-sage">{member.name}</h1>
+            </div>
           </div>
           {!closed && (
             <button
@@ -110,20 +114,16 @@ export default function Connection() {
             </button>
           )}
         </div>
-        {member.short_message && messages.length === 0 && (
-          <p className="mt-2 text-[15px] leading-relaxed text-muted-strong">
-            “{member.short_message}”
-          </p>
-        )}
       </header>
 
       <div className="flex-1">
         {messages.length > 0 ? (
           <MessageList messages={messages} mine="recipient" />
         ) : (
-          <p className="py-10 text-center text-sm text-muted">
-            Say hello whenever you’re ready — {member.name} will reply personally.
-          </p>
+          <div className="flex flex-col gap-4 py-4">
+            <TalkingTo member={member} />
+            <p className="text-center text-sm text-muted">Say hello whenever you’re ready.</p>
+          </div>
         )}
         <div ref={bottomRef} />
       </div>

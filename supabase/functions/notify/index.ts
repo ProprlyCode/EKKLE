@@ -33,6 +33,10 @@ Deno.serve(async (req) => {
       await dailyReading(payload.record.auth_uid, payload.record.plan_id);
       return new Response('ok', { status: 200 });
     }
+    if (payload.record?.kind === 'study') {
+      await studyReminder(payload.record.auth_uid, payload.record.org_id, payload.record.study);
+      return new Response('ok', { status: 200 });
+    }
     if (payload.record?.kind === 'nudge' || payload.record?.kind === 'escalate') {
       await followUp(payload.record.kind, payload.record.conversation_id);
       return new Response('ok', { status: 200 });
@@ -211,6 +215,29 @@ async function dailyReading(authUid: string, planId: string) {
     `${title} — day ${next.day}\n\n${passages}\n\n` +
       (link ? `Read it here: ${link}\n\n` : '') +
       `You asked for this daily email. To stop it, open the plan and choose “Turn off”.`,
+    fromAccount(name),
+  );
+}
+
+/** The weekly study reminder a seeker asked for (0041): the study to do next. */
+async function studyReminder(
+  authUid: string,
+  orgId: string,
+  study: { id: string; number: number; title: string; started: boolean; page: number },
+) {
+  const { data: user } = await supabase.auth.admin.getUserById(authUid);
+  const email = user?.user?.email;
+  if (!email || !study?.id) return;
+  const { base, name } = await accountInfo(supabase, orgId);
+  const link = base ? `${base}/space/studies/${study.id}` : '';
+  await sendEmail(
+    email,
+    study.started ? `Pick up where you left off: ${study.title}` : `Your next study is ready: ${study.title}`,
+    `${study.number}. ${study.title}` +
+      (study.started ? ` — you’re on page ${study.page}.` : '') +
+      `\n\n` +
+      (link ? `Open it here: ${link}\n\n` : '') +
+      `You asked for this weekly reminder. To stop it, open Studies and choose “Turn off”.`,
     fromAccount(name),
   );
 }

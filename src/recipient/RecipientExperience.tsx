@@ -13,12 +13,14 @@ import {
   savedConversation,
   savedLead,
   type RecipientLanding,
+  type MemberCard,
   type RecipientConversation,
 } from '@/data/recipient';
 import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { Spinner } from '@/ui/states';
 import { MessageList } from '@/components/MessageList';
+import { TalkingTo } from '@/components/TalkingTo';
 import { SequenceScreenContent } from './SequenceScreenContent';
 import { AccountLogo } from '@/account/AccountMark';
 
@@ -157,7 +159,7 @@ export default function RecipientExperience() {
       {step.kind === 'message' && (
         <MessageForm
           slug={slug}
-          memberName={member.name}
+          member={member}
           onSent={(conversationId, email, firstName) =>
             goTo({ kind: 'keep', conversationId, email, firstName })
           }
@@ -361,12 +363,12 @@ function Connect({
 
 function MessageForm({
   slug,
-  memberName,
+  member,
   onSent,
   onCancel,
 }: {
   slug: string;
-  memberName: string;
+  member: MemberCard;
   onSent: (conversationId: string, email: string, firstName: string) => void;
   onCancel: () => void;
 }) {
@@ -376,6 +378,7 @@ function MessageForm({
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const memberName = member.name;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -396,10 +399,8 @@ function MessageForm({
         <h1 className="font-serif text-2xl leading-tight text-sage">
           Say hello to {memberName}
         </h1>
-        <p className="text-sm leading-relaxed text-muted-strong">
-          They’ll see your note and reply personally.
-        </p>
       </div>
+      <TalkingTo member={member} />
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <TextInput
           label="Your first name"
@@ -426,8 +427,7 @@ function MessageForm({
           placeholder="Even a few words is a good start."
         />
         <p className="text-[12px] leading-relaxed text-muted">
-          By sending, you’re sharing your name and email with {memberName} so they
-          can reply. You can ask them to delete your details at any time.
+          By sending, you’re sharing your name and email with {memberName} so they can reply.
         </p>
         {error && (
           <p className="rounded-lg border border-sage/20 bg-sage/5 px-3 py-2 text-[13px] text-muted-strong">

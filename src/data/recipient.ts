@@ -11,8 +11,17 @@ export interface RecipientCta {
   url: string | null;
 }
 
+/** Who a seeker is talking to (0041): shown on the card before they write. */
+export interface MemberCard {
+  name: string;
+  short_message: string | null;
+  /** A path in the public `photos` bucket, or null (initials instead). */
+  photo: string | null;
+  ministry: string | null;
+}
+
 export interface RecipientLanding {
-  member: { name: string; short_message: string };
+  member: MemberCard;
   sequence: { id: string; title: string };
   connect: { headline: string; body: string; ctas: RecipientCta[] };
   screens: Array<{ headline: string; body: string; icon: string | null }>;

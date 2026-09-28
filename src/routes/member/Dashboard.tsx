@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from '@/auth/SessionProvider';
-import { updateMyProfile, setActiveSequence } from '@/data/members';
+import { updateMyProfile, setActiveSequence, setMyPhoto, type Member } from '@/data/members';
 import { listApprovedSequences, type Sequence } from '@/data/sequences';
 import { env } from '@/lib/env';
 import { appConfig } from '@/config/app';
@@ -11,6 +11,7 @@ import { TextInput, TextArea } from '@/ui/Field';
 import { ErrorNote } from '@/ui/states';
 import FlowPreview from '@/recipient/FlowPreview';
 import { FaithInAction } from './FaithInAction';
+import { PersonPhoto } from '@/components/TalkingTo';
 
 /**
  * Member home. The focal element is the keepsake card — the thing a member is
@@ -43,6 +44,7 @@ export default function MemberDashboard() {
           await refreshMembership();
         }}
       />
+      <PhotoEditor member={membership} onChange={refreshMembership} />
       <ProfileEditor
         key={membership.id}
         initialName={membership.name}
@@ -286,6 +288,75 @@ function ProfileEditor({
         </Button>
         {saved && <span className="text-[13px] text-muted">Saved</span>}
       </div>
+    </Card>
+  );
+}
+
+/** Centre-crop to a square and shrink to 400 px, as a JPEG. */
+async function squarePhoto(file: File): Promise<Blob> {
+  const img = await createImageBitmap(file);
+  const side = Math.min(img.width, img.height);
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 400;
+  canvas.getContext('2d')!.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 400, 400);
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('photo'))), 'image/jpeg', 0.85),
+  );
+}
+
+/**
+ * The member's photo (optional, N3): someone they share with sees it, with
+ * their name, before writing to them. Initials show when there's none.
+ */
+function PhotoEditor({ member, onChange }: { member: Member; onChange: () => Promise<void> }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save(file: File | null) {
+    setError(null);
+    setBusy(true);
+    try {
+      await setMyPhoto(member, file ? await squarePhoto(file) : null);
+      await onChange();
+    } catch {
+      setError(file ? 'That photo couldn’t be used. Try a JPG or PNG.' : 'Couldn’t remove it just now. Try again.');
+    } finally {
+      setBusy(false);
+      if (input.current) input.current.value = '';
+    }
+  }
+
+  return (
+    <Card className="flex flex-col gap-4">
+      <div>
+        <h2 className="text-base">Your photo</h2>
+        <p className="mt-1 text-sm text-muted-strong">
+          Optional. Someone you share with sees it, with your name, before they write to you.
+        </p>
+      </div>
+      <div className="flex items-center gap-4">
+        <PersonPhoto name={member.name} photo={member.photo} size={64} />
+        <input
+          ref={input}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          aria-label="Photo file"
+          onChange={(e) => void save(e.target.files?.[0] ?? null)}
+        />
+        <div className="flex flex-wrap gap-2">
+          <Button variant="quiet" size="sm" onClick={() => input.current?.click()} disabled={busy}>
+            {busy ? 'Saving…' : member.photo ? 'Change photo' : 'Add a photo'}
+          </Button>
+          {member.photo && (
+            <Button variant="ghost" size="sm" onClick={() => void save(null)} disabled={busy}>
+              Remove
+            </Button>
+          )}
+        </div>
+      </div>
+      {error && <ErrorNote>{error}</ErrorNote>}
     </Card>
   );
 }

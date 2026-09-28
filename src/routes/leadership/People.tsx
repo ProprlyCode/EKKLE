@@ -5,6 +5,7 @@ import {
   setMemberActive,
   setMemberRole,
   removeMember,
+  removeMemberPhoto,
   memberConversationCount,
   type Member,
 } from '@/data/members';
@@ -19,6 +20,7 @@ import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
 import { isAccountAdmin, ROLE_LABEL } from '@/auth/roles';
+import { PersonPhoto } from '@/components/TalkingTo';
 
 const ROLE_NOTE: Record<Role, string> = {
   admin: 'Everything, including settings and the team',
@@ -247,19 +249,22 @@ function MemberRow({
   return (
     <li className="flex flex-col gap-3 px-5 py-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="truncate font-medium text-sage">{member.name}</span>
-            {me && <span className="text-[11px] text-muted">you</span>}
-            {!(admin && canManage) && (
-              <span className="eyebrow text-[10px]">{ROLE_LABEL[member.role]}</span>
-            )}
-            {!member.active && !pending && <span className="text-[11px] text-muted">paused</span>}
-            {pending && <span className="text-[11px] text-muted">invited</span>}
+        <div className="flex min-w-0 items-center gap-3">
+          <PersonPhoto name={member.name} photo={member.photo} size={36} />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="truncate font-medium text-sage">{member.name}</span>
+              {me && <span className="text-[11px] text-muted">you</span>}
+              {!(admin && canManage) && (
+                <span className="eyebrow text-[10px]">{ROLE_LABEL[member.role]}</span>
+              )}
+              {!member.active && !pending && <span className="text-[11px] text-muted">paused</span>}
+              {pending && <span className="text-[11px] text-muted">invited</span>}
+            </div>
+            <p className="truncate text-[13px] text-muted">
+              {pending ? member.email : `/r/${member.code_slug}`}
+            </p>
           </div>
-          <p className="truncate text-[13px] text-muted">
-            {pending ? member.email : `/r/${member.code_slug}`}
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-[13px]">
           {admin && canManage && (
@@ -303,6 +308,15 @@ function MemberRow({
               className="text-muted hover:text-sage"
             >
               {member.active ? 'Pause' : 'Restore'}
+            </button>
+          )}
+          {!me && member.photo && (
+            <button
+              onClick={() => onAct(() => removeMemberPhoto(member.id), `${member.name}’s photo is removed.`)}
+              className="text-muted hover:text-sage"
+              aria-label={`Remove ${member.name}’s photo`}
+            >
+              Remove photo
             </button>
           )}
           {canManage && !removing && (

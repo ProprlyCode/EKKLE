@@ -39,7 +39,7 @@ import { PlanList, PlanPage } from '@/bible/ReadingPlans';
 import { PlanEditor, PlanLibrary } from '@/bible/PlanLibrary';
 import { PromptLibrary } from '@/prompts/PromptLibrary';
 import Connection from '@/space/Connection';
-import Account from '@/space/Account';
+import Account, { DetailsDeleted } from '@/space/Account';
 import SpaceHome from '@/space/SpaceHome';
 import ResourcesLibrary from '@/space/ResourcesLibrary';
 import ResourcePage from '@/space/ResourcePage';
@@ -146,6 +146,7 @@ function AccountRoutes() {
           <Route path="/space/account" element={<Account />} />
         </Route>
       </Route>
+      <Route path="/space/deleted" element={<DetailsDeleted />} />
       {/* Old study-area links (emails already sent, bookmarks). */}
       <Route path="/studies" element={<Navigate to="/space/studies" replace />} />
       <Route path="/studies/connection" element={<Navigate to="/space/messages" replace />} />

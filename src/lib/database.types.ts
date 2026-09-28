@@ -114,6 +114,7 @@ export interface Database {
           email: string | null;
           active_sequence_id: UUID | null;
           removed_at: Timestamp | null;
+          photo: string | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -129,6 +130,7 @@ export interface Database {
           email?: string | null;
           active_sequence_id?: UUID | null;
           removed_at?: Timestamp | null;
+          photo?: string | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -628,6 +630,11 @@ export interface Database {
       study_library: { Args: Record<string, never>; Returns: Json };
       set_study_song: { Args: { p_study: string; p_song: Json }; Returns: undefined };
       set_ministry_study_song: { Args: { p_study: string; p_choice: string; p_song: Json }; Returns: undefined };
+      set_my_photo: { Args: { p_path: string | null }; Returns: undefined };
+      remove_member_photo: { Args: { p_member: string }; Returns: undefined };
+      my_study_reminder: { Args: Record<string, never>; Returns: Json };
+      set_study_reminder: { Args: { p_weekday: number | null; p_at: string | null; p_tz: string | null }; Returns: undefined };
+      delete_my_details: { Args: Record<string, never>; Returns: undefined };
       faith_prompts: { Args: Record<string, never>; Returns: Json };
       prompt_library: { Args: Record<string, never>; Returns: Json };
       save_faith_prompt: { Args: { p_id: string | null; p_kind: string; p_body: string; p_status: string }; Returns: string };

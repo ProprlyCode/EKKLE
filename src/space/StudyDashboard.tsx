@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { listStudies, type StudySummary } from '@/data/studies';
-import { Spinner } from '@/ui/states';
+import { getStudyReminder, setStudyReminder, type StudyReminder } from '@/data/seeker';
+import { Button } from '@/ui/Button';
+import { ErrorNote, Spinner } from '@/ui/states';
 import { Credit } from './StudyReader';
 
 /**
@@ -103,6 +105,8 @@ export default function StudyDashboard() {
             </section>
           ) : null}
 
+          {!allDone && <WeeklyReminder />}
+
           {justCompleted && (
             <p className="rounded-lg border border-sage/20 bg-sage/5 px-4 py-3 text-center text-[13px] text-muted-strong">
               Study complete — the next one is unlocked below.
@@ -126,6 +130,107 @@ export default function StudyDashboard() {
         </>
       )}
     </div>
+  );
+}
+
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/**
+ * The weekly study reminder (N3): off until they choose a day and time. It
+ * only comes while there's a study to do.
+ */
+function WeeklyReminder() {
+  const [current, setCurrent] = useState<StudyReminder | null | undefined>(undefined);
+  const [day, setDay] = useState(0);
+  const [time, setTime] = useState('19:00');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getStudyReminder()
+      .then((r) => {
+        if (!active) return;
+        setCurrent(r);
+        if (r) {
+          setDay(r.weekday);
+          setTime(r.at);
+        }
+      })
+      .catch(() => active && setCurrent(null));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function save(next: { weekday: number; at: string } | null) {
+    setBusy(true);
+    setError(null);
+    try {
+      await setStudyReminder(next);
+      setCurrent(await getStudyReminder());
+    } catch {
+      setError('That didn’t save. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (current === undefined) return null;
+  const on = !!current;
+  return (
+    <section className="card flex flex-col gap-3 px-5 py-4 text-[14px]" aria-label="Weekly reminder">
+      <span>
+        <span className="block font-medium text-sage">Weekly reminder</span>
+        <span className="text-[13px] text-muted">
+          {on
+            ? `An email each ${DAYS[current.weekday]} at ${current.at} with your next study.`
+            : 'Off. Get an email once a week with your next study, on a day and time you choose.'}
+        </span>
+      </span>
+      <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted-strong">
+        <label className="flex items-center gap-2">
+          On
+          <select
+            value={day}
+            onChange={(e) => setDay(Number(e.target.value))}
+            aria-label="Reminder day"
+            className="rounded-md border border-edge bg-canvas px-2 py-1 text-sage"
+          >
+            {DAYS.map((d, i) => (
+              <option key={d} value={i}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-2">
+          at
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            aria-label="Reminder time"
+            className="rounded-md border border-edge bg-canvas px-2 py-1 text-sage"
+          />
+        </label>
+        {on ? (
+          <>
+            <Button size="sm" variant="quiet" disabled={busy || !time} onClick={() => void save({ weekday: day, at: time })}>
+              Save
+            </Button>
+            <Button size="sm" variant="ghost" disabled={busy} onClick={() => void save(null)}>
+              Turn off
+            </Button>
+          </>
+        ) : (
+          <Button size="sm" disabled={busy || !time} onClick={() => void save({ weekday: day, at: time })}>
+            Turn on
+          </Button>
+        )}
+      </div>
+      {error && <ErrorNote>{error}</ErrorNote>}
+    </section>
   );
 }
 

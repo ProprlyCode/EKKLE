@@ -19,7 +19,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | Bible reading plans | **Built** (0038) — Ekklē's four, ministries' own, read together, opt-in daily email |
 | Faith in action prompts | **Built** (0039) — Ekklē's starting set (drafts to publish), ministries' own |
 | Song on a study's Experience page | **Built** (0040) — audio only: SoundCloud link or uploaded file; ministries can swap |
-| N3 Seeker experience | Partly — installable done; planned (0041): trust card with photo, delete my details, weekly study reminder |
+| N3 Seeker experience | **Built** (0041) — installable; who-you're-talking-to card with photo; delete my details; weekly study reminder |
 | N4 Leader & member tools | Partly — study editor done; outcomes view, member help left |
 | Address change requests | Not started (roles step 4) |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
@@ -105,7 +105,7 @@ passed it on. Fixed with it: Your space now follows a conversation that moved
 - Seeker can **resume a conversation on any device**: once they've given their
   email, the same email sign-in (link or code) reopens it.
 
-## N3 — Seeker experience (planned 28 Sep 2026, migration 0041)
+## N3 — Seeker experience — built (0041, 28 Sep 2026)
 
 Installable app (PWA): *built with Your space.* Decided: seekers delete their
 own details; the study reminder is weekly; members own their photo and
@@ -113,15 +113,16 @@ leaders can remove it.
 
 **1. Member photo**
 - `users.photo` (a path in a new public `photos` bucket, `<org>/<uuid>.jpg`).
-- Member profile (QR page → Edit): upload, crop to a square in the browser
-  (resized to 400 px, JPEG), or remove. `set_my_photo(path | null)`.
+- Member QR page → "Your photo": upload (centre-cropped to a square in the
+  browser, 400 px JPEG) or remove. Photos live in `photos/<membership id>/`.
+  `set_my_photo(path | null)`.
 - Leaders can remove a photo from the ministry's people list
   (`remove_member_photo(member)`), not upload one.
 
 **2. "Who you're talking to" card**
 - Shown above the message form on `/r/:slug` and in Your space → Messages
   before the first message: photo (or initials), name, the ministry's name,
-  their short message, and two lines — "Only {name} sees what you write; they
+  their short message, and two lines — "Your messages go to {name}, who'll
   reply personally" and "You can delete your details at any time in Your
   space → Account."
 - `get_recipient_landing` and `seeker_connection` also return the photo.
@@ -133,18 +134,19 @@ leaders can remove it.
   removed, conversations closed, name/email cleared) plus the seeker's study
   progress, Bible highlights and notes, reading plans and reminders, then the
   sign-in itself. Signs them out to a short "Your details are deleted" page.
-- The member's inbox shows "This person deleted their details" in place of
-  the thread; leaders' views keep only counts.
+- As with a member's erase, the conversation leaves the member's inbox;
+  leaders' views keep only counts.
 
 **4. Weekly study reminder (opt-in)**
 - In Your space → Studies: "Email me a reminder" → pick a day and time (in
-  their time zone). Off by default; one-tap stop link in every email.
+  their time zone). Off by default; every email says how to stop it (Studies
+  → Turn off) and links there.
 - Sent only while there is a study to do (one in progress or the next one
   unlocked); stops once they've finished the series. Says which study and
   the page they're on, with a link straight back.
 - `study_reminders (auth_uid, org_id, weekday, at, tz, last_sent_on)`;
-  `private.study_reminders_due` run by the existing 15-minute reading
-  reminder job; `notify` gains `kind: 'study'`.
+  `private.study_reminders_due` on its own 15-minute job
+  (`ekkle-study-reminders`); `notify` gains `kind: 'study'`.
 
 **Tests:** pgTAP 19 (photo rules, delete removes everything, reminders due
 only when a study is left); e2e: member adds a photo → seeker sees the card;

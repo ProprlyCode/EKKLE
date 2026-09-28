@@ -146,3 +146,34 @@ export async function removeMember(userId: string, handTo: string | null): Promi
   const { error } = await supabase.rpc('remove_member', { p_user_id: userId, p_hand_to: handTo });
   if (error) throw error;
 }
+
+// ---------------------------------------------------------------- photos (0041)
+
+const PHOTOS = 'photos';
+
+export function photoUrl(path: string): string {
+  return supabase.storage.from(PHOTOS).getPublicUrl(path).data.publicUrl;
+}
+
+/**
+ * Upload the member's (already square, resized) photo into their own folder,
+ * point their profile at it, and tidy away the old one.
+ */
+export async function setMyPhoto(member: Member, photo: Blob | null): Promise<string | null> {
+  let path: string | null = null;
+  if (photo) {
+    path = `${member.id}/${crypto.randomUUID()}.jpg`;
+    const { error } = await supabase.storage.from(PHOTOS).upload(path, photo, { contentType: 'image/jpeg' });
+    if (error) throw error;
+  }
+  const { error } = await supabase.rpc('set_my_photo', { p_path: path });
+  if (error) throw error;
+  if (member.photo) await supabase.storage.from(PHOTOS).remove([member.photo]);
+  return path;
+}
+
+/** Admins and Leaders: take a member's photo down. */
+export async function removeMemberPhoto(memberId: string): Promise<void> {
+  const { error } = await supabase.rpc('remove_member_photo', { p_member: memberId });
+  if (error) throw error;
+}
