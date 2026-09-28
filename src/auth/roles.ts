@@ -1,14 +1,20 @@
 import type { Role } from '@/lib/database.types';
 
 /**
- * Role helpers. platform_admin is a superset of leadership (full permissions,
- * and the future cross-org owner), so leadership-gated UI treats both the same.
+ * Ministry roles (docs/accounts-and-roles.md): Admin ⊃ Leader ⊃ Member.
+ * The platform team is separate (platform_team) and never a ministry role.
  * Centralized here so every guard/check stays consistent.
  */
 export function isLeader(role: Role | undefined | null): boolean {
-  return role === 'leadership' || role === 'platform_admin';
+  return role === 'admin' || role === 'leader';
 }
 
-export function isPlatformAdmin(role: Role | undefined | null): boolean {
-  return role === 'platform_admin';
+export function isAccountAdmin(role: Role | undefined | null): boolean {
+  return role === 'admin';
 }
+
+export const ROLE_LABEL: Record<Role, string> = {
+  admin: 'Admin',
+  leader: 'Leader',
+  member: 'Member',
+};

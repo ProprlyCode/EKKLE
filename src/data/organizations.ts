@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { appConfig } from '@/config/app';
 import type { Tables } from '@/lib/database.types';
 
 /**
@@ -16,14 +15,9 @@ import type { Tables } from '@/lib/database.types';
 
 export type Organization = Tables<'organizations'>;
 
-/** The single pilot org (v1 is single-tenant — resolved by well-known slug). */
-export async function getPilotOrg(): Promise<Organization> {
-  const { data, error } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('slug', appConfig.pilotOrgSlug)
-    .single();
-
+/** A ministry the signed-in person belongs to (RLS: their own only). */
+export async function getOrganization(id: string): Promise<Organization> {
+  const { data, error } = await supabase.from('organizations').select('*').eq('id', id).single();
   if (error) throw error;
   return data;
 }

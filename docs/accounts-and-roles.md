@@ -84,11 +84,14 @@ demoted.
 
 ## Build slices (each through CI → staging → production)
 
-1. **Roles and the split** — `platform_team`; ministry roles
+1. **Roles and the split** — *built (0026).* `platform_team`; ministry roles
    admin/leader/member; memberships per ministry; role checks scoped to the
    address. Jonathan → platform Owner *and* Admin of his personal ministry.
    The Platform tab disappears from ministry addresses; `ekkle.org/platform`
-   is for the platform team only. pgTAP for every row of both tables above.
+   is for the platform team only (Accounts, metadata only). The ministry's
+   numbers and settings move to its own Overview tab (settings: Admins only).
+   Members can no longer edit their own role directly (only name and
+   message). pgTAP (08_roles) for both permission tables; e2e for the split.
 2. **Platform console** — Accounts (list with metadata, create + invite first
    Admin, suspend), Team (Owner invites Admins/Support), Waitlist.
 3. **Ministry team** — People with roles and invitations by role, join code

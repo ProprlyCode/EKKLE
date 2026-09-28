@@ -49,9 +49,9 @@ Demo logins (password = `STAGING_DEMO_PASSWORD`), made by
 
 | Login | Who |
 |---|---|
-| `leader@demo.ekkle.org` | Sarah — church leadership |
-| `member@demo.ekkle.org` | David — member (`/r/david`) |
-| `admin@demo.ekkle.org` | platform admin (`/platform`) |
+| `leader@demo.ekkle.org` | Demo leader — a Leader of the demo ministry |
+| `member@demo.ekkle.org` | David — a Member (`/r/david`) |
+| `admin@demo.ekkle.org` | the demo ministry's Admin, and the Ekklē team's Owner on `staging.ekkle.org/platform` |
 | `seeker@demo.ekkle.org` | a seeker (`/studies`, "I have a password") |
 
 A seeker with no account is just anyone opening `/offer` or `/r/david`.

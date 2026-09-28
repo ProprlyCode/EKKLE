@@ -16,7 +16,7 @@ values (
   '00000000-0000-0000-0000-0000000000b1',
   '00000000-0000-0000-0000-0000000000a1',
   'Sarah (leader)',
-  'leadership',
+  'admin',
   'sarah',
   'Would love to grab a coffee and talk.'
 ) on conflict (id) do nothing;

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getPilotOrg } from '@/data/organizations';
+import { getOrganization } from '@/data/organizations';
+import { useSession } from '@/auth/SessionProvider';
+import { isAccountAdmin } from '@/auth/roles';
 import { listMembers, type Member } from '@/data/members';
 import {
   getPlatformOverview,
@@ -14,25 +16,29 @@ import { TextInput } from '@/ui/Field';
 import { Spinner, ErrorNote } from '@/ui/states';
 
 /**
- * Platform console (platform_admin only): a cross-cutting overview + the
- * platform/church settings the owner controls. Product UI (interface-design):
- * flat depth, weight+opacity hierarchy, one clear read per tile.
+ * Leadership → Overview (Admins and Leaders): the ministry's numbers and, for
+ * Admins, its settings. Metadata only — never message contents. Product UI
+ * (interface-design): flat depth, weight+opacity hierarchy, one clear read
+ * per tile.
  */
-export default function Console() {
+export default function Overview() {
+  const { membership } = useSession();
+  const admin = isAccountAdmin(membership?.role);
   const [overview, setOverview] = useState<PlatformOverview | null>(null);
   const [org, setOrg] = useState<Organization | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getPlatformOverview(), getPilotOrg(), listMembers()])
+    if (!membership) return;
+    Promise.all([getPlatformOverview(), getOrganization(membership.org_id), listMembers()])
       .then(([o, g, m]) => {
         setOverview(o);
         setOrg(g);
         setMembers(m);
       })
-      .catch(() => setError('Couldn’t load the console.'));
-  }, []);
+      .catch(() => setError('Couldn’t load the overview.'));
+  }, [membership]);
 
   if (error) return <ErrorNote>{error}</ErrorNote>;
   if (!overview || !org)
@@ -45,7 +51,7 @@ export default function Console() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl">Platform</h1>
+        <h1 className="text-xl">Overview</h1>
         <p className="mt-1 text-sm text-muted-strong">
           Everything happening across {org.name}.
         </p>
@@ -85,7 +91,7 @@ export default function Console() {
         )}
       </Card>
 
-      <Settings org={org} members={members} onSaved={setOrg} />
+      {admin && <Settings org={org} members={members} onSaved={setOrg} />}
     </div>
   );
 }
@@ -157,7 +163,7 @@ function Settings({
     <Card className="flex flex-col gap-5">
       <div>
         <h2 className="text-base">Settings</h2>
-        <p className="mt-1 text-sm text-muted-strong">Platform controls for this ministry.</p>
+        <p className="mt-1 text-sm text-muted-strong">For this ministry’s Admins.</p>
       </div>
 
       <TextInput label="Ministry name" value={name} onChange={(e) => setName(e.target.value)} />

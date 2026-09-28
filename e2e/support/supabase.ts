@@ -28,11 +28,17 @@ export const DAVID = {
   password: 'e2e-david-password-1',
 };
 
-/** Seeded leader (Sarah, leadership) — manages content and resources. */
+/** Seeded ministry Admin (Sarah) — manages content, resources and the Account. */
 export const SARAH = {
   userId: '00000000-0000-0000-0000-0000000000b1',
   email: 'sarah@e2e.test',
   password: 'e2e-sarah-password-1',
+};
+
+/** On the Ekklē team (platform_team, Owner) — no ministry membership. */
+export const OWEN = {
+  email: 'owen@e2e.test',
+  password: 'e2e-owen-password-1',
 };
 
 /** A unique address per run so repeated runs never collide. */

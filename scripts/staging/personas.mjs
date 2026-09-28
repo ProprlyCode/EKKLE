@@ -16,16 +16,30 @@ const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 const ORG = '00000000-0000-0000-0000-0000000000a1'; // seed.sql pilot church
 const PERSONAS = [
   // Seeded app rows (supabase/seed.sql) get a login attached.
-  { email: 'leader@demo.ekkle.org', userId: '00000000-0000-0000-0000-0000000000b1' }, // Sarah, leadership
-  { email: 'member@demo.ekkle.org', userId: '00000000-0000-0000-0000-0000000000b2' }, // David, member
-  // Platform admin: created here (production's founder row isn't seeded).
+  { email: 'member@demo.ekkle.org', userId: '00000000-0000-0000-0000-0000000000b2' }, // David, Member
+  // A Leader of the demo ministry (content and people, not settings).
+  {
+    email: 'leader@demo.ekkle.org',
+    create: { org_id: ORG, name: 'Demo leader', role: 'leader', code_slug: 'demo-leader' },
+  },
+  // The demo ministry's Admin — and, on its own, the Ekklē team's Owner on
+  // staging.ekkle.org/platform (docs/accounts-and-roles.md).
   {
     email: 'admin@demo.ekkle.org',
-    create: { org_id: ORG, name: 'Demo admin', role: 'platform_admin', code_slug: 'demo-admin' },
+    create: { org_id: ORG, name: 'Demo admin', role: 'admin', code_slug: 'demo-admin' },
+    platform: 'owner',
   },
   // Seeker: just an auth account; the app creates their study profile on first sign-in.
   { email: 'seeker@demo.ekkle.org' },
 ];
+
+// leader@ used to be attached to Sarah's seeded row; one membership per
+// ministry per login, so detach it before giving leader@ its own row.
+{
+  const { error } = await sb.from('users').update({ auth_uid: null })
+    .eq('id', '00000000-0000-0000-0000-0000000000b1');
+  if (error) throw error;
+}
 
 const { data: list, error: listError } = await sb.auth.admin.listUsers({ perPage: 1000 });
 if (listError) throw listError;
@@ -52,6 +66,15 @@ for (const p of PERSONAS) {
     const { error } = await sb
       .from('users')
       .upsert({ ...p.create, auth_uid: user.id, email: p.email, active: true }, { onConflict: 'code_slug' });
+    if (error) throw error;
+  }
+  if (p.platform) {
+    const { data: seat, error: seatError } = await sb
+      .from('platform_team').select('id').eq('email', p.email).maybeSingle();
+    if (seatError) throw seatError;
+    const { error } = seat
+      ? await sb.from('platform_team').update({ role: p.platform, auth_uid: user.id }).eq('id', seat.id)
+      : await sb.from('platform_team').insert({ email: p.email, role: p.platform, auth_uid: user.id, name: 'Demo admin' });
     if (error) throw error;
   }
   console.log(`persona ready: ${p.email}`);

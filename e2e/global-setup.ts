@@ -1,8 +1,9 @@
-import { admin, DAVID, SARAH } from './support/supabase';
+import { admin, DAVID, OWEN, SARAH } from './support/supabase';
 
 /**
- * Give the seeded member David and leader Sarah a real sign-in (email + password) so the tests
- * can act as him. Idempotent: reuses the auth user if a previous run made it.
+ * Give the seeded member David and ministry Admin Sarah a real sign-in (email +
+ * password) so the tests can act as them, and put Owen on the Ekklē team.
+ * Idempotent: reuses the auth user if a previous run made it.
  */
 export default async function globalSetup() {
   const sb = admin();
@@ -24,6 +25,23 @@ export default async function globalSetup() {
       .from('users')
       .update({ auth_uid: authUser.id, email: person.email, active: true })
       .eq('id', person.userId);
+    if (error) throw error;
+  }
+
+  // Owen: the Ekklē team (platform Owner), with no ministry membership.
+  let owen = list.users.find((u) => u.email === OWEN.email);
+  if (!owen) {
+    const { data, error } = await sb.auth.admin.createUser({
+      email: OWEN.email,
+      password: OWEN.password,
+      email_confirm: true,
+    });
+    if (error) throw error;
+    owen = data.user;
+  }
+  const { data: seat } = await sb.from('platform_team').select('id').eq('email', OWEN.email).maybeSingle();
+  if (!seat) {
+    const { error } = await sb.from('platform_team').insert({ email: OWEN.email, role: 'owner', name: 'Owen' });
     if (error) throw error;
   }
 }

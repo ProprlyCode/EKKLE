@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       .from('users')
       .select('email')
       .eq('org_id', convo.org_id)
-      .in('role', ['leadership', 'platform_admin']);
+      .in('role', ['admin', 'leader']);
 
     for (const l of leaders ?? []) {
       const email = (l as { email: string | null }).email;

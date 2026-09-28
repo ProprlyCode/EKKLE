@@ -9,22 +9,15 @@ import type { Tables } from '@/lib/database.types';
 
 export type Member = Tables<'users'>;
 
-/** The current signed-in user's membership row, or null if not yet a member. */
+/**
+ * The signed-in person's membership in the ministry of this address (a person
+ * can belong to several), or null — always null on ekkle.org itself.
+ */
 export async function getMyMembership(): Promise<Member | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  // Must filter by auth_uid: RLS lets a member see every user in their org, so
-  // an unfiltered query would return an arbitrary row, not the signed-in one.
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('auth_uid', user.id)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc('my_membership');
   if (error) throw error;
-  return data;
+  // A SQL function returning "no row" comes back as a row of nulls.
+  return data && (data as Member).id ? (data as Member) : null;
 }
 
 /**

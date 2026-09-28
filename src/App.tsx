@@ -4,7 +4,7 @@ import {
   RequireAuth,
   RequireMembership,
   RequireLeadership,
-  RequirePlatformAdmin,
+  RequireAccountAdmin,
   AuthedLayout,
 } from '@/auth/guards';
 import { Wordmark } from '@/components/Wordmark';
@@ -22,7 +22,10 @@ import Inbox from '@/routes/member/Inbox';
 import Thread from '@/routes/member/Thread';
 import People from '@/routes/leadership/People';
 import Content from '@/routes/leadership/Content';
-import PlatformConsole from '@/routes/platform/Console';
+import Overview from '@/routes/leadership/Overview';
+import { PlatformGate } from '@/platform/PlatformGate';
+import PlatformLayout from '@/platform/PlatformLayout';
+import PlatformAccounts from '@/platform/Accounts';
 import RecipientExperience from '@/recipient/RecipientExperience';
 import SeekerGate from '@/space/SeekerGate';
 import SeekerLayout from '@/space/SeekerLayout';
@@ -73,14 +76,10 @@ function PlatformRoutes() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/find" element={<FindAccount />} />
 
-      {/* The platform console lives on ekkle.org. */}
-      <Route element={<RequireAuth />}>
-        <Route element={<RequireMembership />}>
-          <Route element={<AuthedLayout />}>
-            <Route element={<RequirePlatformAdmin />}>
-              <Route path="/platform" element={<PlatformConsole />} />
-            </Route>
-          </Route>
+      {/* The Ekklē team's console (platform_team only), never a ministry's. */}
+      <Route element={<PlatformGate />}>
+        <Route element={<PlatformLayout />}>
+          <Route path="/platform" element={<PlatformAccounts />} />
         </Route>
       </Route>
 
@@ -102,6 +101,7 @@ function AccountRoutes() {
       <Route path="/" element={<AccountHome />} />
       <Route path="/for-ministries" element={<ToPlatform />} />
       <Route path="/for-churches" element={<ToPlatform />} />
+      <Route path="/platform" element={<ToPlatform />} />
       <Route path="/offer" element={<Offer />} />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -139,14 +139,13 @@ function AccountRoutes() {
             <Route path="/app/messages/:conversationId" element={<Thread />} />
 
             <Route element={<RequireLeadership />}>
+              <Route path="/leadership/overview" element={<Overview />} />
               <Route path="/leadership/content" element={<Content />} />
               <Route path="/leadership/resources" element={<Resources />} />
               <Route path="/leadership/people" element={<People />} />
-              <Route path="/leadership/account" element={<AccountSettings />} />
-            </Route>
-
-            <Route element={<RequirePlatformAdmin />}>
-              <Route path="/platform" element={<PlatformConsole />} />
+              <Route element={<RequireAccountAdmin />}>
+                <Route path="/leadership/account" element={<AccountSettings />} />
+              </Route>
             </Route>
           </Route>
         </Route>

@@ -10,6 +10,7 @@ import { Card } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
+import { ROLE_LABEL } from '@/auth/roles';
 
 /**
  * Leadership → People. A calm roster (not a data grid): each member is a row
@@ -182,11 +183,8 @@ function MemberRow({
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium text-sage">{member.name}</span>
-          {member.role === 'platform_admin' && (
-            <span className="eyebrow text-[10px]">admin</span>
-          )}
-          {member.role === 'leadership' && (
-            <span className="eyebrow text-[10px]">leader</span>
+          {member.role !== 'member' && (
+            <span className="eyebrow text-[10px]">{ROLE_LABEL[member.role]}</span>
           )}
           {!member.active && (
             <span className="text-[11px] text-muted">paused</span>

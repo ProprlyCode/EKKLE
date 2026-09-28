@@ -18,7 +18,10 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Role = 'member' | 'leadership' | 'platform_admin';
+/** A ministry role (docs/accounts-and-roles.md). */
+export type Role = 'admin' | 'leader' | 'member';
+/** A platform (Ekklē team) role. */
+export type PlatformRole = 'owner' | 'admin' | 'support';
 export type SequenceStatus = 'draft' | 'approved';
 export type SequenceEventKind = 'started' | 'completed' | 'messaged';
 export type ConversationStatus = 'active' | 'blocked';
@@ -544,6 +547,18 @@ export interface Database {
       };
       resolve_account: {
         Args: { p_host: string };
+        Returns: Json;
+      };
+      my_membership: {
+        Args: Record<string, never>;
+        Returns: Database['public']['Tables']['users']['Row'] | null;
+      };
+      claim_platform_seat: {
+        Args: Record<string, never>;
+        Returns: PlatformRole | null;
+      };
+      platform_accounts: {
+        Args: Record<string, never>;
         Returns: Json;
       };
       set_account_branding: {

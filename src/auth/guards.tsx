@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSession } from './SessionProvider';
-import { isLeader, isPlatformAdmin } from './roles';
+import { isAccountAdmin, isLeader } from './roles';
 import { unreadCount } from '@/data/conversations';
 import { openReportsCount } from '@/data/reports';
 import { AppShell, type NavItem } from '@/ui/AppShell';
@@ -47,10 +47,10 @@ export function RequireLeadership() {
   return <Outlet />;
 }
 
-export function RequirePlatformAdmin() {
+/** Ministry Admins only (Account: branding and settings). */
+export function RequireAccountAdmin() {
   const { membership } = useSession();
-  if (membership && !isPlatformAdmin(membership.role))
-    return <Navigate to="/app" replace />;
+  if (membership && !isAccountAdmin(membership.role)) return <Navigate to="/app" replace />;
   return <Outlet />;
 }
 
@@ -80,22 +80,21 @@ export function AuthedLayout() {
     };
   }, [leader]);
 
-  const onPlatform = useAccount().status === 'platform';
-  const nav: NavItem[] = onPlatform
-    ? [{ to: '/platform', label: 'Platform' }] // ekkle.org: only the console
-    : [
-        { to: '/app', label: 'Your code' },
-        { to: '/app/messages', label: 'Messages', dot: unread > 0 },
-        ...(leader
-          ? [
-              { to: '/leadership/content', label: 'Content' },
-              { to: '/leadership/resources', label: 'Resources' },
-              { to: '/leadership/people', label: 'People', dot: openReports > 0 },
-              { to: '/leadership/account', label: 'Account' },
-            ]
-          : []),
-        ...(isPlatformAdmin(membership?.role) ? [{ to: '/platform', label: 'Platform' }] : []),
-      ];
+  // A ministry's own tabs; the platform (ekkle.org/platform) has its own
+  // layout and never appears here.
+  const nav: NavItem[] = [
+    { to: '/app', label: 'Your code' },
+    { to: '/app/messages', label: 'Messages', dot: unread > 0 },
+    ...(leader
+      ? [
+          { to: '/leadership/overview', label: 'Overview' },
+          { to: '/leadership/content', label: 'Content' },
+          { to: '/leadership/resources', label: 'Resources' },
+          { to: '/leadership/people', label: 'People', dot: openReports > 0 },
+        ]
+      : []),
+    ...(isAccountAdmin(membership?.role) ? [{ to: '/leadership/account', label: 'Account' }] : []),
+  ];
 
   return (
     <AppShell

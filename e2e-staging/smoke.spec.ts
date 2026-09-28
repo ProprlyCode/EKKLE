@@ -60,6 +60,17 @@ test('recipient → David → reply, on the real staging stack', async ({ browse
   await expect(recipient.getByText(reply)).toBeVisible();
 });
 
+test('the Ekklē team (admin persona) reaches the platform console on staging.ekkle.org', async ({ page }) => {
+  const platform = process.env.STAGING_PLATFORM_URL || 'https://staging.ekkle.org';
+  await page.goto(`${platform}/sign-in`);
+  await page.getByRole('button', { name: 'Use a password instead' }).click();
+  await page.getByLabel('Email').fill('admin@demo.ekkle.org');
+  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.waitForURL('**/platform');
+  await expect(page.getByRole('heading', { name: 'Accounts' })).toBeVisible();
+});
+
 for (const who of ['leader', 'admin']) {
   test(`${who} persona can sign in`, async ({ page }) => {
     await signInWithPassword(page, `${who}@demo.ekkle.org`);
