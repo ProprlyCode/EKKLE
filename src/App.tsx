@@ -26,6 +26,7 @@ import Overview from '@/routes/leadership/Overview';
 import { PlatformGate } from '@/platform/PlatformGate';
 import PlatformLayout from '@/platform/PlatformLayout';
 import PlatformAccounts from '@/platform/Accounts';
+import PlatformSettings from '@/platform/Settings';
 import RecipientExperience from '@/recipient/RecipientExperience';
 import SeekerGate from '@/space/SeekerGate';
 import SeekerLayout from '@/space/SeekerLayout';
@@ -80,6 +81,7 @@ function PlatformRoutes() {
       <Route element={<PlatformGate />}>
         <Route element={<PlatformLayout />}>
           <Route path="/platform" element={<PlatformAccounts />} />
+          <Route path="/platform/settings" element={<PlatformSettings />} />
         </Route>
       </Route>
 

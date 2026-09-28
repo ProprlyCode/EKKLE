@@ -4,7 +4,10 @@ import { AppShell, type NavItem } from '@/ui/AppShell';
 import { Button } from '@/ui/Button';
 import { PLATFORM_ROLE_LABEL, usePlatformRole } from './PlatformGate';
 
-const NAV: NavItem[] = [{ to: '/platform', label: 'Accounts' }];
+const NAV: NavItem[] = [
+  { to: '/platform', label: 'Accounts' },
+  { to: '/platform/settings', label: 'Settings' },
+];
 
 /** The Ekklē team's chrome on ekkle.org: its own tabs, never a ministry's. */
 export default function PlatformLayout() {

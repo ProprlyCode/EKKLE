@@ -557,6 +557,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: Json;
       };
+      set_my_platform_name: {
+        Args: { p_name: string };
+        Returns: undefined;
+      };
       platform_password_saved: {
         Args: Record<string, never>;
         Returns: undefined;

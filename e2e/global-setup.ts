@@ -30,7 +30,11 @@ export default async function globalSetup() {
 
   // Owen: the Ekklē team (platform Owner), with no ministry membership.
   let owen = list.users.find((u) => u.email === OWEN.email);
-  if (!owen) {
+  if (owen) {
+    // Always start from the known password (a test changes it and back).
+    const { error } = await sb.auth.admin.updateUserById(owen.id, { password: OWEN.password });
+    if (error) throw error;
+  } else {
     const { data, error } = await sb.auth.admin.createUser({
       email: OWEN.email,
       password: OWEN.password,

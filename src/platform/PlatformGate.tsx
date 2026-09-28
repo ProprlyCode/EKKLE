@@ -9,11 +9,19 @@ import { Wordmark } from '@/components/Wordmark';
 import { Button } from '@/ui/Button';
 import { CenterLayout, ErrorNote, FullPageLoading } from '@/ui/states';
 
-const RoleContext = createContext<PlatformRole | null>(null);
+const SeatContext = createContext<{ seat: PlatformSeat | null; update: (s: PlatformSeat) => void }>({
+  seat: null,
+  update: () => {},
+});
 
 /** My role on the Ekklē team (inside the platform area). */
 export function usePlatformRole(): PlatformRole | null {
-  return useContext(RoleContext);
+  return useContext(SeatContext).seat?.role ?? null;
+}
+
+/** My seat on the Ekklē team, and a way to show changes straight away. */
+export function usePlatformSeat() {
+  return useContext(SeatContext);
 }
 
 export const PLATFORM_ROLE_LABEL: Record<PlatformRole, string> = {
@@ -75,14 +83,39 @@ export function PlatformGate() {
     return <SetPassword email={session.user.email ?? ''} onDone={() => setSeat({ ...seat, password_set: true })} />;
 
   return (
-    <RoleContext.Provider value={seat.role}>
+    <SeatContext.Provider value={{ seat, update: setSeat }}>
       <Outlet />
-    </RoleContext.Provider>
+    </SeatContext.Provider>
   );
 }
 
 /** First sign-in on the Ekklē team: choose the password used from now on. */
 function SetPassword({ email, onDone }: { email: string; onDone: () => void }) {
+  return (
+    <CenterLayout>
+      <Wordmark />
+      <div className="card w-full px-6 py-8">
+        <div className="mb-4">
+          <h1 className="text-lg">Set your password</h1>
+          <p className="mt-1 text-sm leading-relaxed text-muted-strong">
+            You’re on the Ekklē team as {email}. Choose a password — you’ll sign in with it
+            from now on.
+          </p>
+        </div>
+        <PasswordForm submitLabel="Save and continue" onSaved={onDone} />
+      </div>
+    </CenterLayout>
+  );
+}
+
+/** New password + confirm (10+ characters); records that a password is set. */
+export function PasswordForm({
+  submitLabel,
+  onSaved,
+}: {
+  submitLabel: string;
+  onSaved: () => void;
+}) {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [saving, setSaving] = useState(false);
@@ -97,46 +130,44 @@ function SetPassword({ email, onDone }: { email: string; onDone: () => void }) {
     try {
       await setMyPassword(password);
       await markPlatformPasswordSet();
-      onDone();
-    } catch {
+      setPassword('');
+      setConfirm('');
       setSaving(false);
-      setError('We couldn’t save that password. Please try again.');
+      onSaved();
+    } catch (err) {
+      setSaving(false);
+      const code = (err as { code?: string } | null)?.code;
+      setError(
+        code === 'same_password'
+          ? 'That’s your current password — choose a new one.'
+          : code === 'weak_password'
+            ? 'That password is too easy to guess — try a longer one.'
+            : 'We couldn’t save that password. Please try again.',
+      );
     }
   }
 
   return (
-    <CenterLayout>
-      <Wordmark />
-      <div className="card w-full px-6 py-8">
-        <div className="mb-4">
-          <h1 className="text-lg">Set your password</h1>
-          <p className="mt-1 text-sm leading-relaxed text-muted-strong">
-            You’re on the Ekklē team as {email}. Choose a password — you’ll sign in with it
-            from now on.
-          </p>
-        </div>
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <TextInput
-            label="New password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            hint="At least 10 characters."
-          />
-          <TextInput
-            label="Confirm password"
-            type="password"
-            autoComplete="new-password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-          />
-          {error && <ErrorNote>{error}</ErrorNote>}
-          <Button type="submit" disabled={saving || !password || !confirm}>
-            {saving ? 'Saving…' : 'Save and continue'}
-          </Button>
-        </form>
-      </div>
-    </CenterLayout>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <TextInput
+        label="New password"
+        type="password"
+        autoComplete="new-password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        hint="At least 10 characters."
+      />
+      <TextInput
+        label="Confirm password"
+        type="password"
+        autoComplete="new-password"
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+      />
+      {error && <ErrorNote>{error}</ErrorNote>}
+      <Button type="submit" disabled={saving || !password || !confirm}>
+        {saving ? 'Saving…' : submitLabel}
+      </Button>
+    </form>
   );
 }

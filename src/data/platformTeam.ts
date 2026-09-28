@@ -11,6 +11,8 @@ export interface PlatformSeat {
   role: PlatformRole;
   /** Set once they've chosen a password (first sign-in is by emailed code). */
   password_set: boolean;
+  email: string;
+  name: string | null;
 }
 
 /** Signing in on ekkle.org: link an invitation to this login; my seat or null. */
@@ -45,4 +47,9 @@ export async function listPlatformAccounts(): Promise<PlatformAccount[]> {
   const { data, error } = await supabase.rpc('platform_accounts');
   if (error) throw error;
   return (data as unknown as PlatformAccount[]) ?? [];
+}
+
+export async function setMyPlatformName(name: string): Promise<void> {
+  const { error } = await supabase.rpc('set_my_platform_name', { p_name: name });
+  if (error) throw error;
 }

@@ -22,6 +22,26 @@ test('the Ekklē team signs in on ekkle.org and sees every account', async ({ pa
   await expect(page.getByRole('heading', { name: 'Accounts' })).toBeVisible();
   await expect(page.getByText('Grace Chapel (pilot)')).toBeVisible();
   await expect(page.getByText('Owner').last()).toBeVisible();
+
+  // Settings: their own name and password.
+  await page.getByRole('link', { name: 'Settings' }).click();
+  await expect(page.getByText(`Signed in as ${OWEN.email}`)).toBeVisible();
+  await page.getByLabel('Name').fill('Owen');
+  await page.getByRole('button', { name: 'Save name' }).click();
+  await expect(page.getByRole('button', { name: 'Saved' })).toBeVisible();
+  // The current password isn't a change…
+  await page.getByLabel('New password').fill(OWEN.password);
+  await page.getByLabel('Confirm password').fill(OWEN.password);
+  await page.getByRole('button', { name: 'Change password' }).click();
+  await expect(page.getByText('That’s your current password')).toBeVisible();
+  // …a new one is (then back, for the next run).
+  for (const pw of ['owen-new-password-2', OWEN.password]) {
+    await page.getByLabel('New password').fill(pw);
+    await page.getByLabel('Confirm password').fill(pw);
+    await page.getByRole('button', { name: 'Change password' }).click();
+    await expect(page.getByLabel('New password')).toHaveValue(''); // cleared once saved
+    await expect(page.getByText('Password saved.')).toBeVisible();
+  }
 });
 
 test('a new Ekklē team member signs in by code, sets a password, and reaches the console', async ({ page }) => {
