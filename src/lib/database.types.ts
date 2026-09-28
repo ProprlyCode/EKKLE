@@ -83,6 +83,7 @@ export interface Database {
           active: boolean;
           email: string | null;
           active_sequence_id: UUID | null;
+          removed_at: Timestamp | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -97,6 +98,7 @@ export interface Database {
           active?: boolean;
           email?: string | null;
           active_sequence_id?: UUID | null;
+          removed_at?: Timestamp | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -575,6 +577,8 @@ export interface Database {
       ministry_study_bank: { Args: Record<string, never>; Returns: Json };
       save_ministry_studies: { Args: { p_items: Json }; Returns: undefined };
       preview_study: { Args: { p_study_id: string }; Returns: Json };
+      member_conversation_count: { Args: { p_user_id: string }; Returns: number };
+      remove_member: { Args: { p_user_id: string; p_hand_to: string | null }; Returns: undefined };
       set_member_role: { Args: { p_user_id: string; p_role: string }; Returns: Json };
       cancel_invitation: { Args: { p_user_id: string }; Returns: undefined };
       set_join_enabled: { Args: { p_enabled: boolean }; Returns: undefined };

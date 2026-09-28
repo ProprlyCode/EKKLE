@@ -68,6 +68,7 @@ export async function listMembers(orgId: string): Promise<Member[]> {
     .from('users')
     .select('*')
     .eq('org_id', orgId)
+    .is('removed_at', null)
     .order('created_at', { ascending: true });
   if (error) throw error;
   return data ?? [];
@@ -127,4 +128,21 @@ export async function setMemberActive(
   });
   if (error) throw error;
   return data;
+}
+
+/** How many conversations someone has (to hand them on when removing them). */
+export async function memberConversationCount(userId: string): Promise<number> {
+  const { data, error } = await supabase.rpc('member_conversation_count', { p_user_id: userId });
+  if (error) throw error;
+  return (data as number | null) ?? 0;
+}
+
+/**
+ * Remove someone from the team: access and their link end; their
+ * conversations go to `handTo` (required when they have any). An invitation
+ * nobody accepted is simply deleted.
+ */
+export async function removeMember(userId: string, handTo: string | null): Promise<void> {
+  const { error } = await supabase.rpc('remove_member', { p_user_id: userId, p_hand_to: handTo });
+  if (error) throw error;
 }

@@ -4,7 +4,8 @@ import {
   inviteMember,
   setMemberActive,
   setMemberRole,
-  cancelInvitation,
+  removeMember,
+  memberConversationCount,
   type Member,
 } from '@/data/members';
 import { sendInvitation } from '@/data/auth';
@@ -27,8 +28,8 @@ const ROLE_NOTE: Record<Role, string> = {
 
 /**
  * Leadership → People (Admins and Leaders). A calm roster (not a data grid):
- * name leading, role and link demoted, quiet actions. Leaders invite Members
- * and pause them; Admins invite and manage anyone, and change roles
+ * name leading, role and link demoted, quiet actions. Leaders invite, pause
+ * and remove Members; Admins invite and manage anyone and change roles
  * (docs/accounts-and-roles.md). Invitations are emailed from here.
  */
 export default function People() {
@@ -68,7 +69,9 @@ export default function People() {
       setError(
         msg.includes('last_admin')
           ? 'Your ministry needs at least one Admin.'
-          : msg.includes('over_email_send_rate_limit') || (err as { status?: number }).status === 429
+          : msg.includes('has_conversations')
+            ? 'Choose a teammate to hand their conversations to.'
+            : msg.includes('over_email_send_rate_limit') || (err as { status?: number }).status === 429
             ? 'An email just went to them — try again in a minute.'
             : 'That didn’t work. Please try again.',
       );
@@ -122,6 +125,7 @@ export default function People() {
                 admin={admin}
                 onAct={act}
                 landing={landing}
+                teammates={members.filter((t) => t.id !== m.id && t.active && t.auth_uid)}
               />
             ))}
           </ul>
@@ -224,89 +228,188 @@ function MemberRow({
   me,
   admin,
   landing,
+  teammates,
   onAct,
 }: {
   member: Member;
   me: boolean;
   admin: boolean;
   landing: string;
+  /** Who a removed person's conversations can be handed to. */
+  teammates: Member[];
   onAct: (fn: () => Promise<unknown>, done: string) => Promise<void>;
 }) {
   const pending = member.auth_uid === null;
   // Leaders manage Members; Admins manage anyone (never themselves here).
   const canManage = !me && (admin || member.role === 'member');
+  const [removing, setRemoving] = useState(false);
 
   return (
-    <li className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate font-medium text-sage">{member.name}</span>
-          {me && <span className="text-[11px] text-muted">you</span>}
-          {!(admin && canManage) && member.role !== 'member' && (
-            <span className="eyebrow text-[10px]">{ROLE_LABEL[member.role]}</span>
-          )}
-          {!member.active && <span className="text-[11px] text-muted">paused</span>}
-          {pending && <span className="text-[11px] text-muted">invited</span>}
+    <li className="flex flex-col gap-3 px-5 py-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="truncate font-medium text-sage">{member.name}</span>
+            {me && <span className="text-[11px] text-muted">you</span>}
+            {!(admin && canManage) && (
+              <span className="eyebrow text-[10px]">{ROLE_LABEL[member.role]}</span>
+            )}
+            {!member.active && !pending && <span className="text-[11px] text-muted">paused</span>}
+            {pending && <span className="text-[11px] text-muted">invited</span>}
+          </div>
+          <p className="truncate text-[13px] text-muted">
+            {pending ? member.email : `/r/${member.code_slug}`}
+          </p>
         </div>
-        <p className="truncate text-[13px] text-muted">
-          {pending ? member.email : `/r/${member.code_slug}`}
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 text-[13px]">
-        {admin && canManage && (
-          <select
-            aria-label={`Role for ${member.name}`}
-            value={member.role}
-            onChange={(e) =>
-              onAct(
-                () => setMemberRole(member.id, e.target.value as Role),
-                `${member.name} is now ${ROLE_LABEL[e.target.value as Role]}.`,
-              )
-            }
-            className="rounded-lg border border-edge bg-canvas px-2 py-1 text-sm text-sage"
-          >
-            {(['member', 'leader', 'admin'] as const).map((r) => (
-              <option key={r} value={r}>
-                {ROLE_LABEL[r]}
-              </option>
-            ))}
-          </select>
-        )}
-        {canManage && pending && member.email && (
-          <>
+        <div className="flex flex-wrap items-center gap-3 text-[13px]">
+          {admin && canManage && (
+            <label className="flex items-center gap-2 text-muted-strong">
+              Role
+              <select
+                aria-label={`Role for ${member.name}`}
+                value={member.role}
+                onChange={(e) =>
+                  onAct(
+                    () => setMemberRole(member.id, e.target.value as Role),
+                    `${member.name} is now ${ROLE_LABEL[e.target.value as Role]}.`,
+                  )
+                }
+                className="rounded-lg border border-edge bg-canvas px-2 py-1 text-sm text-sage"
+              >
+                {(['member', 'leader', 'admin'] as const).map((r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABEL[r]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {canManage && pending && member.email && (
             <button
               onClick={() => onAct(() => sendInvitation(member.email!, landing), `Invitation sent again to ${member.email}.`)}
               className="text-sage underline-offset-2 hover:underline"
             >
               Resend
             </button>
+          )}
+          {canManage && !pending && (
             <button
-              onClick={() => {
-                if (confirm(`Cancel the invitation to ${member.email}?`))
-                  void onAct(() => cancelInvitation(member.id), `Invitation to ${member.email} cancelled.`);
-              }}
+              onClick={() =>
+                onAct(
+                  () => setMemberActive(member.id, !member.active),
+                  member.active ? `${member.name} is paused.` : `${member.name} is active again.`,
+                )
+              }
               className="text-muted hover:text-sage"
             >
-              Cancel
+              {member.active ? 'Pause' : 'Restore'}
             </button>
-          </>
-        )}
-        {canManage && !pending && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              onAct(
-                () => setMemberActive(member.id, !member.active),
-                member.active ? `${member.name} is paused.` : `${member.name} is active again.`,
-              )
-            }
-          >
-            {member.active ? 'Pause' : 'Restore'}
-          </Button>
-        )}
+          )}
+          {canManage && !removing && (
+            <button onClick={() => setRemoving(true)} className="text-muted hover:text-sage">
+              Remove
+            </button>
+          )}
+        </div>
       </div>
+      {removing && (
+        <RemovePanel
+          member={member}
+          pending={pending}
+          teammates={teammates}
+          onCancel={() => setRemoving(false)}
+          onRemove={(handTo) =>
+            onAct(
+              () => removeMember(member.id, handTo),
+              pending ? `The invitation to ${member.email} is removed.` : `${member.name} was removed from the team.`,
+            )
+          }
+        />
+      )}
     </li>
+  );
+}
+
+/**
+ * Confirm a removal. Someone who has joined loses access and their link;
+ * their conversations must go to a teammate (they're never deleted).
+ */
+function RemovePanel({
+  member,
+  pending,
+  teammates,
+  onCancel,
+  onRemove,
+}: {
+  member: Member;
+  pending: boolean;
+  teammates: Member[];
+  onCancel: () => void;
+  onRemove: (handTo: string | null) => Promise<void>;
+}) {
+  const [count, setCount] = useState<number | null>(null);
+  const [handTo, setHandTo] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    memberConversationCount(member.id)
+      .then(setCount)
+      .catch(() => setCount(0));
+  }, [member.id]);
+
+  const needsHandTo = (count ?? 0) > 0;
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-edge bg-canvas px-4 py-3 text-sm text-muted-strong">
+      {count === null ? (
+        <Spinner />
+      ) : pending && !needsHandTo ? (
+        <p>Remove the invitation to {member.email}?</p>
+      ) : (
+        <>
+          <p>
+            Remove {member.name} from the team? They’ll lose access, and their link will stop working.
+          </p>
+          {needsHandTo && (
+            <label className="flex flex-col gap-1.5">
+              <span>
+                {member.name} has {count} {count === 1 ? 'conversation' : 'conversations'}. Hand{' '}
+                {count === 1 ? 'it' : 'them'} to:
+              </span>
+              <select
+                aria-label="Hand conversations to"
+                value={handTo}
+                onChange={(e) => setHandTo(e.target.value)}
+                className="rounded-lg border border-edge bg-card px-2 py-1.5 text-sm text-sage sm:max-w-xs"
+              >
+                <option value="">Choose a teammate…</option>
+                {teammates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </>
+      )}
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          disabled={busy || count === null || (needsHandTo && !handTo)}
+          onClick={async () => {
+            setBusy(true);
+            await onRemove(needsHandTo ? handTo : null);
+            setBusy(false);
+          }}
+        >
+          {pending && !needsHandTo ? 'Remove invitation' : `Remove ${member.name}`}
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          Keep
+        </Button>
+      </div>
+    </div>
   );
 }
 

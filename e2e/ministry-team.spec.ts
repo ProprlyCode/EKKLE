@@ -42,6 +42,29 @@ test('an Admin invites a Leader, who joins as one; the Admin changes their role'
   await admin.reload();
   await admin.getByLabel(`Role for ${name}`).selectOption('member');
   await expect(admin.getByRole('status')).toContainText(`${name} is now Member.`);
+
+  // …and removes them: off the team, and they lose access.
+  const lenaRow = admin.getByRole('listitem').filter({ hasText: name });
+  await lenaRow.getByRole('button', { name: 'Remove', exact: true }).click();
+  await lenaRow.getByRole('button', { name: `Remove ${name}` }).click();
+  await expect(admin.getByRole('status')).toContainText(`${name} was removed from the team.`);
+  await expect(admin.getByRole('listitem').filter({ hasText: name })).toHaveCount(0);
+  await lena.goto('/app');
+  await expect(lena.getByRole('navigation').getByRole('link', { name: 'People', exact: true })).toHaveCount(0);
+});
+
+test('an invitation nobody accepted can be removed', async ({ page }) => {
+  const email = uniqueEmail('never');
+  await adminSignIn(page);
+  await page.goto('/leadership/people');
+  await page.getByLabel('Email').fill(email);
+  await page.getByRole('button', { name: 'Invite', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText(`${email} is invited`);
+  const row = page.getByRole('listitem').filter({ hasText: email });
+  await row.getByRole('button', { name: 'Remove', exact: true }).click();
+  await row.getByRole('button', { name: 'Remove invitation' }).click();
+  await expect(page.getByRole('status')).toContainText(`The invitation to ${email} is removed.`);
+  await expect(page.getByRole('listitem').filter({ hasText: email })).toHaveCount(0);
 });
 
 test('the join code can be switched off (and back on)', async ({ page }) => {
