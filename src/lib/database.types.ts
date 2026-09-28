@@ -635,6 +635,9 @@ export interface Database {
       my_study_reminder: { Args: Record<string, never>; Returns: Json };
       set_study_reminder: { Args: { p_weekday: number | null; p_at: string | null; p_tz: string | null }; Returns: undefined };
       delete_my_details: { Args: Record<string, never>; Returns: undefined };
+      ministry_outcomes: { Args: { p_days: number | null }; Returns: Json };
+      my_outcomes: { Args: { p_days: number | null }; Returns: Json };
+      platform_outcomes: { Args: { p_days: number | null }; Returns: Json };
       faith_prompts: { Args: Record<string, never>; Returns: Json };
       prompt_library: { Args: Record<string, never>; Returns: Json };
       save_faith_prompt: { Args: { p_id: string | null; p_kind: string; p_body: string; p_status: string }; Returns: string };

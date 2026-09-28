@@ -5,10 +5,9 @@ import {
   blockSeekerConnection,
   type SeekerConnection,
 } from '@/data/seeker';
-import { Button } from '@/ui/Button';
-import { TextArea } from '@/ui/Field';
 import { Spinner } from '@/ui/states';
 import { MessageList } from '@/components/MessageList';
+import { ReplyBox } from '@/components/ReplyBox';
 import { PersonPhoto, TalkingTo } from '@/components/TalkingTo';
 
 /**
@@ -40,8 +39,8 @@ export default function Connection() {
     bottomRef.current?.scrollIntoView({ block: 'end' });
   }, [convo]);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function onSubmit(e?: FormEvent) {
+    e?.preventDefault();
     if (!body.trim()) return;
     setSending(true);
     try {
@@ -133,20 +132,14 @@ export default function Connection() {
           This conversation has been closed.
         </p>
       ) : (
-        <form onSubmit={onSubmit} className="flex items-end gap-2">
-          <div className="flex-1">
-            <TextArea
-              label=""
-              rows={2}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder={`Write to ${member.name}…`}
-            />
-          </div>
-          <Button type="submit" disabled={sending || !body.trim()}>
-            Send
-          </Button>
-        </form>
+        <ReplyBox
+          value={body}
+          onChange={setBody}
+          onSend={() => void onSubmit()}
+          sending={sending}
+          placeholder={`Write to ${member.name}…`}
+          bottomRef={bottomRef} aboveNav
+        />
       )}
     </div>
   );

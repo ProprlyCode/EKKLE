@@ -20,7 +20,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | Faith in action prompts | **Built** (0039) — Ekklē's starting set (drafts to publish), ministries' own |
 | Song on a study's Experience page | **Built** (0040) — audio only: SoundCloud link or uploaded file; ministries can swap |
 | N3 Seeker experience | **Built** (0041) — installable; who-you're-talking-to card with photo; delete my details; weekly study reminder |
-| N4 Leader & member tools | Partly — study editor done; outcomes view, member help left |
+| N4 Leader & member tools | **Built** (0042) — outcomes (member, ministry, Ekklē team; 30/90 days/all time), wallet cards, reply box on phones |
 | Address change requests | Not started (roles step 4) |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
 | Custom domains · Visit us card · age question · Tailwind 4 | On hold |
@@ -152,13 +152,25 @@ leaders can remove it.
 only when a study is left); e2e: member adds a photo → seeker sees the card;
 seeker deletes their details → the member sees it; reminder set/stop.
 
-## N4 — Leader & member tools
+## N4 — Leader & member tools — built (0042, 28 Sep 2026)
 
 - ~~Study editor~~ — *built (0034, below).*
-- Outcomes view: codes shared → flows finished → conversations → met in person
-  → studies started/completed, per church and per member.
-- Member help: printable / wallet QR card, a few conversation starters, a
-  better mobile inbox.
+- **Outcomes**, counts only, never message contents, for the last 30 or 90
+  days or all time: opened a link → went through it → reached out → got a
+  reply → connected ("we connected" check-in, once per person), plus people
+  who started a study and studies completed (credited to the member whose
+  link they arrived on). Each step shows its share of those who opened a
+  link (hidden past 100%: people can also reach out without a link).
+  - Leaders: Overview → the ministry and a row per member (`ministry_outcomes`).
+  - Members: "What's come of your link" on their QR page (`my_outcomes`).
+  - Ekklē team: Platform → Outcomes, every ministry and the total
+    (`platform_outcomes`).
+- **Wallet cards**: QR page → Print wallet cards — a Letter sheet of eight
+  3.5 × 2 in cards (code, name, short message, ministry, link) with cut marks.
+- **Reply box on phones** (member and seeker threads): pinned to the bottom,
+  grows with the text, 16 px so phones don't zoom, keeps the newest message in
+  view when the keyboard opens; Ctrl/⌘+Enter sends.
+- Conversation starters: covered by Faith in action (0039).
 
 ## N5 — Studies 2–27 (in progress)
 

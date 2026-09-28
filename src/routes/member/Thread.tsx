@@ -15,8 +15,7 @@ import {
   type CheckinValue,
 } from '@/data/conversations';
 import { MessageList, type ChatMessage } from '@/components/MessageList';
-import { TextArea } from '@/ui/Field';
-import { Button } from '@/ui/Button';
+import { ReplyBox } from '@/components/ReplyBox';
 import { Spinner, ErrorNote } from '@/ui/states';
 
 /** Member's view of one conversation: live thread, reply, check-in, safeguarding. */
@@ -79,8 +78,8 @@ export default function Thread() {
     bottomRef.current?.scrollIntoView({ block: 'end' });
   }, [messages]);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function onSubmit(e?: FormEvent) {
+    e?.preventDefault();
     if (!body.trim()) return;
     setSending(true);
     setError(null);
@@ -213,20 +212,14 @@ export default function Thread() {
           This conversation is closed.
         </p>
       ) : (
-        <form onSubmit={onSubmit} className="flex items-end gap-2">
-          <div className="flex-1">
-            <TextArea
-              label=""
-              rows={2}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Write a reply…"
-            />
-          </div>
-          <Button type="submit" disabled={sending || !body.trim()}>
-            Send
-          </Button>
-        </form>
+        <ReplyBox
+          value={body}
+          onChange={setBody}
+          onSend={() => void onSubmit()}
+          sending={sending}
+          placeholder="Write a reply…"
+          bottomRef={bottomRef}
+        />
       )}
     </div>
   );

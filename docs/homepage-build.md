@@ -147,7 +147,7 @@ heads and the Bible well inside the centre.
 
 | # | File | Contents | Type | Size |
 |---|---|---|---|---|
-| 16 | `logo-mark` | The Ekklē mark, light version for dark backgrounds (cream `#F1ECE1` or brass `#A9824C`). Used in the loader and header. Built from strokes (not filled outlines), so the loader can draw it. | SVG | vector |
+| 16 | `logo-mark` | The Ekklē mark, light version for dark backgrounds, in brass `#A9824C`. Used in the loader and header. Built from strokes (not filled outlines), so the loader can draw it. | SVG | vector |
 | 17 | `og-image` | The link preview for texts and social (the café or the together scene, plus the wordmark). Keep text inside the centre 1000×500. | JPG | 1200×630 |
 | 18 | `scan-screen` | *(I supply this.)* The Ekklē code screen, for compositing onto Sam's phone in #7. | PNG | 1170×2532 |
 

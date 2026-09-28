@@ -5,7 +5,7 @@ import type { MemberCard } from '@/data/recipient';
 export function PersonPhoto({ name, photo, size = 56 }: { name: string; photo: string | null; size?: number }) {
   const initials = name
     .split(/\s+/)
-    .filter(Boolean)
+    .filter((w) => /^\p{L}/u.test(w))
     .slice(0, 2)
     .map((w) => w[0]!.toUpperCase())
     .join('');

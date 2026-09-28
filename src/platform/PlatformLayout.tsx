@@ -6,6 +6,7 @@ import { PLATFORM_ROLE_LABEL, usePlatformRole } from './PlatformGate';
 
 const NAV: NavItem[] = [
   { to: '/platform', label: 'Accounts' },
+  { to: '/platform/outcomes', label: 'Outcomes' },
   { to: '/platform/team', label: 'Team' },
   { to: '/platform/studies', label: 'Studies', end: false },
   { to: '/platform/plans', label: 'Plans', end: false },

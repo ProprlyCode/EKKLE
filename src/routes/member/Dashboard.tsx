@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
 import { updateMyProfile, setActiveSequence, setMyPhoto, type Member } from '@/data/members';
 import { listApprovedSequences, type Sequence } from '@/data/sequences';
@@ -12,6 +13,7 @@ import { ErrorNote } from '@/ui/states';
 import FlowPreview from '@/recipient/FlowPreview';
 import { FaithInAction } from './FaithInAction';
 import { PersonPhoto } from '@/components/TalkingTo';
+import { MyOutcomes } from '@/outcomes/MyOutcomes';
 
 /**
  * Member home. The focal element is the keepsake card — the thing a member is
@@ -37,6 +39,7 @@ export default function MemberDashboard() {
         shareUrl={shareUrl}
       />
       <FaithInAction />
+      <MyOutcomes />
       <FlowPicker
         activeSequenceId={membership.active_sequence_id}
         onChange={async (sequenceId) => {
@@ -122,6 +125,12 @@ function KeepsakeCard({
             Download
           </Button>
         </div>
+        <Link
+          to="/app/wallet-cards"
+          className="text-center text-[13px] text-sage underline-offset-2 hover:underline"
+        >
+          Print wallet cards
+        </Link>
         <p className="break-all text-center text-[12px] text-muted">{shareUrl}</p>
       </div>
     </section>

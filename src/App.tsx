@@ -29,6 +29,8 @@ import PlatformAccounts from '@/platform/Accounts';
 import PlatformSettings from '@/platform/Settings';
 import PlatformTeam from '@/platform/Team';
 import PlatformWaitlist from '@/platform/Waitlist';
+import PlatformOutcomes from '@/platform/Outcomes';
+import WalletCards from '@/routes/member/WalletCards';
 import RecipientExperience from '@/recipient/RecipientExperience';
 import SeekerGate from '@/space/SeekerGate';
 import SeekerLayout from '@/space/SeekerLayout';
@@ -91,6 +93,7 @@ function PlatformRoutes() {
       <Route element={<PlatformGate />}>
         <Route element={<PlatformLayout />}>
           <Route path="/platform" element={<PlatformAccounts />} />
+          <Route path="/platform/outcomes" element={<PlatformOutcomes />} />
           <Route path="/platform/team" element={<PlatformTeam />} />
           <Route path="/platform/waitlist" element={<PlatformWaitlist />} />
           <Route path="/platform/settings" element={<PlatformSettings />} />
@@ -161,6 +164,8 @@ function AccountRoutes() {
           <Route element={<RequireLeadership />}>
             <Route path="/leadership/studies/:studyId" element={<StudyReader preview />} />
           </Route>
+          {/* Wallet cards print on their own, without the app around them. */}
+          <Route path="/app/wallet-cards" element={<WalletCards />} />
           <Route element={<AuthedLayout />}>
             <Route path="/app" element={<MemberDashboard />} />
             <Route path="/app/messages" element={<Inbox />} />

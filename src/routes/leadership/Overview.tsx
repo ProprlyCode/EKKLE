@@ -1,35 +1,45 @@
 import { useEffect, useState } from 'react';
 import { getOrganization } from '@/data/organizations';
 import { useSession } from '@/auth/SessionProvider';
-import { getPlatformOverview, type PlatformOverview, type Organization } from '@/data/platform';
+import type { Organization } from '@/data/platform';
+import { ministryOutcomes, type MinistryOutcomes, type Range } from '@/data/outcomes';
 import { Card } from '@/ui/Card';
 import { Spinner, ErrorNote } from '@/ui/states';
+import { PersonPhoto } from '@/components/TalkingTo';
+import { Funnel, OutcomesTable, RangePicker } from '@/outcomes/Outcomes';
 import { ConversationsCard } from './ConversationsCard';
 
 /**
- * Leadership → Overview (Admins and Leaders): the ministry's numbers
- * (settings live in Account, for Admins). Metadata only — never message contents. Product UI
- * (interface-design): flat depth, weight+opacity hierarchy, one clear read
- * per tile.
+ * Leadership → Overview (Admins and Leaders): the ministry's outcomes — from a
+ * shared link to a real connection, and studies — for the ministry and each
+ * member (N4). Counts only, never message contents. Settings live in Account.
  */
 export default function Overview() {
   const { membership } = useSession();
-  const [overview, setOverview] = useState<PlatformOverview | null>(null);
+  const [range, setRange] = useState<Range>(90);
+  const [outcomes, setOutcomes] = useState<MinistryOutcomes | null>(null);
   const [org, setOrg] = useState<Organization | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!membership) return;
-    Promise.all([getPlatformOverview(), getOrganization(membership.org_id)])
-      .then(([o, g]) => {
-        setOverview(o);
-        setOrg(g);
-      })
+    getOrganization(membership.org_id)
+      .then(setOrg)
       .catch(() => setError('Couldn’t load the overview.'));
   }, [membership]);
 
+  useEffect(() => {
+    let active = true;
+    ministryOutcomes(range)
+      .then((o) => active && setOutcomes(o))
+      .catch(() => active && setError('Couldn’t load the overview.'));
+    return () => {
+      active = false;
+    };
+  }, [range]);
+
   if (error) return <ErrorNote>{error}</ErrorNote>;
-  if (!overview || !org)
+  if (!outcomes || !org)
     return (
       <div className="py-16">
         <Spinner />
@@ -38,66 +48,44 @@ export default function Overview() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-xl">Overview</h1>
-        <p className="mt-1 text-sm text-muted-strong">
-          Everything happening across {org.name}.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl">Overview</h1>
+          <p className="mt-1 text-sm text-muted-strong">What’s come of sharing across {org.name}.</p>
+        </div>
+        <RangePicker value={range} onChange={setRange} />
       </div>
 
-      {/* Overview tiles */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="studies started" value={overview.started} />
-        <Stat label="completed" value={overview.completed} />
-        <Stat label="reached out" value={overview.messaged} />
-        <Stat label="connections made" value={overview.checkins.yes} />
-      </div>
+      <Card className="flex flex-col gap-4">
+        <span className="eyebrow">outcomes</span>
+        <Funnel outcomes={outcomes.ministry} label={`Outcomes for ${org.name}`} />
+      </Card>
 
-      {/* Per-member */}
       <Card className="p-0">
         <div className="border-b border-edge/70 px-5 py-3">
           <span className="eyebrow">by member</span>
         </div>
-        {overview.members.length === 0 ? (
+        {outcomes.members.length === 0 ? (
           <p className="px-5 py-6 text-sm text-muted">No members yet.</p>
         ) : (
-          <ul className="divide-y divide-edge/70">
-            {overview.members.map((m) => (
-              <li key={m.code_slug} className="flex items-center justify-between px-5 py-3">
-                <span className="min-w-0">
-                  <span className="block truncate font-medium text-sage">{m.name}</span>
-                  <span className="text-[12px] text-muted">/r/{m.code_slug}</span>
+          <OutcomesTable
+            caption="Outcomes by member"
+            nameHeader="Member"
+            rows={outcomes.members.map((m) => ({
+              id: m.id,
+              name: (
+                <span className="flex items-center gap-2">
+                  <PersonPhoto name={m.name} photo={m.photo} size={24} />
+                  {m.name}
                 </span>
-                <span className="flex gap-5 text-right text-[13px] text-muted-strong">
-                  <MiniStat label="started" value={m.started} />
-                  <MiniStat label="reached out" value={m.messaged} />
-                  <MiniStat label="chats" value={m.conversations} />
-                </span>
-              </li>
-            ))}
-          </ul>
+              ),
+              outcomes: m.outcomes,
+            }))}
+          />
         )}
       </Card>
 
       <ConversationsCard orgId={org.id} />
     </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-card border border-edge bg-card px-4 py-4">
-      <div className="font-serif text-2xl font-medium text-sage tabular-nums">{value}</div>
-      <div className="mt-1 text-[12px] text-muted">{label}</div>
-    </div>
-  );
-}
-
-function MiniStat({ label, value }: { label: string; value: number }) {
-  return (
-    <span className="flex flex-col items-end">
-      <span className="font-medium text-sage tabular-nums">{value}</span>
-      <span className="text-[11px] text-muted">{label}</span>
-    </span>
   );
 }
