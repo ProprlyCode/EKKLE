@@ -57,6 +57,7 @@ export function AppShell({
                 <NavLink
                   to={item.to}
                   end={item.end ?? true}
+                  data-tour={`nav:${item.to}`}
                   className={({ isActive }) =>
                     cn(
                       'inline-block px-3 py-2 text-sm font-medium -mb-px border-b-2 transition-colors',

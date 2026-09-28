@@ -9,6 +9,9 @@ import { PersonPhoto } from '@/components/TalkingTo';
 import { Funnel, OutcomesTable, RangePicker } from '@/outcomes/Outcomes';
 import { ConversationsCard } from './ConversationsCard';
 import { GetStarted } from '@/components/GetStarted';
+import { TourButton } from '@/tour/Tour';
+import { ADMIN_TOUR, LEADER_TOUR } from '@/tour/tours';
+import { isAccountAdmin } from '@/auth/roles';
 
 /**
  * Leadership → Overview (Admins and Leaders): the ministry's outcomes — from a
@@ -53,6 +56,12 @@ export default function Overview() {
         <div>
           <h1 className="text-xl">Overview</h1>
           <p className="mt-1 text-sm text-muted-strong">What’s come of sharing across {org.name}.</p>
+          <div className="mt-2">
+            <TourButton
+              steps={isAccountAdmin(membership?.role) ? ADMIN_TOUR : LEADER_TOUR}
+              label="Tour of the leadership tabs"
+            />
+          </div>
         </div>
         <RangePicker value={range} onChange={setRange} />
       </div>

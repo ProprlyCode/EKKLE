@@ -39,6 +39,7 @@ export default function SeekerLayout() {
                 key={t.to}
                 to={t.to}
                 end={t.end}
+                data-tour={`nav:${t.to}`}
                 className={({ isActive }) =>
                   'rounded-lg px-2.5 py-1.5 text-[13px] transition-colors ' +
                   (isActive ? 'font-medium text-sage' : 'text-muted hover:text-sage')
@@ -48,7 +49,7 @@ export default function SeekerLayout() {
               </NavLink>
             ))}
           </nav>
-          <Link to="/space/account" className="ml-auto text-[13px] text-muted hover:text-sage">
+          <Link to="/space/account" data-tour="nav:/space/account" className="ml-auto text-[13px] text-muted hover:text-sage">
             Account
           </Link>
         </div>
@@ -68,6 +69,7 @@ export default function SeekerLayout() {
               key={t.to}
               to={t.to}
               end={t.end}
+              data-tour={`nav:${t.to}`}
               className={({ isActive }) =>
                 'flex flex-col items-center gap-1 px-1 py-2.5 text-[11px] transition-colors ' +
                 (isActive ? 'font-medium text-sage' : 'text-muted')

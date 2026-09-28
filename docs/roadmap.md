@@ -23,6 +23,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | N4 Leader & member tools | **Built** (0042) — outcomes (member, ministry, Ekklē team; 30/90 days/all time), wallet cards, reply box on phones |
 | Address change requests | **Built** (0043) — Admin asks in Account; Ekklē team approves in Platform → Accounts; old addresses keep working |
 | Get started checklists | **Built** (0044) — Admins (Overview), members (QR page), seekers (Your space home) |
+| Guided tours | **Built** — seekers, members, Admins/Leaders; only when asked ("Take a quick tour") |
 | "What fits you?" quiz | Idea — recommend a reading plan, pace and reminder from time, read/listen, familiarity; listening needs a licensed Bible audio source |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
 | Custom domains · Visit us card · age question · Tailwind 4 | On hold |
@@ -215,6 +216,15 @@ done; hidden once all are done or when the person hides it.
   reminder · add to home screen (ticked when opened from the home screen).
 - `getting_started(area)`, `mark_getting_started` (only the three app-marked
   steps), `dismiss_getting_started`.
+
+## Guided tours — built (28 Sep 2026)
+
+"Take a quick tour" on Your space home, the QR page and Overview. Never
+starts by itself. Each step dims the page and lights one thing (a tab, your
+code, your photo…) with a short card: Back / Next / Skip, Esc to close, ← →
+to step. On phones the card sits at the bottom of the screen. Built in-house
+(src/tour), no library; no database. Steps live in src/tour/tours.ts — the
+leadership tour adds Account for Admins. The Get started checklists stay.
 
 ## "What fits you?" (idea, agreed Sep 2026 — not planned in detail)
 

@@ -65,7 +65,7 @@ export function ConversationsCard({ orgId }: { orgId: string }) {
   const waiting = items?.filter((c) => c.waiting_since && c.status === 'active').length ?? 0;
 
   return (
-    <Card className="p-0">
+    <Card className="p-0" data-tour="conversations">
       <div className="flex items-center justify-between gap-3 border-b border-edge/70 px-5 py-3">
         <span className="eyebrow">conversations</span>
         {items && waiting > 0 && (

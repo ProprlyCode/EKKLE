@@ -7,6 +7,8 @@ import { Spinner } from '@/ui/states';
 import { lastMessage } from '@/components/MessageList';
 import { InstallHint } from './InstallHint';
 import { GetStarted } from '@/components/GetStarted';
+import { TourButton } from '@/tour/Tour';
+import { SEEKER_TOUR } from '@/tour/tours';
 import { listPlans, type PlanSummary } from '@/bible/plans';
 
 /**
@@ -63,6 +65,7 @@ export default function SpaceHome() {
         <p className="text-[15px] leading-relaxed text-muted-strong">
           Your conversation and your studies, kept together — on any device.
         </p>
+        <TourButton steps={SEEKER_TOUR} label="Tour of Your space" />
       </header>
 
       <GetStarted area="seeker" />

@@ -15,6 +15,8 @@ import { FaithInAction } from './FaithInAction';
 import { PersonPhoto } from '@/components/TalkingTo';
 import { MyOutcomes } from '@/outcomes/MyOutcomes';
 import { GetStarted } from '@/components/GetStarted';
+import { TourButton } from '@/tour/Tour';
+import { MEMBER_TOUR } from '@/tour/tours';
 
 /**
  * Member home. The focal element is the keepsake card — the thing a member is
@@ -34,6 +36,7 @@ export default function MemberDashboard() {
 
   return (
     <div className="flex flex-col gap-8">
+      <TourButton steps={MEMBER_TOUR} label="Tour of your code page" />
       <GetStarted area="member" />
       <KeepsakeCard
         name={membership.name}

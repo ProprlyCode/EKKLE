@@ -61,7 +61,7 @@ export function InstallHint() {
   if (hidden || (!prompt && !isIos())) return null;
 
   return (
-    <section className="flex items-start gap-4 rounded-card border border-edge bg-card px-5 py-4">
+    <section data-tour="install" className="flex items-start gap-4 rounded-card border border-edge bg-card px-5 py-4">
       <img src="/icon-192.png" alt="" width={40} height={40} className="h-10 w-10 shrink-0 rounded-lg" />
       <div className="flex flex-1 flex-col gap-2">
         <p className="text-[15px] font-medium text-sage">Keep Your space on your home screen</p>
