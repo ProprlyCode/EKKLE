@@ -4,6 +4,7 @@ import { useSession } from '@/auth/SessionProvider';
 import { getPlatformOverview, type PlatformOverview, type Organization } from '@/data/platform';
 import { Card } from '@/ui/Card';
 import { Spinner, ErrorNote } from '@/ui/states';
+import { ConversationsCard } from './ConversationsCard';
 
 /**
  * Leadership → Overview (Admins and Leaders): the ministry's numbers
@@ -78,6 +79,7 @@ export default function Overview() {
         )}
       </Card>
 
+      <ConversationsCard orgId={org.id} />
     </div>
   );
 }

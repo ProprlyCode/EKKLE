@@ -135,7 +135,7 @@ export interface RecipientConversation {
   member_name: string;
   status: 'active' | 'blocked';
   messages: Array<{
-    sender_type: 'member' | 'recipient';
+    sender_type: 'member' | 'recipient' | 'note';
     body: string;
     created_at: string;
   }>;

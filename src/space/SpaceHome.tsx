@@ -4,6 +4,7 @@ import { getSeekerConnection, type SeekerConnection } from '@/data/seeker';
 import { listStudies, type StudySummary } from '@/data/studies';
 import { listSeekerResources, type SeekerResourceSummary } from '@/data/resources';
 import { Spinner } from '@/ui/states';
+import { lastMessage } from '@/components/MessageList';
 import { InstallHint } from './InstallHint';
 
 /**
@@ -41,7 +42,7 @@ export default function SpaceHome() {
 
   const member = convo?.member ?? null;
   const messages = convo?.messages ?? [];
-  const last = messages[messages.length - 1];
+  const last = lastMessage(messages);
   const waitingOnThem = last?.sender_type === 'recipient';
 
   const list = studies ?? [];

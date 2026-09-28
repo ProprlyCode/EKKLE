@@ -350,6 +350,19 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['messages']['Insert']>;
         Relationships: [];
       };
+      conversation_handoffs: {
+        Row: {
+          id: UUID;
+          conversation_id: UUID;
+          from_name: string;
+          to_member_id: UUID;
+          to_name: string;
+          created_at: Timestamp;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       connection_checkins: {
         Row: {
           id: UUID;
@@ -610,6 +623,8 @@ export interface Database {
       ministry_study_bank: { Args: Record<string, never>; Returns: Json };
       save_ministry_studies: { Args: { p_items: Json }; Returns: undefined };
       preview_study: { Args: { p_study_id: string }; Returns: Json };
+      leadership_conversations: { Args: Record<string, never>; Returns: Json };
+      reassign_conversation: { Args: { p_conversation_id: string; p_to_member: string }; Returns: undefined };
       study_library: { Args: Record<string, never>; Returns: Json };
       save_study_series: { Args: { p_id: string | null; p_title: string }; Returns: string };
       lock_study_series: { Args: { p_id: string }; Returns: undefined };

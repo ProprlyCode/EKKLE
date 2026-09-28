@@ -28,6 +28,10 @@ Deno.serve(async (req) => {
   if (!fromOurTrigger(req)) return new Response('unauthorized', { status: 401 });
   try {
     const payload = await req.json();
+    if (payload.record?.kind === 'nudge' || payload.record?.kind === 'escalate') {
+      await followUp(payload.record.kind, payload.record.conversation_id);
+      return new Response('ok', { status: 200 });
+    }
     const record: MessageRecord | undefined = payload.record;
     if (!record?.conversation_id) {
       return new Response('ignored', { status: 200 });
@@ -115,3 +119,53 @@ Deno.serve(async (req) => {
     return new Response('error', { status: 200 }); // never block the insert
   }
 });
+
+// Follow-through (migration 0035): someone has been waiting for a reply.
+//   nudge    (24h) → the member, with a link to the conversation
+//   escalate (48h) → the ministry's Admins and Leaders, metadata only
+async function followUp(kind: 'nudge' | 'escalate', conversationId: string) {
+  const { data: convo } = await supabase
+    .from('conversations')
+    .select('id, org_id, member:users(name, email, active), recipient:recipients(first_name)')
+    .eq('id', conversationId)
+    .single();
+  if (!convo) return;
+  const member = convo.member as unknown as { name: string; email: string | null; active: boolean };
+  const firstName =
+    (convo.recipient as unknown as { first_name: string | null }).first_name || 'Someone';
+  const { base, name: accountName } = await accountInfo(supabase, convo.org_id);
+  const from = fromAccount(accountName);
+
+  if (kind === 'nudge') {
+    if (!member.active) return;
+    await sendEmail(
+      member.email,
+      `${firstName} is waiting to hear from you`,
+      `${firstName} wrote to you a day ago and hasn't heard back yet.\n\n` +
+        (base ? `Reply here: ${base}/app/messages/${convo.id}\n` : ''),
+      from,
+    );
+    return;
+  }
+
+  const { data: leaders } = await supabase
+    .from('users')
+    .select('email')
+    .eq('org_id', convo.org_id)
+    .eq('active', true)
+    .is('removed_at', null)
+    .in('role', ['admin', 'leader']);
+  for (const l of leaders ?? []) {
+    const email = (l as { email: string | null }).email;
+    if (!email || email === member.email) continue;
+    await sendEmail(
+      email,
+      `${firstName} has been waiting two days`,
+      `${firstName} wrote to ${member.name} two days ago and hasn't had a reply yet. ` +
+        `You may want to check in with ${member.name}, or move the conversation to someone else.\n\n` +
+        (base ? `Conversations: ${base}/leadership/overview\n` : '') +
+        `\nThis note never includes what anyone wrote.`,
+      from,
+    );
+  }
+}

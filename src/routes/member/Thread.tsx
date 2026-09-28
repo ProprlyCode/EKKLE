@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   getMessages,
+  getHandoffs,
   getConversationMeta,
   sendMemberMessage,
   markConversationRead,
@@ -13,7 +14,7 @@ import {
   type ConversationMeta,
   type CheckinValue,
 } from '@/data/conversations';
-import { MessageList } from '@/components/MessageList';
+import { MessageList, type ChatMessage } from '@/components/MessageList';
 import { TextArea } from '@/ui/Field';
 import { Button } from '@/ui/Button';
 import { Spinner, ErrorNote } from '@/ui/states';
@@ -23,6 +24,11 @@ export default function Thread() {
   const { conversationId = '' } = useParams();
   const [meta, setMeta] = useState<ConversationMeta | null | undefined>(undefined);
   const [messages, setMessages] = useState<Message[]>([]);
+  // Where the conversation came from, if it was passed on (0035).
+  const [notes, setNotes] = useState<ChatMessage[]>([]);
+  const shown: ChatMessage[] = [...messages, ...notes].sort((a, b) =>
+    a.created_at.localeCompare(b.created_at),
+  );
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +53,19 @@ export default function Thread() {
         void markConversationRead(conversationId);
       })
       .catch(() => active && setError('Couldn’t load this conversation.'));
+
+    getHandoffs(conversationId)
+      .then((h) =>
+        active &&
+        setNotes(
+          h.map((x) => ({
+            sender_type: 'note' as const,
+            body: `${x.from_name} passed this conversation to ${x.to_name}.`,
+            created_at: x.created_at,
+          })),
+        ),
+      )
+      .catch(() => {});
 
     const unsub = subscribeToMessages(conversationId, () => void refresh());
     return () => {
@@ -179,7 +198,7 @@ export default function Thread() {
         ) : messages.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted">No messages yet.</p>
         ) : (
-          <MessageList messages={messages} mine="member" />
+          <MessageList messages={shown} mine="member" />
         )}
         <div ref={bottomRef} />
       </div>

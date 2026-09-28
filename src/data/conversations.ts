@@ -110,6 +110,50 @@ export async function getMessages(conversationId: string): Promise<Message[]> {
   return data ?? [];
 }
 
+/** When the conversation moved between members (0035), oldest first. */
+export async function getHandoffs(
+  conversationId: string,
+): Promise<Array<{ from_name: string; to_name: string; created_at: string }>> {
+  const { data, error } = await supabase
+    .from('conversation_handoffs')
+    .select('from_name, to_name, created_at')
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+// ---------------------------------------------------------------- leadership
+// Every conversation in the ministry — metadata only, never what anyone wrote.
+
+export interface LeadershipConversation {
+  id: string;
+  first_name: string;
+  member_id: string;
+  member_name: string;
+  member_active: boolean;
+  status: ConversationStatus;
+  started_at: string;
+  last_at: string | null;
+  /** Set when the last message is theirs and nobody has replied. */
+  waiting_since: string | null;
+}
+
+export async function listLeadershipConversations(): Promise<LeadershipConversation[]> {
+  const { data, error } = await supabase.rpc('leadership_conversations');
+  if (error) throw error;
+  return (data as unknown as LeadershipConversation[]) ?? [];
+}
+
+/** Move a conversation to another member; the history moves with it. */
+export async function reassignConversation(conversationId: string, toMember: string): Promise<void> {
+  const { error } = await supabase.rpc('reassign_conversation', {
+    p_conversation_id: conversationId,
+    p_to_member: toMember,
+  });
+  if (error) throw error;
+}
+
 export async function sendMemberMessage(
   conversationId: string,
   body: string,

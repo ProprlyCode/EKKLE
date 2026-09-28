@@ -1,7 +1,8 @@
 import { cn } from '@/lib/cn';
 
 export interface ChatMessage {
-  sender_type: 'member' | 'recipient';
+  /** 'note': a quiet line from Ekklē (e.g. the conversation moved to someone). */
+  sender_type: 'member' | 'recipient' | 'note';
   body: string;
   created_at: string;
 }
@@ -9,6 +10,7 @@ export interface ChatMessage {
 /**
  * Message bubbles. `mine` says which side is the current viewer, so their
  * messages sit on the right in sage; the other side sits left on a cream card.
+ * Notes sit centred, small, between the messages.
  */
 export function MessageList({
   messages,
@@ -20,6 +22,13 @@ export function MessageList({
   return (
     <div className="flex flex-col gap-2">
       {messages.map((m, i) => {
+        if (m.sender_type === 'note') {
+          return (
+            <p key={i} role="note" className="py-2 text-center text-[13px] text-muted">
+              {m.body}
+            </p>
+          );
+        }
         const isMine = m.sender_type === mine;
         return (
           <div
@@ -41,4 +50,12 @@ export function MessageList({
       })}
     </div>
   );
+}
+
+/** The last real message (not a note). */
+export function lastMessage<T extends ChatMessage>(messages: T[]): T | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].sender_type !== 'note') return messages[i];
+  }
+  return undefined;
 }

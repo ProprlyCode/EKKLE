@@ -4,19 +4,39 @@ Approved by Jonathan. Built in order, one sprint at a time, each shipped through
 CI (checks → migrations → site). Seeker item "age question at sign-up" is **on
 hold** pending a decision; Tailwind 4 is **on hold**.
 
+## Where we are (28 Sep 2026)
+
+| Area | Status |
+|---|---|
+| N1 Notifications | **Built** — emails through Resend, sign-in code + link, sign-in emails in the account's name |
+| Your space | **Built** — Home, Messages, Studies, Bible, Resources, Account; installable |
+| Accounts on their own addresses | **Built** — subdomains, branding (tenancy.md phases 1–2b) |
+| Roles & platform console | **Built** — steps 1–3 (accounts-and-roles.md); remove people |
+| Study bank · study editor | **Built** — shared bank, series, Word import, answers after submitting |
+| Built-in Bible | **Built** — BSB, KJV, ESV; search, highlights, notes, study references |
+| Studies 2–27 | **In progress** — 6 of 27 in hand; imported through the editor |
+| N2 Follow-through | **Built** — nudges (24h / 48h), move one conversation |
+| Bible reading plans · Faith in action prompts | Agreed — next to plan (see "Next ideas") |
+| N3 Seeker experience | Partly — installable done; "who you're talking to" card, reminders left |
+| N4 Leader & member tools | Partly — study editor done; outcomes view, member help left |
+| Address change requests | Not started (roles step 4) |
+| Self-serve ministry sign-up + approval | Later (roles step 5) |
+| Custom domains · Visit us card · age question · Tailwind 4 | On hold |
+
 ## Decisions
 
 | Topic | Decision |
 |---|---|
 | Email | **Resend**, sending from ekkle.org (Jonathan sets up the account + DNS) |
-| Studies 2–27 | Jonathan gathers them in the Study 1 format; converted with `scripts/convert_study.py` |
+| Studies 2–27 | Jonathan gathers them in the Study 1 format and imports them in Platform → Studies (Word import, 0034); `scripts/convert_study.py` is no longer needed |
 | "Who you're talking to" card | Optional member **photo** + name + church (initials when no photo) |
 | Unanswered messages | Nudge the member at **24h**; metadata-only leader alert at **48h** |
 
-## N1 — Notifications (first)
+## N1 — Notifications — built
 
-Nothing emails anyone today: the code in `supabase/functions/notify*` has never
-been deployed, and sign-in emails use Supabase's built-in, rate-limited sender.
+*Built:* `notify`, `notify-report` and `send-auth-email` are deployed by CI;
+sign-in emails go through the Send Email Hook and Resend (tenancy.md 2b). The
+original plan:
 
 - CI deploys Edge Functions (`notify`, `notify-report`) and sets their secrets.
 - Database triggers (a migration) call them on new messages / new reports.
@@ -61,7 +81,20 @@ On hold: **Visit us** card (must fit different account owners — church,
 personal ministry — think through first). Later: Your person photo card,
 email preferences.
 
-## N2 — Follow-through
+## N2 — Follow-through (built, 0035)
+
+*Already covered elsewhere:* resuming on any device (Your space), and handing a
+removed person's conversations to a teammate (0032).
+
+*Built (0035):* a job every 15 minutes (pg_cron) finds people whose last
+message has gone unanswered — the member is emailed at 24 hours, the
+ministry's Admins and Leaders get a metadata-only note at 48 hours, once per
+wait (waits older than a week when it shipped were skipped). Overview →
+Conversations lists every conversation (metadata only, waiting ones first)
+with **Move to…**: the history moves, the person exploring sees "You're now
+talking with …" in the conversation (no email), and the new member sees who
+passed it on. Fixed with it: Your space now follows a conversation that moved
+(also after Remove).
 
 - Unanswered-message nudges: 24h email to the member, 48h metadata-only alert to
   the church's leaders (scheduled with `pg_cron`).
@@ -70,7 +103,7 @@ email preferences.
 - Seeker can **resume a conversation on any device**: once they've given their
   email, the same email sign-in (link or code) reopens it.
 
-## N3 — Seeker experience
+## N3 — Seeker experience (installable: built with Your space)
 
 - "Who you're talking to" card before writing: photo (optional upload in the
   member profile, Supabase Storage), name, church, and one line on what happens
@@ -81,21 +114,23 @@ email preferences.
 
 ## N4 — Leader & member tools
 
-- Study editor for leaders (create/edit studies and pages, fill-in blanks,
-  live preview, draft/approved) — replaces SQL seeding.
+- ~~Study editor~~ — *built (0034, below).*
 - Outcomes view: codes shared → flows finished → conversations → met in person
   → studies started/completed, per church and per member.
 - Member help: printable / wallet QR card, a few conversation starters, a
   better mobile inbox.
 
-## N5 — Studies 2–27 (when the source files are ready)
+## N5 — Studies 2–27 (in progress)
 
-Convert with the existing converter, seed via migration, proof in the reader.
+Import in Platform → Studies → Import from Word, check, preview, publish. Lock
+the series once all 27 are in. (6 of 27 in hand, Sep 2026.)
 
-## Then: multi-church (C1–C4)
+## Multi-church — built differently than first planned
 
-As already planned: path-based tenancy (`ekkle.org/c/<slug>`), gated church
-sign-up, church owners manage admins, per-church branding, platform console.
+Instead of paths (`ekkle.org/c/<slug>`), each ministry has its own address
+(`<ministry>.ekkle.org`) — see tenancy.md. Ministry roles, the platform console
+and branding are built (accounts-and-roles.md steps 1–3). Left: address change
+requests (step 4) and self-serve sign-up with approval (step 5, later).
 
 ## On hold
 
@@ -128,6 +163,23 @@ sign-up, church owners manage admins, per-church branding, platform console.
   `ESV_API_KEY` is set.
 - ESV terms: non-commercial, never stored (the database keeps only references
   — `bible_marks`, `bible_state`), copyright notice shown under ESV text.
+
+## Next ideas (agreed Sep 2026, to plan in detail)
+
+**Bible reading plans** — in the Bible tab, for people exploring and the team.
+- Plans come from Ekklē (a starting set, e.g. John in 21 days, the Gospels in
+  90 days, the Bible in a year) and ministries add their own, like the study
+  bank.
+- Simple: today's passage opens in the Bible; tick it off; catch up any time;
+  no streaks.
+- *Read it together:* a ministry starts a plan for its people; each reader sees
+  that others are reading along (a count, never names or scores).
+- Opt-in daily email with today's reading (never on by default; one tap to stop).
+
+**Faith in action** — on the member's QR page (their code and share link).
+- A "This week" prompt beside the code, plus a list to browse: everyday
+  moments, ways to share the code, conversation starters.
+- Ekklē writes a starting set; a ministry's Admins and Leaders add their own.
 
 ## Study editor (Sep 2026)
 

@@ -20,7 +20,8 @@ export interface SeekerConnection {
   member: { name: string; short_message: string } | null;
   status: 'active' | 'blocked';
   messages: Array<{
-    sender_type: 'member' | 'recipient';
+    /** 'note': the conversation moved to someone else (0035). */
+    sender_type: 'member' | 'recipient' | 'note';
     body: string;
     created_at: string;
   }>;
