@@ -67,6 +67,18 @@ jobs:
         run: npm test
       - name: Build
         run: npx vite build
+      # The Edge Functions only bundle at the production deploy step; load
+      # each one here (every file it imports is fetched and parsed) so a
+      # mistake shows up before anything deploys.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Edge Functions load
+        run: |
+          for f in supabase/functions/*/index.ts; do
+            echo "Loading $f"
+            deno install --no-lock --entrypoint "$f"
+          done
 
   database:
     name: Migrations apply cleanly

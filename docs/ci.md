@@ -7,7 +7,7 @@ way anything reaches production.
 
 | Job | When | What it proves |
 |---|---|---|
-| App checks | every push / PR | typecheck, lint, unit tests (`npm test`), production build |
+| App checks | every push / PR | typecheck, lint, unit tests (`npm test`, no database settings — keep tested code free of the Supabase client), production build, Edge Functions load |
 | Migrations apply cleanly | every push / PR | a fresh Postgres 17 applies every migration + seed; SQL lint; **database security tests** (`supabase/tests/`, pgTAP) |
 | End-to-end | every push / PR | Playwright drives the real app against a full local Supabase: waitlist, recipient → member → reply, seeker sign-up → Study 1 |
 | Staging | `main`, after all three pass | same commit → staging database (migrations + demo seed + demo logins) and **staging.ekkle.org**, then smoke tests there (`e2e-staging/`) as real personas |
@@ -17,6 +17,11 @@ way anything reaches production.
 
 If any check fails, nothing deploys. Vercel's own auto-deploy for `main` is
 off (`vercel.json`), so nothing skips the line.
+
+- **Edge Functions load** (App checks): each function in `supabase/functions`
+  is loaded with Deno (`deno install --entrypoint`), so a file that can't be
+  parsed or an import that can't be found fails here, before any deploy —
+  rather than at the production "Deploy migrations" step.
 
 ## Day to day
 
