@@ -99,3 +99,22 @@ test('a ministry shows its own tabs by role, never the platform', async ({ brows
   await member.goto('/leadership/account');
   await member.waitForURL('**/app');
 });
+
+test('"Sign in" on ekkle.org takes the Ekklē team to the console, not to find a ministry', async ({ page }) => {
+  // Signed out: Find your church or ministry, with a way in for the team.
+  await page.goto(`${PLATFORM}find`);
+  await expect(page.getByRole('heading', { name: 'Find your church or ministry' })).toBeVisible();
+  await page.getByRole('link', { name: 'On the Ekklē team? Sign in here' }).click();
+  await page.waitForURL('**/sign-in');
+
+  // Signed in on the team: /find goes straight to the console.
+  await signIn(page, PLATFORM, OWEN.email, OWEN.password);
+  await page.waitForURL('**/platform');
+  await page.goto(`${PLATFORM}find`);
+  await page.waitForURL('**/platform');
+  await expect(page.getByRole('heading', { name: 'Accounts' })).toBeVisible();
+
+  // An account page opened on ekkle.org offers the console too.
+  await page.goto(`${PLATFORM}app`);
+  await expect(page.getByRole('link', { name: /Go to the console/ })).toBeVisible();
+});

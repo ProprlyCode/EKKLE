@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/auth/SessionProvider';
+import { claimPlatformSeat } from '@/data/platformTeam';
 import { Wordmark } from '@/components/Wordmark';
 import { TextInput } from '@/ui/Field';
 import { accountUrl, type AccountAddress } from './address';
@@ -18,7 +19,9 @@ interface Found extends AccountAddress {
  */
 export default function FindAccount() {
   const { pathname, search } = useLocation();
-  const { membership } = useSession();
+  const { membership, session } = useSession();
+  // The Ekklē team signs in on ekkle.org itself, not on a ministry's address.
+  const [onTeam, setOnTeam] = useState(false);
   const [mine, setMine] = useState<Found | null>(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Found[]>([]);
@@ -40,6 +43,17 @@ export default function FindAccount() {
   }, [membership]);
 
   useEffect(() => {
+    if (!session) return;
+    let active = true;
+    claimPlatformSeat()
+      .then((seat) => active && setOnTeam(!!seat))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [session]);
+
+  useEffect(() => {
     if (query.trim().length < 2) {
       setResults([]);
       return;
@@ -56,6 +70,9 @@ export default function FindAccount() {
     };
   }, [query]);
 
+  // "Sign in" on ekkle.org leads here: the Ekklē team goes straight to its console.
+  if (onTeam && pathname === '/find') return <Navigate to="/platform" replace />;
+
   return (
     <main className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-8 px-5 py-16">
       <Wordmark />
@@ -65,6 +82,19 @@ export default function FindAccount() {
           Each church and ministry on Ekklē has its own address. Find yours to continue.
         </p>
       </div>
+
+      {onTeam && (
+        <Link
+          to="/platform"
+          className="card flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:border-sage/40"
+        >
+          <span>
+            <span className="block text-[12px] uppercase tracking-wide text-muted">Ekklē team</span>
+            <span className="font-serif text-lg text-sage">Go to the console</span>
+          </span>
+          <span aria-hidden className="text-muted">→</span>
+        </Link>
+      )}
 
       {mine && (
         <a
@@ -105,6 +135,12 @@ export default function FindAccount() {
           <p className="text-[13px] text-muted">No match yet — check the spelling, or ask whoever invited you for the link.</p>
         )}
       </div>
+
+      {!session && (
+        <Link to="/sign-in" className="text-center text-[13px] text-muted hover:text-sage">
+          On the Ekklē team? Sign in here
+        </Link>
+      )}
     </main>
   );
 }
