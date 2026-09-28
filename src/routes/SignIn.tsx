@@ -47,9 +47,14 @@ export default function SignIn() {
     try {
       await sendMagicLink(email);
       setStatus('sent');
-    } catch {
+    } catch (err) {
       setStatus('idle');
-      setError('That didn’t send. Check the address and try again.');
+      const status = (err as { status?: number } | null)?.status;
+      setError(
+        status === 429
+          ? 'We just emailed you — check your inbox (or wait a minute and try again).'
+          : 'That didn’t send. Check the address and try again.',
+      );
     }
   }
 

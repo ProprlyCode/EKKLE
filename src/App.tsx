@@ -27,6 +27,8 @@ import { PlatformGate } from '@/platform/PlatformGate';
 import PlatformLayout from '@/platform/PlatformLayout';
 import PlatformAccounts from '@/platform/Accounts';
 import PlatformSettings from '@/platform/Settings';
+import PlatformTeam from '@/platform/Team';
+import PlatformWaitlist from '@/platform/Waitlist';
 import RecipientExperience from '@/recipient/RecipientExperience';
 import SeekerGate from '@/space/SeekerGate';
 import SeekerLayout from '@/space/SeekerLayout';
@@ -55,6 +57,8 @@ export default function App() {
   const account = useAccount();
   if (account.status === 'loading') return <FullPageLoading />;
   if (account.status === 'unknown') return <UnknownAddress />;
+  if (account.status === 'account' && account.account.status === 'suspended')
+    return <PausedAddress name={account.account.name} />;
   return account.status === 'platform' ? <PlatformRoutes /> : <AccountRoutes />;
 }
 
@@ -81,6 +85,8 @@ function PlatformRoutes() {
       <Route element={<PlatformGate />}>
         <Route element={<PlatformLayout />}>
           <Route path="/platform" element={<PlatformAccounts />} />
+          <Route path="/platform/team" element={<PlatformTeam />} />
+          <Route path="/platform/waitlist" element={<PlatformWaitlist />} />
           <Route path="/platform/settings" element={<PlatformSettings />} />
         </Route>
       </Route>
@@ -155,6 +161,21 @@ function AccountRoutes() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
+  );
+}
+
+/** A suspended account: its address is offline (docs/accounts-and-roles.md). */
+function PausedAddress({ name }: { name: string }) {
+  return (
+    <main className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-6 px-4 py-16 text-center">
+      <Wordmark />
+      <div className="card w-full px-6 py-8">
+        <h1 className="text-xl">{name} is paused</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-strong">
+          This ministry’s space isn’t available right now. Please check back later.
+        </p>
+      </div>
+    </main>
   );
 }
 

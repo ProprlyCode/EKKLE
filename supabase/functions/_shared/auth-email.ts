@@ -17,6 +17,11 @@ export interface AuthEmailInput {
   link: string;
   /** The account the person signed in on, or null for Ekklē itself. */
   account: EmailAccount | null;
+  /**
+   * They have a pending invitation there (to the ministry, or on ekkle.org to
+   * the Ekklē team): the sign-in reads as an invitation.
+   */
+  invited?: boolean;
 }
 
 export interface RenderedEmail {
@@ -53,9 +58,9 @@ const COPY: Record<string, Copy> = {
   },
   invite: {
     subject: (who) => `You’re invited to ${who}`,
-    lead: 'You’ve been invited to join. Tap the button to accept and sign in.',
+    lead: 'You’ve been invited to join. Tap the button to accept and sign in, or enter this code where you started:',
     button: 'Accept the invitation',
-    showCode: false,
+    showCode: true,
   },
   email_change: {
     subject: (who) => `Confirm your new email for ${who}`,
@@ -79,9 +84,11 @@ function expiry(copy: Copy): string {
   return 'The link works once and expires soon.';
 }
 
-export function renderAuthEmail({ action, token, link, account }: AuthEmailInput): RenderedEmail {
-  const copy = COPY[action] ?? COPY.magiclink;
-  const who = account?.name ?? 'Ekklē';
+export function renderAuthEmail({ action, token, link, account, invited = false }: AuthEmailInput): RenderedEmail {
+  const signIn = action === 'magiclink' || action === 'signup';
+  const copy = invited && signIn ? COPY.invite : (COPY[action] ?? COPY.magiclink);
+  // An invitation on ekkle.org is to the Ekklē team.
+  const who = account?.name ?? (invited && signIn ? 'the Ekklē team' : 'Ekklē');
   const accent = account?.accent && /^#[0-9a-f]{6}$/i.test(account.accent) ? account.accent : SAGE;
   const subject = copy.subject(who);
 

@@ -12,6 +12,7 @@ export interface Account {
   kind: 'church' | 'personal_ministry';
   accent_color: string | null;
   logo_path: string | null;
+  status: 'active' | 'suspended';
 }
 
 export type AccountState =

@@ -53,11 +53,13 @@ Deno.serve(async (req) => {
 
   // The account whose address the person started on (null on ekkle.org).
   let account: EmailAccount | null = null;
+  let accountId: string | null = null;
   const host = hostOf(d.redirect_to) ?? hostOf(d.site_url);
   if (host) {
     const { data } = await supabase.rpc('resolve_account', { p_host: host });
     if (data) {
-      const a = data as { name: string; accent_color: string | null; logo_path: string | null };
+      const a = data as { id: string; name: string; accent_color: string | null; logo_path: string | null };
+      accountId = a.id;
       account = {
         name: a.name,
         accent: a.accent_color,
@@ -68,8 +70,15 @@ Deno.serve(async (req) => {
     }
   }
 
+  // A pending invitation (to this ministry, or on ekkle.org to the Ekklē team)?
+  const { data: invited } = await supabase.rpc('auth_email_is_invitation', {
+    p_email: user.email,
+    p_org: accountId,
+  });
+
   const action = d.email_action_type;
   const email = renderAuthEmail({
+    invited: invited === true,
     action,
     token: d.token,
     link: verifyLink(SUPABASE_URL, d.token_hash, action, d.redirect_to || d.site_url),

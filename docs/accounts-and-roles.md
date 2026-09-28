@@ -92,8 +92,15 @@ demoted.
    numbers and settings move to its own Overview tab (settings: Admins only).
    Members can no longer edit their own role directly (only name and
    message). pgTAP (08_roles) for both permission tables; e2e for the split.
-2. **Platform console** — Accounts (list with metadata, create + invite first
-   Admin, suspend), Team (Owner invites Admins/Support), Waitlist.
+2. **Platform console** — *built (0027–0029).* Accounts: create (name,
+   kind, address checked as you type, first Admin) — the account starts with
+   the standard welcome flow and its Admin is emailed an invitation ("You're
+   invited to <Ministry>", via the sign-in email hook); resend; pause /
+   reactivate (a paused address shows "<Ministry> is paused" and nothing on
+   it works). Team: Owners invite (emailed "You're invited to the Ekklē
+   team"), change roles, remove; always one Owner. Waitlist: every sign-up,
+   with "Create account" filling in the form. Settings: your name and
+   password (the first sign-in on ekkle.org is by code, then a password).
 3. **Ministry team** — People with roles and invitations by role, join code
    on/off; the settings now in the platform console (responder, join code,
    offer on/off) move to the ministry's Account tab.

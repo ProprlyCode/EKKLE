@@ -557,6 +557,17 @@ export interface Database {
         Args: Record<string, never>;
         Returns: Json;
       };
+      platform_subdomain_available: { Args: { p_subdomain: string }; Returns: boolean };
+      platform_create_account: {
+        Args: { p_name: string; p_kind: string; p_subdomain: string; p_admin_name: string; p_admin_email: string };
+        Returns: Json;
+      };
+      platform_set_account_status: { Args: { p_org_id: string; p_status: string }; Returns: undefined };
+      platform_team_list: { Args: Record<string, never>; Returns: Json };
+      platform_invite_member: { Args: { p_email: string; p_name: string; p_role: string }; Returns: undefined };
+      platform_set_member_role: { Args: { p_id: string; p_role: string }; Returns: undefined };
+      platform_remove_member: { Args: { p_id: string }; Returns: undefined };
+      platform_waitlist: { Args: Record<string, never>; Returns: Json };
       set_my_platform_name: {
         Args: { p_name: string };
         Returns: undefined;

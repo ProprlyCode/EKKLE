@@ -44,6 +44,18 @@ describe('sign-in email', () => {
     expect(e.html).not.toContain('999999');
   });
 
+  it('an invitation to a ministry reads as one, with code and link', () => {
+    const e = renderAuthEmail({ action: 'magiclink', token: '424242', link: 'https://l.test', account: grace, invited: true });
+    expect(e.subject).toBe('You’re invited to Grace Chapel');
+    expect(e.html).toContain('Accept the invitation');
+    expect(e.html).toContain('424242');
+  });
+
+  it('an invitation on ekkle.org is to the Ekklē team', () => {
+    const e = renderAuthEmail({ action: 'signup', token: '1', link: 'https://l.test', account: null, invited: true });
+    expect(e.subject).toBe('You’re invited to the Ekklē team');
+  });
+
   it('ignores an accent that is not a colour', () => {
     const e = renderAuthEmail({ action: 'magiclink', token: '1', link: 'https://l.test', account: { ...grace, accent: 'red;x' } });
     expect(e.html).toContain('background: #3f4a3a');
