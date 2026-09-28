@@ -77,8 +77,9 @@ it's live (SSL is automatic). Sign-in is allowed on it automatically.
    Open: where the Vercel token lives (a Supabase function vs a scheduled
    GitHub sync). Later still: sending from the church's own domain (verified
    in Resend).
-4. **Platform console** — create accounts, pick their subdomain, see them all;
-   "find your church" on ekkle.org.
+4. **Platform console** — *built* (accounts-and-roles.md step 2): create
+   accounts, pick their subdomain, see them all; "find your church" on
+   ekkle.org.
 
 ## Open
 
