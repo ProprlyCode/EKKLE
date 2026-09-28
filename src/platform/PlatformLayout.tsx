@@ -7,6 +7,7 @@ import { PLATFORM_ROLE_LABEL, usePlatformRole } from './PlatformGate';
 const NAV: NavItem[] = [
   { to: '/platform', label: 'Accounts' },
   { to: '/platform/team', label: 'Team' },
+  { to: '/platform/studies', label: 'Studies', end: false },
   { to: '/platform/waitlist', label: 'Waitlist' },
   { to: '/platform/settings', label: 'Settings' },
 ];
@@ -17,7 +18,8 @@ export default function PlatformLayout() {
   const role = usePlatformRole();
   return (
     <AppShell
-      nav={NAV}
+      // Studies are kept by Owners and Admins.
+      nav={role === 'support' ? NAV.filter((n) => n.to !== '/platform/studies') : NAV}
       right={
         <span className="flex items-center gap-3">
           {role && <span className="eyebrow">{PLATFORM_ROLE_LABEL[role]}</span>}

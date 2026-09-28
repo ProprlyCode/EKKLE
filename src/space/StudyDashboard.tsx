@@ -109,14 +109,16 @@ export default function StudyDashboard() {
           )}
 
           {/* Full list */}
-          <section className="flex flex-col gap-3">
-            <span className="eyebrow">all studies</span>
-            <ol className="flex flex-col gap-3">
-              {studies.map((s, i) => (
-                <StudyRow key={s.id} study={s} index={i} />
-              ))}
-            </ol>
-          </section>
+          {groupBySeries(studies).map(([series, list], g, groups) => (
+            <section key={series ?? g} className="flex flex-col gap-3">
+              <span className="eyebrow">{groups.length > 1 && series ? series : 'all studies'}</span>
+              <ol className="flex flex-col gap-3">
+                {list.map((s, i) => (
+                  <StudyRow key={s.id} study={s} index={i} />
+                ))}
+              </ol>
+            </section>
+          ))}
         </>
       )}
     </div>
@@ -169,4 +171,18 @@ function StudyRow({ study, index }: { study: StudySummary; index: number }) {
       </Link>
     </li>
   );
+}
+
+/** Studies by series, in the order they come. */
+function groupBySeries(studies: StudySummary[]): Array<[string | null, StudySummary[]]> {
+  const groups: Array<[string | null, StudySummary[]]> = [];
+  for (const s of studies) {
+    const key = s.series ?? null;
+    const last = groups[groups.length - 1];
+    const found = groups.find(([k]) => k === key);
+    if (found) found[1].push(s);
+    else if (last && last[0] === key) last[1].push(s);
+    else groups.push([key, [s]]);
+  }
+  return groups;
 }

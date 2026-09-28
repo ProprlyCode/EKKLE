@@ -226,6 +226,9 @@ export interface Database {
           title: string;
           tagline: string | null;
           status: SequenceStatus;
+          series_id: UUID;
+          answers: string[];
+          draft: Json | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -607,6 +610,15 @@ export interface Database {
       ministry_study_bank: { Args: Record<string, never>; Returns: Json };
       save_ministry_studies: { Args: { p_items: Json }; Returns: undefined };
       preview_study: { Args: { p_study_id: string }; Returns: Json };
+      study_library: { Args: Record<string, never>; Returns: Json };
+      save_study_series: { Args: { p_id: string | null; p_title: string }; Returns: string };
+      lock_study_series: { Args: { p_id: string }; Returns: undefined };
+      create_study: { Args: { p_series: string; p_draft: Json }; Returns: string };
+      editor_study: { Args: { p_id: string }; Returns: Json };
+      save_study_draft: { Args: { p_id: string; p_draft: Json }; Returns: undefined };
+      publish_study: { Args: { p_id: string }; Returns: undefined };
+      discard_study_draft: { Args: { p_id: string }; Returns: undefined };
+      move_study: { Args: { p_id: string; p_by: number }; Returns: undefined };
       member_conversation_count: { Args: { p_user_id: string }; Returns: number };
       remove_member: { Args: { p_user_id: string; p_hand_to: string | null }; Returns: undefined };
       set_member_role: { Args: { p_user_id: string; p_role: string }; Returns: Json };

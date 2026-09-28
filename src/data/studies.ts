@@ -24,6 +24,7 @@ export interface StudySummary {
   locked: boolean;
   started: boolean;
   last_page: number;
+  series?: string | null;
 }
 
 export interface StudyDetail {
@@ -32,7 +33,11 @@ export interface StudyDetail {
   title: string;
   tagline: string | null;
   locked: boolean;
+  /** The series it belongs to. */
+  series?: string | null;
   pages: StudyPage[];
+  /** The intended answers — once the study is submitted (and in previews). */
+  answers?: string[] | null;
   progress: {
     last_page: number;
     answers: Record<string, string>;
@@ -89,6 +94,7 @@ export interface BankStudy {
   title: string;
   tagline: string | null;
   source: 'ekkle' | 'ministry';
+  series?: string | null;
   enabled: boolean;
   /** Its place in the unlock order (only when on). */
   number: number | null;

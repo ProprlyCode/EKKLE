@@ -46,16 +46,32 @@ function countBlanks(page: StudyPage): number {
  * (Resources → Bible studies). Every page and blank works; nothing is saved,
  * and the closing page returns to Resources.
  */
-export default function StudyReader({ preview = false }: { preview?: boolean }) {
+export default function StudyReader({
+  preview = false,
+  draft,
+  onClose,
+}: {
+  preview?: boolean;
+  /** The study editor's preview: this content, not a saved study. */
+  draft?: StudyDetail;
+  onClose?: () => void;
+}) {
   const { studyId = '' } = useParams();
   const navigate = useNavigate();
   const backTo = preview ? '/leadership/resources' : '/space/studies';
+  const leave = () => (onClose ? onClose() : navigate(backTo));
+  // Preview: after "Submit answers", show the answers as people would.
+  const [previewSubmitted, setPreviewSubmitted] = useState(false);
   const [study, setStudy] = useState<StudyDetail | null | undefined>(undefined);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1); // 1-indexed; last page is the submit page
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (draft) {
+      setStudy(draft);
+      return;
+    }
     let active = true;
     (preview ? previewStudy(studyId) : getStudy(studyId))
       .then((data) => {
@@ -70,7 +86,7 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
     return () => {
       active = false;
     };
-  }, [studyId, preview]);
+  }, [studyId, preview, draft]);
 
   // Blank offsets: the global index of the first blank on each content page.
   const pageBlankStart = useMemo(() => {
@@ -89,7 +105,7 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
   // Persist place + answers, debounced, whenever they change.
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!study || study.locked || preview) return;
+    if (!study || study.locked || preview || draft) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       void saveStudyProgress(study.id, page, answers);
@@ -122,7 +138,7 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
               ? 'It may have moved. Head back to the library to keep going.'
               : 'Finish the study before this one, and it opens up next.'}
           </p>
-          <Button variant="quiet" onClick={() => navigate(backTo)} className="mt-2">
+          <Button variant="quiet" onClick={leave} className="mt-2">
             {preview ? 'Back to resources' : 'Back to studies'}
           </Button>
         </div>
@@ -140,15 +156,21 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
 
   async function onSubmit() {
     if (!study) return;
-    if (preview) return navigate(backTo);
+    if (preview || draft) return setPreviewSubmitted(true);
     setSubmitting(true);
     try {
       await completeStudy(study.id, answers);
-      navigate('/space/studies', { state: { completed: study.id } });
+      // Stay here: the answers are shown now that it's submitted.
+      const fresh = await getStudy(study.id);
+      if (fresh) setStudy(fresh);
     } catch {
+      /* the button stays, to try again */
+    } finally {
       setSubmitting(false);
     }
   }
+
+  const submitted = previewSubmitted || !!study.progress?.completed;
 
   return (
     <BibleBase.Provider value={preview ? '/app/bible' : '/space/bible'}>
@@ -156,8 +178,8 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
       {preview && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-edge bg-card px-3 py-2 text-[13px] text-muted-strong">
           <span>Preview — what people see. Nothing is saved.</span>
-          <button onClick={() => navigate(backTo)} className="text-sage underline-offset-2 hover:underline">
-            Back to resources
+          <button onClick={leave} className="text-sage underline-offset-2 hover:underline">
+            {onClose ? 'Close preview' : 'Back to resources'}
           </button>
         </div>
       )}
@@ -174,13 +196,25 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
       {/* Body */}
       <div className="flex-1 py-8">
         {onSubmitPage ? (
-          <SubmitPage
-            allFilled={allFilled}
-            filled={filledCount}
-            total={pageBlankStart.total}
-            submitting={submitting}
-            onSubmit={onSubmit}
-          />
+          submitted ? (
+            <Results
+              answers={answers}
+              intended={study.answers ?? null}
+              total={pageBlankStart.total}
+              onDone={() =>
+                preview || draft ? leave() : navigate('/space/studies', { state: { completed: study.id } })
+              }
+              doneLabel={preview || draft ? (onClose ? 'Close preview' : 'Back to resources') : 'Back to studies'}
+            />
+          ) : (
+            <SubmitPage
+              allFilled={allFilled}
+              filled={filledCount}
+              total={pageBlankStart.total}
+              submitting={submitting}
+              onSubmit={onSubmit}
+            />
+          )
         ) : (
           <PageBody
             page={study.pages[page - 1]}
@@ -363,6 +397,62 @@ function SubmitPage({
         className="mt-1 w-full max-w-xs"
       >
         {submitting ? 'Saving…' : 'Submit answers'}
+      </Button>
+    </div>
+  );
+}
+
+/** After submitting: each answer given beside the intended one. */
+function Results({
+  answers,
+  intended,
+  total,
+  onDone,
+  doneLabel,
+}: {
+  answers: Record<string, string>;
+  intended: string[] | null;
+  total: number;
+  onDone: () => void;
+  doneLabel: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-5 py-4 text-center">
+      <span aria-hidden className="block h-[2px] w-8 rounded-full bg-sage/70" />
+      <h2 className="font-serif text-2xl text-sage">Study complete</h2>
+      {intended && total > 0 && (
+        <>
+          <p className="max-w-sm text-[15px] leading-relaxed text-muted-strong">
+            Here are your answers beside the ones the study had in mind.
+          </p>
+          <table className="w-full max-w-sm text-left text-[15px]">
+            <thead>
+              <tr className="border-b border-edge text-[12px] uppercase tracking-wide text-muted">
+                <th className="w-8 py-2 font-medium">#</th>
+                <th className="py-2 font-medium">Your answer</th>
+                <th className="py-2 font-medium">Answer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: total }, (_, i) => {
+                const mine = (answers[i] ?? '').trim();
+                const same = mine.toLowerCase() === (intended[i] ?? '').trim().toLowerCase();
+                return (
+                  <tr key={i} className="border-b border-edge/60">
+                    <td className="py-2 tabular-nums text-muted">{i + 1}</td>
+                    <td className="py-2 text-muted-strong">{mine || '—'}</td>
+                    <td className={'py-2 ' + (same ? 'text-muted-strong' : 'font-medium text-sage')}>
+                      {intended[i] ?? ''}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
+      )}
+      <Button onClick={onDone} className="mt-1 w-full max-w-xs">
+        {doneLabel}
       </Button>
     </div>
   );

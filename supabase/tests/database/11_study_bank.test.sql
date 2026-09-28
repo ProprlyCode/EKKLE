@@ -54,8 +54,8 @@ set local "request.jwt.claims" to '{"sub":"b1000000-0000-0000-0000-000000000003"
 select is((select jsonb_agg(s ->> 'title') from jsonb_array_elements(seeker_studies()) s),
   '["Hope''s own", "The Logic of Love"]'::jsonb, 'seekers get the chosen studies, in the chosen order');
 select is(seeker_study('b5000000-0000-0000-0000-000000000002'), null, 'a study turned off can''t be opened');
-select is((seeker_study(current_setting('test.love')::uuid) ->> 'locked')::boolean, true,
-  'the second study stays locked until the first is finished');
+select is((seeker_study(current_setting('test.love')::uuid) ->> 'locked')::boolean, false,
+  'studies unlock within their own series (0034): Ekklē''s first study is open beside the ministry''s');
 
 -- ---- Boundaries ----
 set local "request.jwt.claims" to '{"sub":"b1000000-0000-0000-0000-000000000002","role":"authenticated"}';

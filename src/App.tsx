@@ -42,6 +42,8 @@ import ResourcesLibrary from '@/space/ResourcesLibrary';
 import ResourcePage from '@/space/ResourcePage';
 import Resources from '@/routes/leadership/Resources';
 import AccountSettings from '@/routes/leadership/AccountSettings';
+import { StudyLibrary } from '@/studies/StudyLibrary';
+import { StudyEditor } from '@/studies/StudyEditor';
 // The cinematic homepage is code-split so GSAP/Lenis never load in the product.
 const Home = lazy(() => import('@/public/home/Home'));
 import ForMinistries from '@/public/ForMinistries';
@@ -89,6 +91,8 @@ function PlatformRoutes() {
           <Route path="/platform/team" element={<PlatformTeam />} />
           <Route path="/platform/waitlist" element={<PlatformWaitlist />} />
           <Route path="/platform/settings" element={<PlatformSettings />} />
+          <Route path="/platform/studies" element={<StudyLibrary base="/platform/studies" bank />} />
+          <Route path="/platform/studies/:studyId" element={<StudyEditor base="/platform/studies" />} />
         </Route>
       </Route>
 
@@ -159,6 +163,11 @@ function AccountRoutes() {
               <Route path="/leadership/overview" element={<Overview />} />
               <Route path="/leadership/content" element={<Content />} />
               <Route path="/leadership/resources" element={<Resources />} />
+              <Route
+                path="/leadership/study-editor"
+                element={<StudyLibrary base="/leadership/study-editor" bank={false} />}
+              />
+              <Route path="/leadership/study-editor/:studyId" element={<StudyEditor base="/leadership/study-editor" />} />
               <Route path="/leadership/people" element={<People />} />
               <Route element={<RequireAccountAdmin />}>
                 <Route path="/leadership/account" element={<AccountSettings />} />

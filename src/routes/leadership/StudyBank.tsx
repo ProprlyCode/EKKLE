@@ -61,6 +61,12 @@ export function StudyBank() {
           <p className="mt-1 text-sm text-muted-strong">
             The Ekklē study bank. Choose which studies people get and the order they unlock in.
           </p>
+          <Link
+            to="/leadership/study-editor"
+            className="mt-1 inline-block text-[13px] text-sage underline-offset-2 hover:underline"
+          >
+            Write or import your own studies →
+          </Link>
         </div>
         {studies && (
           <span className="shrink-0 text-[13px] text-muted" role="status">
@@ -91,7 +97,10 @@ export function StudyBank() {
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-center gap-2">
                   <span className={'truncate font-medium ' + (s.enabled ? 'text-sage' : 'text-muted')}>{s.title}</span>
-                  <span className="eyebrow text-[10px]">{s.source === 'ekkle' ? 'Ekklē' : 'Your ministry'}</span>
+                  <span className="eyebrow text-[10px]">
+                    {s.source === 'ekkle' ? 'Ekklē' : 'Your ministry'}
+                    {s.series ? ` · ${s.series}` : ''}
+                  </span>
                 </span>
                 <span className="block text-[12px] text-muted">
                   {s.pages} {s.pages === 1 ? 'page' : 'pages'} · {s.seekers_started} started ·{' '}

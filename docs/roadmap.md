@@ -112,8 +112,7 @@ sign-up, church owners manage admins, per-church branding, platform console.
   their own Studies tab, which follows the ministry's choice and order.
 - Fixed with it: a seeker's next study now stays locked until the one before
   is finished (it unlocked as soon as the previous one was listed).
-- *Next:* the study editor — for a ministry's own studies, and for the Ekklē
-  team to keep the bank (studies 2–27 as their files arrive).
+- *Next:* the study editor — built (0034, below).
 
 ## Built-in Bible (Sep 2026)
 
@@ -129,3 +128,25 @@ sign-up, church owners manage admins, per-church branding, platform console.
   `ESV_API_KEY` is set.
 - ESV terms: non-commercial, never stored (the database keeps only references
   — `bible_marks`, `bible_state`), copyright notice shown under ESV text.
+
+## Study editor (Sep 2026)
+
+- *Built (0034).* Studies belong to **series**. Ekklē's series are the shared
+  bank, kept by the Ekklē team's Owners and Admins (Platform → Studies); a
+  ministry's Admins and Leaders keep their own (Resources → Bible studies →
+  "Write or import your own studies"). A **locked** series is finished: its
+  studies can't be edited and nothing is added to it (locking needs every
+  draft published or discarded first).
+- **Import from Word** (one or many .docx at once, read in the browser): the
+  title line ("3  THE IMAGE OF GOD"), pages split at "Page N of M" lines (else
+  Word page breaks), underscores → blanks (quotes around them dropped),
+  Discover/Connect/Experience and capitalised lines → headings, images kept,
+  "Submit Answers" ends the content, and the table with an "Answer" column
+  gives one answer per blank. Warnings when blanks and answers don't match.
+- **Editor:** each page as text (`# heading`, `_____` blank, `[image 1]`), the
+  answer for each blank beside its page, add / join / remove pages, preview in
+  the real reader, and **draft → publish** (every blank needs an answer).
+  People keep their progress; the editor warns that moved blanks can shift it.
+- **People** see their answers beside the intended ones once they submit a
+  study (never before). Studies unlock one after another within a series, and
+  are numbered within it; the Studies tab groups them by series.
