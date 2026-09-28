@@ -25,12 +25,12 @@ test('a leader brands the account and visitors see it', async ({ browser }) => {
   // Too light to read → can't be saved.
   await leader.getByLabel('Hex').fill('#ffcc00');
   await expect(leader.getByText(/Too light to read/)).toBeVisible();
-  await expect(leader.getByRole('button', { name: 'Save' })).toBeDisabled();
+  await expect(leader.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
 
   await leader.getByRole('button', { name: 'Navy' }).click();
   await expect(leader.getByText(/Reads clearly/)).toBeVisible();
   await leader.getByLabel('Logo file').setInputFiles('public/icon-512.png');
-  await leader.getByRole('button', { name: 'Save' }).click();
+  await leader.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(leader.getByRole('button', { name: 'Saved' })).toBeVisible();
   // The app's own header wears it at once.
   await expect(leader.getByRole('banner').getByRole('img', { name: 'Grace Fellowship' })).toBeVisible();

@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { appConfig } from '@/config/app';
-import type { Tables } from '@/lib/database.types';
+import type { Role, Tables } from '@/lib/database.types';
 
 /**
  * Member/leadership data access. All church-side reads/writes for the `users`
@@ -59,24 +59,50 @@ export async function updateMyProfile(
   return data;
 }
 
-/** Leadership: everyone in the org (for the People view). */
-export async function listMembers(): Promise<Member[]> {
+/**
+ * Admins and Leaders: this ministry's team (for People). Filtered by ministry —
+ * RLS also shows a person their own memberships elsewhere.
+ */
+export async function listMembers(orgId: string): Promise<Member[]> {
   const { data, error } = await supabase
     .from('users')
     .select('*')
+    .eq('org_id', orgId)
     .order('created_at', { ascending: true });
   if (error) throw error;
   return data ?? [];
 }
 
-/** Leadership: pre-create an invited member. */
-export async function inviteMember(name: string, email: string): Promise<Member> {
+/**
+ * Invite someone by email with a role (Leaders: Members; Admins: anyone). They
+ * are linked when they first sign in with that email on this address.
+ */
+export async function inviteMember(name: string, email: string, role: Role = 'member'): Promise<Member> {
   const { data, error } = await supabase.rpc('invite_member', {
     p_name: name.trim(),
     p_email: email.trim(),
+    p_role: role,
   });
   if (error) throw error;
   return data;
+}
+
+/** Admins: change someone's role (the ministry always keeps an Admin). */
+export async function setMemberRole(userId: string, role: Role): Promise<void> {
+  const { error } = await supabase.rpc('set_member_role', { p_user_id: userId, p_role: role });
+  if (error) throw error;
+}
+
+/** Cancel an invitation that hasn't been accepted. */
+export async function cancelInvitation(userId: string): Promise<void> {
+  const { error } = await supabase.rpc('cancel_invitation', { p_user_id: userId });
+  if (error) throw error;
+}
+
+/** Admins: turn the join code on or off. */
+export async function setJoinEnabled(enabled: boolean): Promise<void> {
+  const { error } = await supabase.rpc('set_join_enabled', { p_enabled: enabled });
+  if (error) throw error;
 }
 
 /** Set (or clear, with null) the member's active flow. Must be an approved flow. */

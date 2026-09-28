@@ -85,7 +85,7 @@ test('a ministry shows its own tabs by role, never the platform', async ({ brows
   for (const tab of ['Overview', 'Content', 'Resources', 'People', 'Account'])
     await expect(nav.getByRole('link', { name: tab, exact: true })).toBeVisible();
   await expect(nav.getByRole('link', { name: 'Platform' })).toHaveCount(0);
-  await admin.getByRole('link', { name: 'Overview', exact: true }).click();
+  await admin.getByRole('link', { name: 'Account', exact: true }).click();
   await expect(admin.getByRole('heading', { name: 'Settings' })).toBeVisible();
 
   // Member: their own code and messages only.

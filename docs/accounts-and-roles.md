@@ -101,9 +101,13 @@ demoted.
    team"), change roles, remove; always one Owner. Waitlist: every sign-up,
    with "Create account" filling in the form. Settings: your name and
    password (the first sign-in on ekkle.org is by code, then a password).
-3. **Ministry team** — People with roles and invitations by role, join code
-   on/off; the settings now in the platform console (responder, join code,
-   offer on/off) move to the ministry's Account tab.
+3. **Ministry team** — *built (0030).* People: invite by email with a role
+   (Leaders invite Members; Admins anyone), emailed as "You're invited to
+   <Ministry>"; Resend / Cancel pending invitations; Admins change roles
+   (never leaving the ministry without an Admin); Pause / Restore (Leaders:
+   Members only). Account → Settings (Admins): designated responder, offer
+   page on/off, join code on/off and New code — moved here from Overview,
+   which is now numbers only.
 4. **Address requests** — request from Account, decide in the console, old
    addresses redirect.
 5. *Later:* self-serve ministry sign-up → platform approval → account created.

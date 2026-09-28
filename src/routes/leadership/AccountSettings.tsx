@@ -12,6 +12,7 @@ import {
   uploadLogo,
 } from '@/account/branding';
 import { Card } from '@/ui/Card';
+import { MinistrySettings } from './MinistrySettings';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { ErrorNote, FullPageLoading } from '@/ui/states';
@@ -275,6 +276,8 @@ export default function AccountSettings() {
           </div>
         </div>
       </div>
+
+      <MinistrySettings orgId={account.id} />
     </div>
   );
 }

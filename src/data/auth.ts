@@ -104,3 +104,16 @@ export async function sendPasswordReset(
   });
   if (error) throw error;
 }
+
+/**
+ * Email someone their invitation: a sign-in (link + code) that returns to
+ * `landing`. The sign-in email hook sees the pending invitation and words it
+ * as one — "You're invited to <Ministry>" or "…to the Ekklē team".
+ */
+export async function sendInvitation(email: string, landing: string): Promise<void> {
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email.trim().toLowerCase(),
+    options: { emailRedirectTo: landing, shouldCreateUser: true },
+  });
+  if (error) throw error;
+}

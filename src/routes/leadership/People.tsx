@@ -3,27 +3,49 @@ import {
   listMembers,
   inviteMember,
   setMemberActive,
+  setMemberRole,
+  cancelInvitation,
   type Member,
 } from '@/data/members';
+import { sendInvitation } from '@/data/auth';
 import { listReports, resolveReport, type IncidentReport } from '@/data/reports';
+import { useSession } from '@/auth/SessionProvider';
+import { useAccount } from '@/account/AccountProvider';
+import { accountUrl } from '@/account/address';
+import type { Role } from '@/lib/database.types';
 import { Card } from '@/ui/Card';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
-import { ROLE_LABEL } from '@/auth/roles';
+import { isAccountAdmin, ROLE_LABEL } from '@/auth/roles';
+
+const ROLE_NOTE: Record<Role, string> = {
+  admin: 'Everything, including settings and the team',
+  leader: 'Content, resources and people',
+  member: 'Their own link and conversations',
+};
 
 /**
- * Leadership → People. A calm roster (not a data grid): each member is a row
- * with name leading, role/handle demoted, and one quiet action. Invite by email;
- * self-signups can be paused.
+ * Leadership → People (Admins and Leaders). A calm roster (not a data grid):
+ * name leading, role and link demoted, quiet actions. Leaders invite Members
+ * and pause them; Admins invite and manage anyone, and change roles
+ * (docs/accounts-and-roles.md). Invitations are emailed from here.
  */
 export default function People() {
+  const { membership } = useSession();
+  const account = useAccount();
+  const admin = isAccountAdmin(membership?.role);
   const [members, setMembers] = useState<Member[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const orgId = membership?.org_id;
+  // Where invitations land: this ministry's app, on its own address.
+  const landing = account.status === 'account' ? accountUrl(account.account, '/app') : `${window.location.origin}/app`;
 
   async function refresh() {
+    if (!orgId) return;
     try {
-      setMembers(await listMembers());
+      setMembers(await listMembers(orgId));
     } catch {
       setError('Couldn’t load the roster.');
     }
@@ -31,7 +53,27 @@ export default function People() {
 
   useEffect(() => {
     void refresh();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId]);
+
+  async function act(fn: () => Promise<unknown>, done: string) {
+    setError(null);
+    setNotice(null);
+    try {
+      await fn();
+      setNotice(done);
+      await refresh();
+    } catch (err) {
+      const msg = (err as { message?: string } | null)?.message ?? '';
+      setError(
+        msg.includes('last_admin')
+          ? 'Your ministry needs at least one Admin.'
+          : msg.includes('over_email_send_rate_limit') || (err as { status?: number }).status === 429
+            ? 'An email just went to them — try again in a minute.'
+            : 'That didn’t work. Please try again.',
+      );
+    }
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -44,8 +86,20 @@ export default function People() {
 
       <IncidentReports />
 
-      <InviteForm onInvited={refresh} />
+      <InviteForm
+        admin={admin}
+        landing={landing}
+        onInvited={async (msg) => {
+          setNotice(msg);
+          await refresh();
+        }}
+      />
 
+      {notice && (
+        <p role="status" className="rounded-lg border border-edge bg-card px-4 py-3 text-sm text-sage">
+          {notice}
+        </p>
+      )}
       {error && <ErrorNote>{error}</ErrorNote>}
 
       {members === null ? (
@@ -61,7 +115,14 @@ export default function People() {
         <Card className="p-0">
           <ul className="divide-y divide-edge/70">
             {members.map((m) => (
-              <MemberRow key={m.id} member={m} onChanged={refresh} />
+              <MemberRow
+                key={m.id}
+                member={m}
+                me={m.id === membership?.id}
+                admin={admin}
+                onAct={act}
+                landing={landing}
+              />
             ))}
           </ul>
         </Card>
@@ -160,73 +221,134 @@ function IncidentReports() {
 
 function MemberRow({
   member,
-  onChanged,
+  me,
+  admin,
+  landing,
+  onAct,
 }: {
   member: Member;
-  onChanged: () => Promise<void>;
+  me: boolean;
+  admin: boolean;
+  landing: string;
+  onAct: (fn: () => Promise<unknown>, done: string) => Promise<void>;
 }) {
-  const [busy, setBusy] = useState(false);
   const pending = member.auth_uid === null;
-
-  async function toggleActive() {
-    setBusy(true);
-    try {
-      await setMemberActive(member.id, !member.active);
-      await onChanged();
-    } finally {
-      setBusy(false);
-    }
-  }
+  // Leaders manage Members; Admins manage anyone (never themselves here).
+  const canManage = !me && (admin || member.role === 'member');
 
   return (
-    <li className="flex items-center justify-between gap-4 px-5 py-4">
+    <li className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="truncate font-medium text-sage">{member.name}</span>
-          {member.role !== 'member' && (
+          {me && <span className="text-[11px] text-muted">you</span>}
+          {!(admin && canManage) && member.role !== 'member' && (
             <span className="eyebrow text-[10px]">{ROLE_LABEL[member.role]}</span>
           )}
-          {!member.active && (
-            <span className="text-[11px] text-muted">paused</span>
-          )}
-          {pending && member.active && (
-            <span className="text-[11px] text-muted">invited</span>
-          )}
+          {!member.active && <span className="text-[11px] text-muted">paused</span>}
+          {pending && <span className="text-[11px] text-muted">invited</span>}
         </div>
-        <p className="truncate text-[13px] text-muted">/r/{member.code_slug}</p>
+        <p className="truncate text-[13px] text-muted">
+          {pending ? member.email : `/r/${member.code_slug}`}
+        </p>
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={toggleActive}
-        disabled={busy}
-      >
-        {member.active ? 'Pause' : 'Restore'}
-      </Button>
+      <div className="flex flex-wrap items-center gap-3 text-[13px]">
+        {admin && canManage && (
+          <select
+            aria-label={`Role for ${member.name}`}
+            value={member.role}
+            onChange={(e) =>
+              onAct(
+                () => setMemberRole(member.id, e.target.value as Role),
+                `${member.name} is now ${ROLE_LABEL[e.target.value as Role]}.`,
+              )
+            }
+            className="rounded-lg border border-edge bg-canvas px-2 py-1 text-sm text-sage"
+          >
+            {(['member', 'leader', 'admin'] as const).map((r) => (
+              <option key={r} value={r}>
+                {ROLE_LABEL[r]}
+              </option>
+            ))}
+          </select>
+        )}
+        {canManage && pending && member.email && (
+          <>
+            <button
+              onClick={() => onAct(() => sendInvitation(member.email!, landing), `Invitation sent again to ${member.email}.`)}
+              className="text-sage underline-offset-2 hover:underline"
+            >
+              Resend
+            </button>
+            <button
+              onClick={() => {
+                if (confirm(`Cancel the invitation to ${member.email}?`))
+                  void onAct(() => cancelInvitation(member.id), `Invitation to ${member.email} cancelled.`);
+              }}
+              className="text-muted hover:text-sage"
+            >
+              Cancel
+            </button>
+          </>
+        )}
+        {canManage && !pending && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              onAct(
+                () => setMemberActive(member.id, !member.active),
+                member.active ? `${member.name} is paused.` : `${member.name} is active again.`,
+              )
+            }
+          >
+            {member.active ? 'Pause' : 'Restore'}
+          </Button>
+        )}
+      </div>
     </li>
   );
 }
 
-function InviteForm({ onInvited }: { onInvited: () => Promise<void> }) {
+function InviteForm({
+  admin,
+  landing,
+  onInvited,
+}: {
+  admin: boolean;
+  landing: string;
+  onInvited: (msg: string) => Promise<void>;
+}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [role, setRole] = useState<Role>('member');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
-      await inviteMember(name, email);
+      await inviteMember(name, email, admin ? role : 'member');
+      let msg = `${email.trim()} is invited${admin && role !== 'member' ? ` as ${ROLE_LABEL[role]}` : ''}.`;
+      try {
+        await sendInvitation(email, landing);
+        msg += ' We emailed them an invitation.';
+      } catch {
+        msg += ' The email didn’t send — use “Resend”.';
+      }
       setName('');
       setEmail('');
-      setDone(true);
-      setTimeout(() => setDone(false), 1600);
-      await onInvited();
-    } catch {
-      setError('Couldn’t send that invite. Check the email and try again.');
+      setRole('member');
+      await onInvited(msg);
+    } catch (err) {
+      const m = (err as { message?: string } | null)?.message ?? '';
+      setError(
+        m.includes('already_member')
+          ? 'They’re already on your team (or invited).'
+          : 'Couldn’t invite them. Check the email and try again.',
+      );
     } finally {
       setBusy(false);
     }
@@ -237,28 +359,44 @@ function InviteForm({ onInvited }: { onInvited: () => Promise<void> }) {
       <div>
         <h2 className="text-base">Invite someone</h2>
         <p className="mt-1 text-sm text-muted-strong">
-          They’ll be linked when they first sign in with this email.
+          We’ll email them an invitation; they join when they open it.
         </p>
       </div>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <TextInput
-          label="Name"
-          className="sm:w-40"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <TextInput
-          label="Email"
-          type="email"
-          className="flex-1"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="them@ministry.org"
-        />
-        <Button type="submit" disabled={busy || !email}>
-          {busy ? 'Inviting…' : done ? 'Invited' : 'Invite'}
-        </Button>
+      <form onSubmit={onSubmit} className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <TextInput label="Name" className="sm:w-40" value={name} onChange={(e) => setName(e.target.value)} />
+          <TextInput
+            label="Email"
+            type="email"
+            className="flex-1"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="them@ministry.org"
+          />
+          {!admin && (
+            <Button type="submit" disabled={busy || !email}>
+              {busy ? 'Inviting…' : 'Invite'}
+            </Button>
+          )}
+        </div>
+        {admin && (
+          <>
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 text-[13px] font-medium text-muted-strong">Role</legend>
+              {(['member', 'leader', 'admin'] as const).map((r) => (
+                <label key={r} className="flex items-center gap-2 text-sm text-sage">
+                  <input type="radio" name="invite-role" checked={role === r} onChange={() => setRole(r)} className="accent-sage" />
+                  <span className="font-medium">{ROLE_LABEL[r]}</span>
+                  <span className="text-muted">— {ROLE_NOTE[r]}</span>
+                </label>
+              ))}
+            </fieldset>
+            <Button type="submit" disabled={busy || !email} className="self-start">
+              {busy ? 'Inviting…' : 'Invite'}
+            </Button>
+          </>
+        )}
       </form>
       {error && <ErrorNote>{error}</ErrorNote>}
     </Card>

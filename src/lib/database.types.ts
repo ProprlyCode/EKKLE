@@ -46,6 +46,8 @@ export interface Database {
           kind: 'church' | 'personal_ministry';
           accent_color: string | null;
           logo_path: string | null;
+          join_enabled: boolean;
+          status: 'active' | 'suspended';
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -61,6 +63,8 @@ export interface Database {
           kind?: 'church' | 'personal_ministry';
           accent_color?: string | null;
           logo_path?: string | null;
+          join_enabled?: boolean;
+          status?: 'active' | 'suspended';
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -421,7 +425,7 @@ export interface Database {
         Returns: Database['public']['Tables']['users']['Row'];
       };
       invite_member: {
-        Args: { p_name: string; p_email: string };
+        Args: { p_name: string; p_email: string; p_role?: string };
         Returns: Database['public']['Tables']['users']['Row'];
       };
       set_member_active: {
@@ -568,6 +572,9 @@ export interface Database {
       platform_set_member_role: { Args: { p_id: string; p_role: string }; Returns: undefined };
       platform_remove_member: { Args: { p_id: string }; Returns: undefined };
       platform_waitlist: { Args: Record<string, never>; Returns: Json };
+      set_member_role: { Args: { p_user_id: string; p_role: string }; Returns: Json };
+      cancel_invitation: { Args: { p_user_id: string }; Returns: undefined };
+      set_join_enabled: { Args: { p_enabled: boolean }; Returns: undefined };
       set_my_platform_name: {
         Args: { p_name: string };
         Returns: undefined;
