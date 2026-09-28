@@ -14,12 +14,12 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | Roles & platform console | **Built** — steps 1–3 (accounts-and-roles.md); remove people |
 | Study bank · study editor | **Built** — shared bank, series, Word import, answers after submitting |
 | Built-in Bible | **Built** — BSB, KJV, ESV; search, highlights, notes, study references |
-| Studies 2–27 | **In progress** — 6 of 27 in hand; imported through the editor |
+| Studies 2–27 | **In progress** — 20 of 27 imported; imported through the editor |
 | N2 Follow-through | **Built** — nudges (24h / 48h), move one conversation |
 | Bible reading plans | **Built** (0038) — Ekklē's four, ministries' own, read together, opt-in daily email |
 | Faith in action prompts | **Built** (0039) — Ekklē's starting set (drafts to publish), ministries' own |
 | Song on a study's Experience page | **Built** (0040) — audio only: SoundCloud link or uploaded file; ministries can swap |
-| N3 Seeker experience | Partly — installable done; "who you're talking to" card, reminders left |
+| N3 Seeker experience | Partly — installable done; planned (0041): trust card with photo, delete my details, weekly study reminder |
 | N4 Leader & member tools | Partly — study editor done; outcomes view, member help left |
 | Address change requests | Not started (roles step 4) |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
@@ -105,14 +105,50 @@ passed it on. Fixed with it: Your space now follows a conversation that moved
 - Seeker can **resume a conversation on any device**: once they've given their
   email, the same email sign-in (link or code) reopens it.
 
-## N3 — Seeker experience (installable: built with Your space)
+## N3 — Seeker experience (planned 28 Sep 2026, migration 0041)
 
-- "Who you're talking to" card before writing: photo (optional upload in the
-  member profile, Supabase Storage), name, church, and one line on what happens
-  when you send and how to delete your details.
-- Installable app (PWA): add to home screen, opens straight to studies /
-  conversation.
-- Opt-in study reminders (email; never on by default).
+Installable app (PWA): *built with Your space.* Decided: seekers delete their
+own details; the study reminder is weekly; members own their photo and
+leaders can remove it.
+
+**1. Member photo**
+- `users.photo` (a path in a new public `photos` bucket, `<org>/<uuid>.jpg`).
+- Member profile (QR page → Edit): upload, crop to a square in the browser
+  (resized to 400 px, JPEG), or remove. `set_my_photo(path | null)`.
+- Leaders can remove a photo from the ministry's people list
+  (`remove_member_photo(member)`), not upload one.
+
+**2. "Who you're talking to" card**
+- Shown above the message form on `/r/:slug` and in Your space → Messages
+  before the first message: photo (or initials), name, the ministry's name,
+  their short message, and two lines — "Only {name} sees what you write; they
+  reply personally" and "You can delete your details at any time in Your
+  space → Account."
+- `get_recipient_landing` and `seeker_connection` also return the photo.
+- Replaces the small print under the form.
+
+**3. Delete my details (self-serve)**
+- Your space → Account → "Delete my details", with a confirm step.
+- `delete_my_details()`: the same erasure as `erase_conversation` (messages
+  removed, conversations closed, name/email cleared) plus the seeker's study
+  progress, Bible highlights and notes, reading plans and reminders, then the
+  sign-in itself. Signs them out to a short "Your details are deleted" page.
+- The member's inbox shows "This person deleted their details" in place of
+  the thread; leaders' views keep only counts.
+
+**4. Weekly study reminder (opt-in)**
+- In Your space → Studies: "Email me a reminder" → pick a day and time (in
+  their time zone). Off by default; one-tap stop link in every email.
+- Sent only while there is a study to do (one in progress or the next one
+  unlocked); stops once they've finished the series. Says which study and
+  the page they're on, with a link straight back.
+- `study_reminders (auth_uid, org_id, weekday, at, tz, last_sent_on)`;
+  `private.study_reminders_due` run by the existing 15-minute reading
+  reminder job; `notify` gains `kind: 'study'`.
+
+**Tests:** pgTAP 19 (photo rules, delete removes everything, reminders due
+only when a study is left); e2e: member adds a photo → seeker sees the card;
+seeker deletes their details → the member sees it; reminder set/stop.
 
 ## N4 — Leader & member tools
 
@@ -125,7 +161,7 @@ passed it on. Fixed with it: Your space now follows a conversation that moved
 ## N5 — Studies 2–27 (in progress)
 
 Import in Platform → Studies → Import from Word, check, preview, publish. Lock
-the series once all 27 are in. (6 of 27 in hand, Sep 2026.)
+the series once all 27 are in. (20 of 27 imported, 28 Sep 2026.)
 
 ## Multi-church — built differently than first planned
 
