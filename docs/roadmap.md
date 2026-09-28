@@ -21,7 +21,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | Song on a study's Experience page | **Built** (0040) — audio only: SoundCloud link or uploaded file; ministries can swap |
 | N3 Seeker experience | **Built** (0041) — installable; who-you're-talking-to card with photo; delete my details; weekly study reminder |
 | N4 Leader & member tools | **Built** (0042) — outcomes (member, ministry, Ekklē team; 30/90 days/all time), wallet cards, reply box on phones |
-| Address change requests | Not started (roles step 4) |
+| Address change requests | **Built** (0043) — Admin asks in Account; Ekklē team approves in Platform → Accounts; old addresses keep working |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
 | Custom domains · Visit us card · age question · Tailwind 4 | On hold |
 
@@ -181,8 +181,24 @@ the series once all 27 are in. (20 of 27 imported, 28 Sep 2026.)
 
 Instead of paths (`ekkle.org/c/<slug>`), each ministry has its own address
 (`<ministry>.ekkle.org`) — see tenancy.md. Ministry roles, the platform console
-and branding are built (accounts-and-roles.md steps 1–3). Left: address change
-requests (step 4) and self-serve sign-up with approval (step 5, later).
+and branding are built (accounts-and-roles.md steps 1–3). Address change
+requests (step 4) are built (0043, below); self-serve sign-up with approval
+(step 5) is later.
+
+## Address change requests — built (0043, 28 Sep 2026)
+
+- A ministry's Admin: Account → Address → "Request a new address" (checked
+  as they type), optional note; one waits at a time; they can cancel it.
+- The Ekklē team's Owners and Admins approve or decline (with a reason) in
+  Platform → Accounts → Address requests; Support can see them. No limit on
+  how often: each change is approved by hand.
+- Approving moves the ministry at once. The old address goes into
+  `previous_addresses`: it keeps leading to the same page at the new address
+  (printed codes, wallet cards, links, installed apps), and is never given to
+  anyone else. People sign in once more at the new address.
+- Nothing to change in Vercel (wildcard `*.ekkle.org`) or in Supabase Auth
+  (wildcard redirect). Emails: the team hears of a request; the Admin hears
+  the decision.
 
 ## On hold
 

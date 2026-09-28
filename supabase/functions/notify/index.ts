@@ -10,7 +10,7 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { accountInfo, fromAccount, fromOurTrigger, sendEmail } from '../_shared/email.ts';
+import { accountInfo, fromAccount, fromOurTrigger, sendEmail, SITE_URL } from '../_shared/email.ts';
 import { readingLabel } from '../_shared/books.ts';
 
 interface MessageRecord {
@@ -31,6 +31,10 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     if (payload.record?.kind === 'reading') {
       await dailyReading(payload.record.auth_uid, payload.record.plan_id);
+      return new Response('ok', { status: 200 });
+    }
+    if (payload.record?.kind === 'address_request' || payload.record?.kind === 'address_decided') {
+      await addressRequest(payload.record.kind, payload.record.request_id);
       return new Response('ok', { status: 200 });
     }
     if (payload.record?.kind === 'study') {
@@ -238,6 +242,51 @@ async function studyReminder(
       `\n\n` +
       (link ? `Open it here: ${link}\n\n` : '') +
       `You asked for this weekly reminder. To stop it, open Studies and choose “Turn off”.`,
+    fromAccount(name),
+  );
+}
+
+/**
+ * Address change requests (0043): the Ekklē team's Owners and Admins hear of
+ * a new one; the Admin who asked hears the decision.
+ */
+async function addressRequest(kind: 'address_request' | 'address_decided', requestId: string) {
+  const { data: req } = await supabase
+    .from('address_requests')
+    .select('org_id, subdomain, from_subdomain, note, status, reason, requester:users(name, email)')
+    .eq('id', requestId)
+    .single();
+  if (!req) return;
+  const requester = req.requester as unknown as { name: string; email: string | null } | null;
+  const { base, name } = await accountInfo(supabase, req.org_id);
+  const ministry = name ?? 'A ministry';
+
+  if (kind === 'address_request') {
+    const { data: team } = await supabase.from('platform_team').select('email').in('role', ['owner', 'admin']);
+    const link = SITE_URL ? `${SITE_URL}/platform` : '';
+    for (const t of team ?? []) {
+      await sendEmail(
+        (t as { email: string | null }).email,
+        `${ministry} asked for a new address: ${req.subdomain}`,
+        `${requester?.name ?? 'An Admin'} at ${ministry} asked to move from ${req.from_subdomain} to ${req.subdomain}.` +
+          (req.note ? `\n\nTheir note: “${req.note}”` : '') +
+          (link ? `\n\nApprove or decline it in the console: ${link}` : ''),
+      );
+    }
+    return;
+  }
+
+  if (!requester?.email) return;
+  await sendEmail(
+    requester.email,
+    req.status === 'approved' ? `Your new address is ready: ${req.subdomain}` : 'About your address request',
+    req.status === 'approved'
+      ? `${ministry} has moved to its new address${base ? `: ${base}` : ` (${req.subdomain})`}.\n\n` +
+          `Your old address still works and leads there, so printed codes and shared links keep working. ` +
+          `Everyone will be asked to sign in once at the new address.`
+      : `Your request to move ${ministry} to ${req.subdomain} wasn’t approved.` +
+          (req.reason ? `\n\n“${req.reason}”` : '') +
+          `\n\nYou can ask for a different address in Account.`,
     fromAccount(name),
   );
 }

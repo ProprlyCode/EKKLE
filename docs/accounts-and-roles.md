@@ -77,7 +77,8 @@ demoted.
 - **`address_requests`** — `(org_id, subdomain, note, status
   pending|approved|declined, requested_by, decided_by, timestamps)`.
   Approving changes the address; the old one is kept in
-  `previous_subdomains` and keeps redirecting, so printed QR codes still work.
+  `previous_addresses` (a table, so an old address is never reused) and keeps
+  redirecting, so printed QR codes still work.
 - Invitation emails reuse the sign-in email hook (phase 2b): when the address
   has a pending invitation for that email, the email reads "You're invited to
   <Ministry>" instead of a plain sign-in.
@@ -108,6 +109,6 @@ demoted.
    Members only). Account → Settings (Admins): designated responder, offer
    page on/off, join code on/off and New code — moved here from Overview,
    which is now numbers only.
-4. **Address requests** — request from Account, decide in the console, old
+4. **Address requests** — *built (0043).* request from Account, decide in the console, old
    addresses redirect.
 5. *Later:* self-serve ministry sign-up → platform approval → account created.

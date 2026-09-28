@@ -13,6 +13,7 @@ import {
 } from '@/account/branding';
 import { Card } from '@/ui/Card';
 import { MinistrySettings } from './MinistrySettings';
+import { AddressCard } from './AddressCard';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { ErrorNote, FullPageLoading } from '@/ui/states';
@@ -276,6 +277,8 @@ export default function AccountSettings() {
           </div>
         </div>
       </div>
+
+      <AddressCard subdomain={account.subdomain} />
 
       <MinistrySettings orgId={account.id} />
     </div>

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { isSupabaseConfigured } from '@/lib/env';
-import { isPlatformHost } from './address';
+import { accountUrl, isPlatformHost } from './address';
 import { applyBranding } from './branding';
 
 export interface Account {
@@ -44,8 +44,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       .rpc('resolve_account', { p_host: window.location.host })
       .then(({ data, error }) => {
         if (!active) return;
-        if (error || !data) setState({ status: 'unknown' });
-        else setState({ status: 'account', account: data as unknown as Account });
+        const found = data as unknown as (Account & { moved_to?: string }) | null;
+        if (error || !found) setState({ status: 'unknown' });
+        // An old address (0043): go to the same page at the ministry's new one.
+        else if (found.moved_to) {
+          const { pathname, search, hash } = window.location;
+          window.location.replace(accountUrl(found, `${pathname}${search}${hash}`));
+        } else setState({ status: 'account', account: found });
       });
     return () => {
       active = false;

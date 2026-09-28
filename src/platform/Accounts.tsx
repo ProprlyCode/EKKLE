@@ -16,6 +16,7 @@ import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
 import { usePlatformRole } from './PlatformGate';
+import { AddressRequests } from './AddressRequests';
 
 const KIND: Record<PlatformAccount['kind'], string> = {
   church: 'Church',
@@ -104,6 +105,14 @@ export default function Accounts() {
           }}
         />
       )}
+
+      <AddressRequests
+        canManage={canManage}
+        onDecided={(msg) => {
+          setNotice(msg);
+          void refresh();
+        }}
+      />
 
       {accounts === null && !error ? (
         <div className="py-8">

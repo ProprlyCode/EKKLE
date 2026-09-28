@@ -635,6 +635,12 @@ export interface Database {
       my_study_reminder: { Args: Record<string, never>; Returns: Json };
       set_study_reminder: { Args: { p_weekday: number | null; p_at: string | null; p_tz: string | null }; Returns: undefined };
       delete_my_details: { Args: Record<string, never>; Returns: undefined };
+      address_available: { Args: { p_subdomain: string }; Returns: boolean };
+      my_address_request: { Args: Record<string, never>; Returns: Json };
+      request_address_change: { Args: { p_subdomain: string; p_note: string }; Returns: string };
+      cancel_address_request: { Args: Record<string, never>; Returns: undefined };
+      platform_address_requests: { Args: Record<string, never>; Returns: Json };
+      decide_address_request: { Args: { p_id: string; p_approve: boolean; p_reason: string }; Returns: undefined };
       ministry_outcomes: { Args: { p_days: number | null }; Returns: Json };
       my_outcomes: { Args: { p_days: number | null }; Returns: Json };
       platform_outcomes: { Args: { p_days: number | null }; Returns: Json };
