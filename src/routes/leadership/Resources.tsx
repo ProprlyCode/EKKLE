@@ -93,6 +93,19 @@ export default function Resources() {
         <span aria-hidden className="text-muted">→</span>
       </Link>
 
+      <Link
+        to="/leadership/faith-in-action"
+        className="card flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:border-sage/40"
+      >
+        <span>
+          <span className="block text-base text-sage">Faith in action</span>
+          <span className="text-sm text-muted-strong">
+            Ideas and prompts your members see beside their code. Add your own.
+          </span>
+        </span>
+        <span aria-hidden className="text-muted">→</span>
+      </Link>
+
       <h2 className="-mb-4 text-base">Reading, video and links</h2>
 
       {error && <ErrorNote>{error}</ErrorNote>}

@@ -37,6 +37,7 @@ import StudyReader from '@/space/StudyReader';
 import BibleReader from '@/bible/BibleReader';
 import { PlanList, PlanPage } from '@/bible/ReadingPlans';
 import { PlanEditor, PlanLibrary } from '@/bible/PlanLibrary';
+import { PromptLibrary } from '@/prompts/PromptLibrary';
 import Connection from '@/space/Connection';
 import Account from '@/space/Account';
 import SpaceHome from '@/space/SpaceHome';
@@ -97,6 +98,7 @@ function PlatformRoutes() {
           <Route path="/platform/studies/:studyId" element={<StudyEditor base="/platform/studies" />} />
           <Route path="/platform/plans" element={<PlanLibrary base="/platform/plans" bank />} />
           <Route path="/platform/plans/:planId" element={<PlanEditor base="/platform/plans" />} />
+          <Route path="/platform/prompts" element={<PromptLibrary bank />} />
         </Route>
       </Route>
 
@@ -181,6 +183,7 @@ function AccountRoutes() {
                 element={<PlanLibrary base="/leadership/reading-plans" bank={false} />}
               />
               <Route path="/leadership/reading-plans/:planId" element={<PlanEditor base="/leadership/reading-plans" />} />
+              <Route path="/leadership/faith-in-action" element={<PromptLibrary bank={false} />} />
               <Route path="/leadership/people" element={<People />} />
               <Route element={<RequireAccountAdmin />}>
                 <Route path="/leadership/account" element={<AccountSettings />} />

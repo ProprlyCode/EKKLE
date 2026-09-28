@@ -626,6 +626,10 @@ export interface Database {
       leadership_conversations: { Args: Record<string, never>; Returns: Json };
       reassign_conversation: { Args: { p_conversation_id: string; p_to_member: string }; Returns: undefined };
       study_library: { Args: Record<string, never>; Returns: Json };
+      faith_prompts: { Args: Record<string, never>; Returns: Json };
+      prompt_library: { Args: Record<string, never>; Returns: Json };
+      save_faith_prompt: { Args: { p_id: string | null; p_kind: string; p_body: string; p_status: string }; Returns: string };
+      delete_faith_prompt: { Args: { p_id: string }; Returns: undefined };
       reading_plans: { Args: Record<string, never>; Returns: Json };
       reading_plan: { Args: { p_id: string }; Returns: Json };
       start_reading_plan: { Args: { p_id: string; p_together: boolean; p_area: string }; Returns: undefined };

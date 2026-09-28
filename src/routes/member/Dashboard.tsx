@@ -10,6 +10,7 @@ import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { ErrorNote } from '@/ui/states';
 import FlowPreview from '@/recipient/FlowPreview';
+import { FaithInAction } from './FaithInAction';
 
 /**
  * Member home. The focal element is the keepsake card — the thing a member is
@@ -34,6 +35,7 @@ export default function MemberDashboard() {
         message={membership.short_message}
         shareUrl={shareUrl}
       />
+      <FaithInAction />
       <FlowPicker
         activeSequenceId={membership.active_sequence_id}
         onChange={async (sequenceId) => {

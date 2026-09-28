@@ -17,7 +17,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | Studies 2–27 | **In progress** — 6 of 27 in hand; imported through the editor |
 | N2 Follow-through | **Built** — nudges (24h / 48h), move one conversation |
 | Bible reading plans | **Built** (0038) — Ekklē's four, ministries' own, read together, opt-in daily email |
-| Faith in action prompts | Next |
+| Faith in action prompts | **Built** (0039) — Ekklē's starting set (drafts to publish), ministries' own |
 | Song on a study's Experience page | Design notes below — not built |
 | N3 Seeker experience | Partly — installable done; "who you're talking to" card, reminders left |
 | N4 Leader & member tools | Partly — study editor done; outcomes view, member help left |
@@ -248,3 +248,13 @@ for that study plays while they reflect.
   choice? (No lyrics on screen — they're copyrighted separately.)
 - **Build size:** small — a `song` field on studies (url, title, artist),
   a field in the editor, and the player card in the reader.
+
+## Faith in action (Sep 2026)
+
+- *Built (0039).* Beside each member's code (the Your code tab): **this
+  week's** prompt — the same for everyone in the ministry, turning over each
+  Monday — and "More ideas" to browse, in three kinds: everyday moments,
+  sharing your code, conversation starters.
+- Ekklē's starting set (24 prompts, drafted by Claude) arrives as **drafts**:
+  the Ekklē team edits and publishes them in Platform → Prompts. A ministry's
+  Admins and Leaders add their own in Resources → Faith in action.

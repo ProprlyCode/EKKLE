@@ -9,6 +9,7 @@ const NAV: NavItem[] = [
   { to: '/platform/team', label: 'Team' },
   { to: '/platform/studies', label: 'Studies', end: false },
   { to: '/platform/plans', label: 'Plans', end: false },
+  { to: '/platform/prompts', label: 'Prompts' },
   { to: '/platform/waitlist', label: 'Waitlist' },
   { to: '/platform/settings', label: 'Settings' },
 ];
@@ -19,8 +20,8 @@ export default function PlatformLayout() {
   const role = usePlatformRole();
   return (
     <AppShell
-      // Studies and plans are kept by Owners and Admins.
-      nav={role === 'support' ? NAV.filter((n) => !['/platform/studies', '/platform/plans'].includes(n.to)) : NAV}
+      // Studies, plans and prompts are kept by Owners and Admins.
+      nav={role === 'support' ? NAV.filter((n) => !['/platform/studies', '/platform/plans', '/platform/prompts'].includes(n.to)) : NAV}
       right={
         <span className="flex items-center gap-3">
           {role && <span className="eyebrow">{PLATFORM_ROLE_LABEL[role]}</span>}
