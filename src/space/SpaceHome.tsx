@@ -6,6 +6,7 @@ import { listSeekerResources, type SeekerResourceSummary } from '@/data/resource
 import { Spinner } from '@/ui/states';
 import { lastMessage } from '@/components/MessageList';
 import { InstallHint } from './InstallHint';
+import { listPlans, type PlanSummary } from '@/bible/plans';
 
 /**
  * Your space — home (/space). The seeker's own place: the person they're
@@ -16,6 +17,7 @@ export default function SpaceHome() {
   const [convo, setConvo] = useState<SeekerConnection | null | undefined>(undefined);
   const [studies, setStudies] = useState<StudySummary[] | null | undefined>(undefined);
   const [resources, setResources] = useState<SeekerResourceSummary[]>([]);
+  const [plans, setPlans] = useState<PlanSummary[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -25,6 +27,9 @@ export default function SpaceHome() {
     listStudies()
       .then((s) => active && setStudies(s))
       .catch(() => active && setStudies(null));
+    listPlans()
+      .then((p) => active && setPlans(p))
+      .catch(() => undefined); // optional on Home
     listSeekerResources()
       .then((r) => active && setResources(r))
       .catch(() => undefined); // optional on Home
@@ -120,6 +125,23 @@ export default function SpaceHome() {
           </ul>
         </section>
       )}
+
+      {plans
+        .filter((p) => p.mine?.next_day)
+        .slice(0, 2)
+        .map((p) => (
+          <Link
+            key={p.id}
+            to={`/space/bible/plans/${p.id}`}
+            className="card group flex flex-col gap-1 px-5 py-4 transition-colors hover:border-sage/40"
+          >
+            <span className="eyebrow">your reading</span>
+            <span className="font-serif text-lg text-sage">{p.title}</span>
+            <span className="text-[13px] text-muted">
+              Day {p.mine!.next_day} · {p.mine!.done} of {p.days} days read
+            </span>
+          </Link>
+        ))}
 
       <InstallHint />
     </div>

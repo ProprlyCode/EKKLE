@@ -626,6 +626,21 @@ export interface Database {
       leadership_conversations: { Args: Record<string, never>; Returns: Json };
       reassign_conversation: { Args: { p_conversation_id: string; p_to_member: string }; Returns: undefined };
       study_library: { Args: Record<string, never>; Returns: Json };
+      reading_plans: { Args: Record<string, never>; Returns: Json };
+      reading_plan: { Args: { p_id: string }; Returns: Json };
+      start_reading_plan: { Args: { p_id: string; p_together: boolean; p_area: string }; Returns: undefined };
+      mark_reading_day: { Args: { p_id: string; p_day: number; p_done: boolean }; Returns: undefined };
+      stop_reading_plan: { Args: { p_id: string }; Returns: undefined };
+      set_reading_reminder: { Args: { p_id: string; p_at: string | null; p_tz: string }; Returns: undefined };
+      plan_library: { Args: Record<string, never>; Returns: Json };
+      plan_for_editing: { Args: { p_id: string }; Returns: Json };
+      save_reading_plan: {
+        Args: { p_id: string | null; p_title: string; p_description: string; p_days: Json; p_status: string };
+        Returns: string;
+      };
+      delete_reading_plan: { Args: { p_id: string }; Returns: undefined };
+      start_reading_together: { Args: { p_plan: string; p_start: string }; Returns: string };
+      end_reading_together: { Args: { p_group: string }; Returns: undefined };
       save_study_series: { Args: { p_id: string | null; p_title: string }; Returns: string };
       lock_study_series: { Args: { p_id: string }; Returns: undefined };
       set_study_series_credit: { Args: { p_id: string; p_credit: string; p_url: string }; Returns: undefined };

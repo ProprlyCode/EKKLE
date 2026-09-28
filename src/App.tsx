@@ -35,6 +35,8 @@ import SeekerLayout from '@/space/SeekerLayout';
 import StudyDashboard from '@/space/StudyDashboard';
 import StudyReader from '@/space/StudyReader';
 import BibleReader from '@/bible/BibleReader';
+import { PlanList, PlanPage } from '@/bible/ReadingPlans';
+import { PlanEditor, PlanLibrary } from '@/bible/PlanLibrary';
 import Connection from '@/space/Connection';
 import Account from '@/space/Account';
 import SpaceHome from '@/space/SpaceHome';
@@ -93,6 +95,8 @@ function PlatformRoutes() {
           <Route path="/platform/settings" element={<PlatformSettings />} />
           <Route path="/platform/studies" element={<StudyLibrary base="/platform/studies" bank />} />
           <Route path="/platform/studies/:studyId" element={<StudyEditor base="/platform/studies" />} />
+          <Route path="/platform/plans" element={<PlanLibrary base="/platform/plans" bank />} />
+          <Route path="/platform/plans/:planId" element={<PlanEditor base="/platform/plans" />} />
         </Route>
       </Route>
 
@@ -133,6 +137,8 @@ function AccountRoutes() {
           <Route path="/space/studies" element={<StudyDashboard />} />
           <Route path="/space/bible" element={<BibleReader base="/space/bible" stickyTop="top-[53px]" />} />
           <Route path="/space/bible/:book/:chapter" element={<BibleReader base="/space/bible" stickyTop="top-[53px]" />} />
+          <Route path="/space/bible/plans" element={<PlanList base="/space/bible" />} />
+          <Route path="/space/bible/plans/:planId" element={<PlanPage base="/space/bible" />} />
           <Route path="/space/resources" element={<ResourcesLibrary />} />
           <Route path="/space/resources/:resourceId" element={<ResourcePage />} />
           <Route path="/space/account" element={<Account />} />
@@ -157,6 +163,8 @@ function AccountRoutes() {
             <Route path="/app/messages" element={<Inbox />} />
             <Route path="/app/bible" element={<BibleReader base="/app/bible" />} />
             <Route path="/app/bible/:book/:chapter" element={<BibleReader base="/app/bible" />} />
+            <Route path="/app/bible/plans" element={<PlanList base="/app/bible" />} />
+            <Route path="/app/bible/plans/:planId" element={<PlanPage base="/app/bible" />} />
             <Route path="/app/messages/:conversationId" element={<Thread />} />
 
             <Route element={<RequireLeadership />}>
@@ -168,6 +176,11 @@ function AccountRoutes() {
                 element={<StudyLibrary base="/leadership/study-editor" bank={false} />}
               />
               <Route path="/leadership/study-editor/:studyId" element={<StudyEditor base="/leadership/study-editor" />} />
+              <Route
+                path="/leadership/reading-plans"
+                element={<PlanLibrary base="/leadership/reading-plans" bank={false} />}
+              />
+              <Route path="/leadership/reading-plans/:planId" element={<PlanEditor base="/leadership/reading-plans" />} />
               <Route path="/leadership/people" element={<People />} />
               <Route element={<RequireAccountAdmin />}>
                 <Route path="/leadership/account" element={<AccountSettings />} />

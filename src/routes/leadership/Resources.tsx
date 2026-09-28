@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSession } from '@/auth/SessionProvider';
 import {
@@ -78,6 +79,19 @@ export default function Resources() {
       </div>
 
       <StudyBank />
+
+      <Link
+        to="/leadership/reading-plans"
+        className="card flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:border-sage/40"
+      >
+        <span>
+          <span className="block text-base text-sage">Reading plans</span>
+          <span className="text-sm text-muted-strong">
+            Plans people follow in the Bible tab. Read one together, or write your own.
+          </span>
+        </span>
+        <span aria-hidden className="text-muted">→</span>
+      </Link>
 
       <h2 className="-mb-4 text-base">Reading, video and links</h2>
 

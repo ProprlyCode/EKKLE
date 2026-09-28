@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { markDay } from './plans';
 import { BOOKS, BOOK_BY_ID, formatReference, type Book } from './books';
 import {
   ESV_COPYRIGHT,
@@ -54,6 +55,10 @@ export default function BibleReader({ base, stickyTop = 'top-0' }: { base: strin
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
+  // Opened from a reading plan: "Day 3 — Mark as read" (0038).
+  const [search] = useSearchParams();
+  const planId = search.get('plan');
+  const planDay = Number(search.get('day')) || null;
 
   // No place in the URL: pick up where they left off (else John 1).
   useEffect(() => {
@@ -164,7 +169,24 @@ export default function BibleReader({ base, stickyTop = 'top-0' }: { base: strin
         >
           Notes
         </button>
+        <Link
+          to={`${base}/plans`}
+          className="rounded-lg px-2 py-1 text-[13px] text-muted hover:bg-sage/5 hover:text-sage"
+        >
+          Plans
+        </Link>
       </div>
+
+      {planId && planDay && (
+        <PlanBar
+          onDone={async () => {
+            await markDay(planId, planDay, true);
+            navigate(`${base}/plans/${planId}`);
+          }}
+          day={planDay}
+          back={`${base}/plans/${planId}`}
+        />
+      )}
 
       {panel === 'books' && <BookPicker current={book} onPick={go} />}
       {panel === 'search' && <SearchPanel translation={translation} onOpen={(h) => go(h.book, h.chapter)} />}
@@ -507,6 +529,29 @@ function NotesPanel({ onOpen }: { onOpen: (b: Book, c: number) => void }) {
           })}
         </ul>
       )}
+    </div>
+  );
+}
+
+/** Reading from a plan: mark the day read, or go back to the plan. */
+function PlanBar({ day, back, onDone }: { day: number; back: string; onDone: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-edge bg-card px-4 py-2 text-[13px] text-muted-strong">
+      <span className="flex-1">Day {day} of your reading plan</span>
+      <Link to={back} className="text-sage underline-offset-2 hover:underline">
+        Back to the plan
+      </Link>
+      <Button
+        size="sm"
+        disabled={busy}
+        onClick={() => {
+          setBusy(true);
+          onDone().catch(() => setBusy(false));
+        }}
+      >
+        Mark day {day} read
+      </Button>
     </div>
   );
 }

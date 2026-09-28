@@ -11,6 +11,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { accountInfo, fromAccount, fromOurTrigger, sendEmail } from '../_shared/email.ts';
+import { readingLabel } from '../_shared/books.ts';
 
 interface MessageRecord {
   id: string;
@@ -28,6 +29,10 @@ Deno.serve(async (req) => {
   if (!fromOurTrigger(req)) return new Response('unauthorized', { status: 401 });
   try {
     const payload = await req.json();
+    if (payload.record?.kind === 'reading') {
+      await dailyReading(payload.record.auth_uid, payload.record.plan_id);
+      return new Response('ok', { status: 200 });
+    }
     if (payload.record?.kind === 'nudge' || payload.record?.kind === 'escalate') {
       await followUp(payload.record.kind, payload.record.conversation_id);
       return new Response('ok', { status: 200 });
@@ -168,4 +173,44 @@ async function followUp(kind: 'nudge' | 'escalate', conversationId: string) {
       from,
     );
   }
+}
+
+// Reading plans (migration 0038): today's reading, for someone who turned the
+// daily email on — the next day they haven't ticked off.
+async function dailyReading(authUid: string, planId: string) {
+  const { data: progress } = await supabase
+    .from('reading_progress')
+    .select('done_days, org_id, area, plan:reading_plans(title)')
+    .eq('auth_uid', authUid)
+    .eq('plan_id', planId)
+    .single();
+  if (!progress) return;
+  const done: number[] = progress.done_days ?? [];
+  const { data: days } = await supabase
+    .from('reading_plan_days')
+    .select('day, readings')
+    .eq('plan_id', planId)
+    .order('day');
+  const next = (days ?? []).find((d: { day: number }) => !done.includes(d.day)) as
+    | { day: number; readings: string[] }
+    | undefined;
+  if (!next) return;
+  const { data: user } = await supabase.auth.admin.getUserById(authUid);
+  const email = user?.user?.email;
+  if (!email) return;
+
+  const title = (progress.plan as unknown as { title: string } | null)?.title ?? 'Your reading plan';
+  const { base, name } = progress.org_id
+    ? await accountInfo(supabase, progress.org_id)
+    : { base: Deno.env.get('SITE_URL') ?? '', name: null };
+  const link = base ? `${base}/${progress.area === 'app' ? 'app' : 'space'}/bible/plans/${planId}` : '';
+  const passages = next.readings.map(readingLabel).join('; ');
+  await sendEmail(
+    email,
+    `Today’s reading: ${passages}`,
+    `${title} — day ${next.day}\n\n${passages}\n\n` +
+      (link ? `Read it here: ${link}\n\n` : '') +
+      `You asked for this daily email. To stop it, open the plan and choose “Turn off”.`,
+    fromAccount(name),
+  );
 }
