@@ -108,7 +108,7 @@ export function MinistrySettings({ orgId }: { orgId: string }) {
             ))}
         </select>
         <p className="text-[12px] text-muted">
-          Who seekers reach when they didn’t come through someone’s link.
+          Who people reach when they didn’t come through someone’s link.
         </p>
       </div>
 

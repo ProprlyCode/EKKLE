@@ -115,7 +115,7 @@ export default function Accounts() {
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="accounts" value={accounts.length} />
-            <Stat label="seekers" value={totals.seekers} />
+            <Stat label="people exploring" value={totals.seekers} />
             <Stat label="conversations" value={totals.conversations} />
             <Stat label="connections made" value={totals.connections} />
           </div>
@@ -201,7 +201,7 @@ function AccountRow({
         </span>
         <span className="flex gap-5 text-right text-[13px] text-muted-strong">
           <Mini label="team" value={a.team} />
-          <Mini label="seekers" value={a.seekers} />
+          <Mini label="exploring" value={a.seekers} />
           <Mini label="studies" value={a.studies_started} />
           <Mini label="chats" value={a.conversations} />
         </span>

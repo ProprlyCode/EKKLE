@@ -59,7 +59,7 @@ export function StudyBank() {
         <div>
           <h2 className="text-base">Bible studies</h2>
           <p className="mt-1 text-sm text-muted-strong">
-            The Ekklē study bank. Choose which your seekers get and the order they unlock in.
+            The Ekklē study bank. Choose which studies people get and the order they unlock in.
           </p>
         </div>
         {studies && (

@@ -153,7 +153,7 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
     <Shell>
       {preview && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-edge bg-card px-3 py-2 text-[13px] text-muted-strong">
-          <span>Preview — what seekers see. Nothing is saved.</span>
+          <span>Preview — what people see. Nothing is saved.</span>
           <button onClick={() => navigate(backTo)} className="text-sage underline-offset-2 hover:underline">
             Back to resources
           </button>

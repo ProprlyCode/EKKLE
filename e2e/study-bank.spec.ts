@@ -24,7 +24,7 @@ test('the study bank in Resources: see, preview, choose', async ({ page }) => {
 
   // Preview: the real reader, nothing saved.
   await row.getByRole('link', { name: 'Preview' }).click();
-  await expect(page.getByText('Preview — what seekers see. Nothing is saved.')).toBeVisible();
+  await expect(page.getByText('Preview — what people see. Nothing is saved.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The Logic of Love' })).toBeVisible();
   await page.getByRole('button', { name: 'Back to resources' }).first().click();
   await page.waitForURL('**/leadership/resources');
