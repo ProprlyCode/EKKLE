@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayLabel, parseDayLine, readingLabel } from './plans';
+import { dayLabel, parseDayLine, readingLabel } from './readings';
 
 describe('reading plans', () => {
   it('reads a day as people write it', () => {
