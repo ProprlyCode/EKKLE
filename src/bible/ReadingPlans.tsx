@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/ui/Button";
-import { ErrorNote, Spinner } from "@/ui/states";
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Button } from '@/ui/Button';
+import { ErrorNote, Spinner } from '@/ui/states';
 import {
   dayLabel,
   getPlan,
@@ -14,7 +14,7 @@ import {
   stopPlan,
   type PlanDetail,
   type PlanSummary,
-} from "./plans";
+} from './plans';
 
 /**
  * Bible → Plans: reading plans to follow at your own pace (tick days off,
@@ -42,8 +42,7 @@ export function PlanList({ base }: { base: string }) {
         </Link>
         <h1 className="mt-2 font-serif text-2xl text-sage">Reading plans</h1>
         <p className="mt-1 text-[15px] leading-relaxed text-muted-strong">
-          A little each day, at your own pace. Miss a day? Just pick up where
-          you left off.
+          A little each day, at your own pace. Miss a day? Just pick up where you left off.
         </p>
       </div>
 
@@ -60,9 +59,7 @@ export function PlanList({ base }: { base: string }) {
       )}
       {others.length > 0 && (
         <section className="flex flex-col gap-3">
-          <span className="eyebrow">
-            {mine.length ? "more plans" : "choose a plan"}
-          </span>
+          <span className="eyebrow">{mine.length ? 'more plans' : 'choose a plan'}</span>
           {others.map((p) => (
             <PlanCard key={p.id} plan={p} base={base} />
           ))}
@@ -80,15 +77,9 @@ function PlanCard({ plan, base }: { plan: PlanSummary; base: string }) {
     >
       <span className="flex flex-wrap items-center gap-2">
         <span className="font-serif text-lg text-sage">{plan.title}</span>
-        {plan.together && (
-          <span className="eyebrow text-[10px]">reading together</span>
-        )}
+        {plan.together && <span className="eyebrow text-[10px]">reading together</span>}
       </span>
-      {plan.description && (
-        <span className="text-[14px] text-muted-strong">
-          {plan.description}
-        </span>
-      )}
+      {plan.description && <span className="text-[14px] text-muted-strong">{plan.description}</span>}
       <span className="text-[12px] text-muted">
         {plan.mine
           ? plan.mine.next_day
@@ -101,9 +92,9 @@ function PlanCard({ plan, base }: { plan: PlanSummary; base: string }) {
 }
 
 export function PlanPage({ base }: { base: string }) {
-  const { planId = "" } = useParams();
+  const { planId = '' } = useParams();
   const navigate = useNavigate();
-  const area = base.startsWith("/app") ? "app" : "space";
+  const area = base.startsWith('/app') ? 'app' : 'space';
   const [plan, setPlan] = useState<PlanDetail | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,7 +120,7 @@ export function PlanPage({ base }: { base: string }) {
       await fn();
       await refresh();
     } catch {
-      setError("That didn’t work. Please try again.");
+      setError('That didn’t work. Please try again.');
     } finally {
       setBusy(false);
     }
@@ -149,38 +140,23 @@ export function PlanPage({ base }: { base: string }) {
   const done = new Set(plan.mine?.done_days ?? []);
   const next = plan.days.find((d) => !done.has(d.day)) ?? null;
   // Around where they are (or the group is), unless they ask for every day.
-  const focus = plan.mine
-    ? (next?.day ?? plan.days.length)
-    : (plan.together?.day ?? 1);
-  const visible = showAll
-    ? plan.days
-    : plan.days.filter((d) => d.day >= focus - 2 && d.day <= focus + 6);
+  const focus = plan.mine ? (next?.day ?? plan.days.length) : (plan.together?.day ?? 1);
+  const visible = showAll ? plan.days : plan.days.filter((d) => d.day >= focus - 2 && d.day <= focus + 6);
   const openHref = (reading: string, day: number) => {
     const r = parseReadingId(reading);
-    return r
-      ? `${base}/${r.book.id}/${r.chapter}?plan=${plan.id}&day=${day}`
-      : base;
+    return r ? `${base}/${r.book.id}/${r.chapter}?plan=${plan.id}&day=${day}` : base;
   };
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link
-          to={`${base}/plans`}
-          className="text-[13px] text-muted hover:text-sage"
-        >
+        <Link to={`${base}/plans`} className="text-[13px] text-muted hover:text-sage">
           ← Reading plans
         </Link>
         <h1 className="mt-2 font-serif text-2xl text-sage">{plan.title}</h1>
-        {plan.description && (
-          <p className="mt-1 text-[15px] leading-relaxed text-muted-strong">
-            {plan.description}
-          </p>
-        )}
+        {plan.description && <p className="mt-1 text-[15px] leading-relaxed text-muted-strong">{plan.description}</p>}
         <p className="mt-1 text-[13px] text-muted">
-          {plan.mine
-            ? `${done.size} of ${plan.days.length} days read`
-            : `${plan.days.length} days`}
+          {plan.mine ? `${done.size} of ${plan.days.length} days read` : `${plan.days.length} days`}
         </p>
       </div>
 
@@ -188,10 +164,9 @@ export function PlanPage({ base }: { base: string }) {
 
       {plan.together && (
         <div className="rounded-lg border border-sage/20 bg-sage/5 px-4 py-3 text-[14px] text-muted-strong">
-          Your ministry is reading this together — the group is on day{" "}
-          {Math.min(plan.together.day, plan.days.length)}
+          Your ministry is reading this together — the group is on day {Math.min(plan.together.day, plan.days.length)}
           {plan.together.readers > 0 &&
-            ` · ${plan.together.readers} ${plan.together.readers === 1 ? "person" : "people"} reading along`}
+            ` · ${plan.together.readers} ${plan.together.readers === 1 ? 'person' : 'people'} reading along`}
           .
         </div>
       )}
@@ -199,26 +174,20 @@ export function PlanPage({ base }: { base: string }) {
       {!plan.mine ? (
         <div className="flex flex-wrap gap-2">
           {plan.together && (
-            <Button
-              onClick={() => void act(() => startPlan(plan.id, true, area))}
-              disabled={busy}
-            >
+            <Button onClick={() => void act(() => startPlan(plan.id, true, area))} disabled={busy}>
               Read along together
             </Button>
           )}
           <Button
-            variant={plan.together ? "quiet" : "primary"}
+            variant={plan.together ? 'quiet' : 'primary'}
             onClick={() => void act(() => startPlan(plan.id, false, area))}
             disabled={busy}
           >
-            {plan.together ? "Start on my own" : "Start this plan"}
+            {plan.together ? 'Start on my own' : 'Start this plan'}
           </Button>
         </div>
       ) : next ? (
-        <section
-          className="card flex flex-col gap-3 px-5 py-4"
-          aria-label="Today’s reading"
-        >
+        <section className="card flex flex-col gap-3 px-5 py-4" aria-label="Today’s reading">
           <span className="eyebrow">today’s reading · day {next.day}</span>
           <ul className="flex flex-wrap gap-2">
             {next.readings.map((r) => (
@@ -233,11 +202,7 @@ export function PlanPage({ base }: { base: string }) {
             ))}
           </ul>
           <div>
-            <Button
-              size="sm"
-              onClick={() => void act(() => markDay(plan.id, next.day, true))}
-              disabled={busy}
-            >
+            <Button size="sm" onClick={() => void act(() => markDay(plan.id, next.day, true))} disabled={busy}>
               Mark day {next.day} read
             </Button>
           </div>
@@ -259,17 +224,13 @@ export function PlanPage({ base }: { base: string }) {
                 <input
                   type="checkbox"
                   checked={done.has(d.day)}
-                  onChange={(e) =>
-                    void act(() => markDay(plan.id, d.day, e.target.checked))
-                  }
+                  onChange={(e) => void act(() => markDay(plan.id, d.day, e.target.checked))}
                   disabled={busy}
                   aria-label={`Day ${d.day} read`}
                   className="h-4 w-4 shrink-0 accent-sage"
                 />
               ) : null}
-              <span className="w-14 shrink-0 text-[12px] tabular-nums text-muted">
-                Day {d.day}
-              </span>
+              <span className="w-14 shrink-0 text-[12px] tabular-nums text-muted">Day {d.day}</span>
               <Link
                 to={openHref(d.readings[0], d.day)}
                 className="min-w-0 flex-1 truncate text-[15px] text-sage hover:underline"
@@ -297,28 +258,16 @@ export function PlanPage({ base }: { base: string }) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() =>
-                  void act(() => stopPlan(plan.id)).then(() =>
-                    navigate(`${base}/plans`),
-                  )
-                }
+                onClick={() => void act(() => stopPlan(plan.id)).then(() => navigate(`${base}/plans`))}
               >
                 Stop
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setConfirmStop(false)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => setConfirmStop(false)}>
                 Keep reading
               </Button>
             </>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setConfirmStop(true)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setConfirmStop(true)}>
               Stop this plan
             </Button>
           )}
@@ -339,9 +288,7 @@ function Reminder({
   act: (fn: () => Promise<void>) => Promise<void>;
 }) {
   const on = !!plan.mine?.remind_at;
-  const [time, setTime] = useState(
-    (plan.mine?.remind_at ?? "07:00").slice(0, 5),
-  );
+  const [time, setTime] = useState((plan.mine?.remind_at ?? '07:00').slice(0, 5));
   return (
     <section className="card flex flex-col gap-3 px-5 py-4 text-[14px]">
       <span>
@@ -349,7 +296,7 @@ function Reminder({
         <span className="text-[13px] text-muted">
           {on
             ? `Today’s reading arrives each day at ${time}.`
-            : "Off. Get each day’s reading by email, at a time you choose."}
+            : 'Off. Get each day’s reading by email, at a time you choose.'}
         </span>
       </span>
       <div className="flex flex-wrap items-center gap-2">
@@ -383,11 +330,7 @@ function Reminder({
             </Button>
           </>
         ) : (
-          <Button
-            size="sm"
-            disabled={busy || !time}
-            onClick={() => void act(() => setReminder(plan.id, time))}
-          >
+          <Button size="sm" disabled={busy || !time} onClick={() => void act(() => setReminder(plan.id, time))}>
             Turn on
           </Button>
         )}

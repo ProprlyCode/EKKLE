@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Json } from '@/lib/database.types';
-import type { StudyBlock } from './studies';
+import type { StudyBlock, StudySong } from './studies';
 
 /**
  * The study editor. On ekkle.org the Ekklē team's Owners and Admins keep
@@ -42,6 +42,8 @@ export interface EditorStudy {
   status: 'draft' | 'approved';
   series: { id: string; title: string; locked: boolean; credit: string | null; credit_url: string | null };
   has_draft: boolean;
+  /** The song offered at the Experience section (0040). */
+  song: StudySong | null;
   content: StudyContent;
   people_started: number;
 }
@@ -66,6 +68,12 @@ export async function saveSeries(id: string | null, title: string): Promise<stri
 /** Set (or clear) where a series' studies come from. Allowed after locking. */
 export async function setSeriesCredit(id: string, credit: string, url: string): Promise<void> {
   const { error } = await supabase.rpc('set_study_series_credit', { p_id: id, p_credit: credit, p_url: url });
+  if (error) throw error;
+}
+
+/** Set (or remove, with null) a study's song. Allowed after locking. */
+export async function setStudySong(id: string, song: StudySong | null): Promise<void> {
+  const { error } = await supabase.rpc('set_study_song', { p_study: id, p_song: song as unknown as Json });
   if (error) throw error;
 }
 

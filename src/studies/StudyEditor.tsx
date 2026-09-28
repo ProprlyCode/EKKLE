@@ -6,16 +6,19 @@ import {
   publishStudy,
   reason,
   saveDraft,
+  setStudySong,
   type EditorStudy,
   type StudyContent,
 } from '@/data/studyEditor';
-import type { StudyDetail } from '@/data/studies';
+import type { StudyDetail, StudySong } from '@/data/studies';
 import StudyReader from '@/space/StudyReader';
 import { Button } from '@/ui/Button';
 import { Card } from '@/ui/Card';
 import { TextInput } from '@/ui/Field';
 import { ErrorNote, Spinner } from '@/ui/states';
 import { BLANK, countBlanks, pageToText, textToBlocks } from './format';
+import { useSession } from '@/auth/SessionProvider';
+import { SongForm, songLabel } from './Song';
 
 type SaveState = 'saved' | 'saving' | 'unsaved' | 'error';
 
@@ -26,6 +29,7 @@ type SaveState = 'saved' | 'saving' | 'unsaved' | 'error';
  */
 export function StudyEditor({ base }: { base: string }) {
   const { studyId = '' } = useParams();
+  const { membership } = useSession();
   const navigate = useNavigate();
   const [study, setStudy] = useState<EditorStudy | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -194,6 +198,7 @@ export function StudyEditor({ base }: { base: string }) {
     answers: content.answers,
     credit: study.series.credit,
     credit_url: study.series.credit_url,
+    song: study.song,
     progress: null,
   };
 
@@ -244,6 +249,12 @@ export function StudyEditor({ base }: { base: string }) {
           </p>
         )}
       </Card>
+
+      <StudySongCard
+        studyId={study.id}
+        initial={study.song}
+        folder={base.startsWith('/platform') ? 'ekkle' : (membership?.org_id ?? '')}
+      />
 
       {pages.map((text, i) => (
         <Card key={i} className="flex flex-col gap-3">
@@ -393,4 +404,56 @@ function blankContexts(blocks: ReturnType<typeof textToBlocks>): string[] {
     }
   }
   return out;
+}
+
+/**
+ * The song offered at the study's Experience section (0040). Saved on its own
+ * (not part of the draft), and can be changed after the series is locked.
+ */
+function StudySongCard({ studyId, initial, folder }: { studyId: string; initial: StudySong | null; folder: string }) {
+  const [song, setSong] = useState(initial);
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save(next: StudySong | null) {
+    setBusy(true);
+    setError(null);
+    try {
+      await setStudySong(studyId, next);
+      setSong(next);
+      setEditing(false);
+    } catch {
+      setError('Couldn’t save the song. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="min-w-0 flex-1">
+          <span className="block text-base">Song for the Experience section</span>
+          <span className="text-[13px] text-muted">
+            {song ? songLabel(song) : 'None — people can be offered a song to listen to while they reflect.'}
+          </span>
+        </span>
+        {!editing && (
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+            {song ? 'Change' : 'Add a song'}
+          </Button>
+        )}
+        {!editing && song && (
+          <Button variant="ghost" size="sm" disabled={busy} onClick={() => void save(null)}>
+            Remove
+          </Button>
+        )}
+      </div>
+      {error && <ErrorNote>{error}</ErrorNote>}
+      {editing && (
+        <SongForm initial={song} folder={folder} busy={busy} onSave={(s) => void save(s)} onCancel={() => setEditing(false)} />
+      )}
+    </Card>
+  );
 }

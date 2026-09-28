@@ -19,6 +19,7 @@ import {
 import { Button } from '@/ui/Button';
 import { Spinner } from '@/ui/states';
 import { BibleBase, ScriptureText } from '@/bible/ScriptureText';
+import { SongOffer, SongPlayer } from '@/studies/Song';
 
 /**
  * The study reader — a paginated, brand-styled workbook. One page at a time
@@ -66,6 +67,8 @@ export default function StudyReader({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1); // 1-indexed; last page is the submit page
   const [submitting, setSubmitting] = useState(false);
+  // The Experience song (0040): nothing plays until they tap.
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     if (draft) {
@@ -149,6 +152,12 @@ export default function StudyReader({
   const filledCount = Object.values(answers).filter((v) => v.trim()).length;
   const allFilled = filledCount >= pageBlankStart.total;
   const onSubmitPage = page > contentPages;
+  // The Experience section: from the page with the "Experience" heading on.
+  const experienceFrom =
+    study.pages.findIndex((pg) =>
+      pg.blocks.some((b) => b.t === 'h' && b.text.trim().toLowerCase() === 'experience'),
+    ) + 1;
+  const inExperience = !!study.song && experienceFrom > 0 && page >= experienceFrom && !onSubmitPage;
 
   function setAnswer(index: number, value: string) {
     setAnswers((prev) => ({ ...prev, [index]: value }));
@@ -217,14 +226,21 @@ export default function StudyReader({
             />
           )
         ) : (
-          <PageBody
-            page={study.pages[page - 1]}
-            startIndex={pageBlankStart.starts[page - 1] ?? 0}
-            answers={answers}
-            onAnswer={setAnswer}
-          />
+          <>
+            {inExperience && !playing && study.song && (
+              <SongOffer song={study.song} onPlay={() => setPlaying(true)} />
+            )}
+            <PageBody
+              page={study.pages[page - 1]}
+              startIndex={pageBlankStart.starts[page - 1] ?? 0}
+              answers={answers}
+              onAnswer={setAnswer}
+            />
+          </>
         )}
       </div>
+
+      {playing && study.song && <SongPlayer song={study.song} onClose={() => setPlaying(false)} />}
 
       {/* Pager */}
       <div className="sticky bottom-0 -mx-5 flex items-center justify-between border-t border-edge/70 bg-canvas/95 px-5 py-3 backdrop-blur">

@@ -10,6 +10,14 @@ export type StudyBlock =
   | { t: 'p'; text: string }
   | { t: 'img'; src: string };
 
+/**
+ * A song for the study's Experience section (0040, audio only): a SoundCloud
+ * link, or an audio file uploaded to the `songs` bucket.
+ */
+export type StudySong =
+  | { kind: 'soundcloud'; url: string; title: string; artist?: string | null }
+  | { kind: 'file'; path: string; title: string; artist?: string | null };
+
 export interface StudyPage {
   page_number: number;
   blocks: StudyBlock[];
@@ -40,6 +48,7 @@ export interface StudyDetail {
   series?: string | null;
   credit?: string | null;
   credit_url?: string | null;
+  song?: StudySong | null;
   pages: StudyPage[];
   /** The intended answers — once the study is submitted (and in previews). */
   answers?: string[] | null;
@@ -101,6 +110,10 @@ export interface BankStudy {
   source: 'ekkle' | 'ministry';
   series?: string | null;
   credit?: string | null;
+  /** The song this ministry's people get, Ekklē's default, and the choice. */
+  song?: StudySong | null;
+  default_song?: StudySong | null;
+  song_choice?: 'default' | 'own' | 'none';
   enabled: boolean;
   /** Its place in the unlock order (only when on). */
   number: number | null;
@@ -126,4 +139,18 @@ export async function previewStudy(studyId: string): Promise<StudyDetail | null>
   const { data, error } = await supabase.rpc('preview_study', { p_study_id: studyId });
   if (error) throw error;
   return (data as StudyDetail | null) ?? null;
+}
+
+/** A ministry's song for a study: keep the default, use its own, or none. */
+export async function setMinistrySong(
+  studyId: string,
+  choice: 'default' | 'own' | 'none',
+  song: StudySong | null,
+): Promise<void> {
+  const { error } = await supabase.rpc('set_ministry_study_song', {
+    p_study: studyId,
+    p_choice: choice,
+    p_song: song as never,
+  });
+  if (error) throw error;
 }

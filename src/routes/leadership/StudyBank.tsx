@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { listStudyBank, saveStudyBank, type BankStudy } from '@/data/studies';
+import { listStudyBank, saveStudyBank, setMinistrySong, type BankStudy, type StudySong } from '@/data/studies';
+import { useSession } from '@/auth/SessionProvider';
+import { SongForm, songLabel } from '@/studies/Song';
+import { Button } from '@/ui/Button';
 import { Card } from '@/ui/Card';
 import { ErrorNote, Spinner } from '@/ui/states';
 
@@ -13,6 +16,8 @@ export function StudyBank() {
   const [studies, setStudies] = useState<BankStudy[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [songFor, setSongFor] = useState<string | null>(null);
+  const { membership } = useSession();
 
   useEffect(() => {
     listStudyBank()
@@ -90,7 +95,8 @@ export function StudyBank() {
       ) : (
         <ol className="divide-y divide-edge/70">
           {studies.map((s, i) => (
-            <li key={s.id} className="flex items-center gap-3 px-5 py-3">
+            <li key={s.id} className="flex flex-col gap-2 px-5 py-3">
+              <div className="flex items-center gap-3">
               <span className="w-7 shrink-0 text-center font-serif text-lg tabular-nums text-sage">
                 {s.number ?? '–'}
               </span>
@@ -143,10 +149,98 @@ export function StudyBank() {
                 />
                 Offer
               </label>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 pl-10 text-[12px] text-muted">
+                <span>
+                  Song:{' '}
+                  {s.song ? songLabel(s.song) : 'none'}
+                  {s.song_choice === 'own' ? ' (your own)' : s.song_choice === 'none' && s.default_song ? ' (turned off)' : ''}
+                </span>
+                <button
+                  onClick={() => setSongFor(songFor === s.id ? null : s.id)}
+                  aria-expanded={songFor === s.id}
+                  aria-label={`Song for ${s.title}`}
+                  className="text-sage underline-offset-2 hover:underline"
+                >
+                  Change
+                </button>
+              </div>
+              {songFor === s.id && (
+                <SongChoice
+                  study={s}
+                  folder={membership?.org_id ?? ''}
+                  onDone={async (choice, song) => {
+                    await setMinistrySong(s.id, choice, song);
+                    setSongFor(null);
+                    setStudies(await listStudyBank());
+                  }}
+                  onCancel={() => setSongFor(null)}
+                />
+              )}
             </li>
           ))}
         </ol>
       )}
     </Card>
+  );
+}
+
+/** A ministry's song for a study: Ekklē's default, its own, or none (0040). */
+function SongChoice({
+  study,
+  folder,
+  onDone,
+  onCancel,
+}: {
+  study: BankStudy;
+  folder: string;
+  onDone: (choice: 'default' | 'own' | 'none', song: StudySong | null) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [own, setOwn] = useState(study.song_choice === 'own');
+
+  async function choose(choice: 'default' | 'own' | 'none', song: StudySong | null) {
+    setBusy(true);
+    setError(null);
+    try {
+      await onDone(choice, song);
+    } catch {
+      setBusy(false);
+      setError('Couldn’t save that. Please try again.');
+    }
+  }
+
+  return (
+    <div className="ml-10 flex flex-col gap-3 rounded-lg border border-edge bg-canvas p-3 text-[13px]">
+      <p className="text-muted-strong">Offered when someone reaches this study’s Experience section.</p>
+      <div className="flex flex-wrap gap-2">
+        {study.default_song && (
+          <Button size="sm" variant="quiet" disabled={busy} onClick={() => void choose('default', null)}>
+            Use {study.source === 'ekkle' ? 'Ekklē’s' : 'the study’s'} song ({songLabel(study.default_song)})
+          </Button>
+        )}
+        <Button size="sm" variant="quiet" disabled={busy} onClick={() => setOwn(true)}>
+          Use our own song
+        </Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={() => void choose('none', null)}>
+          No song
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+      {own && (
+        <SongForm
+          initial={study.song_choice === 'own' ? (study.song ?? null) : null}
+          folder={folder}
+          busy={busy}
+          saveLabel="Use this song"
+          onSave={(song) => void choose('own', song)}
+        />
+      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
+    </div>
   );
 }

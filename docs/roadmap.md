@@ -18,7 +18,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | N2 Follow-through | **Built** — nudges (24h / 48h), move one conversation |
 | Bible reading plans | **Built** (0038) — Ekklē's four, ministries' own, read together, opt-in daily email |
 | Faith in action prompts | **Built** (0039) — Ekklē's starting set (drafts to publish), ministries' own |
-| Song on a study's Experience page | Design notes below — not built |
+| Song on a study's Experience page | **Built** (0040) — audio only: SoundCloud link or uploaded file; ministries can swap |
 | N3 Seeker experience | Partly — installable done; "who you're talking to" card, reminders left |
 | N4 Leader & member tools | Partly — study editor done; outcomes view, member help left |
 | Address change requests | Not started (roles step 4) |
@@ -225,7 +225,20 @@ requests (step 4) and self-serve sign-up with approval (step 5, later).
   own time zone; a job every 15 minutes sends the next unread day once a day
   (`notify`, kind `reading`), and stops when the plan is finished.
 
-## Song on a study's Experience page — design notes (not built)
+## Song on a study's Experience page — built (0040), audio only
+
+*Built:* each study can carry a song, set in the study editor ("Song for the
+Experience section") by whoever keeps the study: a **SoundCloud link** (its
+slim audio player — full songs, licensing handled by SoundCloud) or an
+**uploaded audio file** (MP3/M4A/AAC/OGG/WAV, up to 20 MB, public `songs`
+bucket; only recordings the uploader has the rights to). When someone reaches
+the Experience section, "Listen while you reflect ▶" appears; nothing plays
+until they tap, and the player stays with them through the section. A
+ministry can keep Ekklē's song, use its own, or offer none (Resources → Bible
+studies → Song). YouTube was ruled out: no video wanted, and YouTube's terms
+don't allow hiding the player.
+
+### Earlier design notes
 
 The idea: when someone reaches a study's *Experience* section, a song chosen
 for that study plays while they reflect.
