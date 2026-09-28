@@ -555,7 +555,11 @@ export interface Database {
       };
       claim_platform_seat: {
         Args: Record<string, never>;
-        Returns: PlatformRole | null;
+        Returns: Json;
+      };
+      platform_password_saved: {
+        Args: Record<string, never>;
+        Returns: undefined;
       };
       platform_accounts: {
         Args: Record<string, never>;

@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
 import { setMyPassword } from '@/data/auth';
+import { isPlatformHost } from '@/account/address';
+import { markPlatformPasswordSet } from '@/data/platformTeam';
 import { Wordmark } from '@/components/Wordmark';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
@@ -60,6 +62,8 @@ export default function ResetPassword() {
     setStatus('saving');
     try {
       await setMyPassword(password);
+      // On ekkle.org this is the Ekklē team: note that a password is set.
+      if (isPlatformHost()) await markPlatformPasswordSet().catch(() => {});
       setStatus('done');
     } catch {
       setStatus('idle');
@@ -78,7 +82,11 @@ export default function ResetPassword() {
           </p>
           <Button
             className="mt-5"
-            onClick={() => navigate(src === 'seeker' ? '/space' : '/app', { replace: true })}
+            onClick={() =>
+              navigate(src === 'seeker' ? '/space' : isPlatformHost() ? '/platform' : '/app', {
+                replace: true,
+              })
+            }
           >
             Continue
           </Button>

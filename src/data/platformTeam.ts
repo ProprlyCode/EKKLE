@@ -7,11 +7,23 @@ import type { PlatformRole } from '@/lib/database.types';
  * seekers' names or emails.
  */
 
-/** Signing in on ekkle.org: link an invitation to this login; my role or null. */
-export async function claimPlatformSeat(): Promise<PlatformRole | null> {
+export interface PlatformSeat {
+  role: PlatformRole;
+  /** Set once they've chosen a password (first sign-in is by emailed code). */
+  password_set: boolean;
+}
+
+/** Signing in on ekkle.org: link an invitation to this login; my seat or null. */
+export async function claimPlatformSeat(): Promise<PlatformSeat | null> {
   const { data, error } = await supabase.rpc('claim_platform_seat');
   if (error) throw error;
-  return (data as PlatformRole | null) ?? null;
+  return (data as unknown as PlatformSeat | null) ?? null;
+}
+
+/** Record that this team member has set a password on their login. */
+export async function markPlatformPasswordSet(): Promise<void> {
+  const { error } = await supabase.rpc('platform_password_saved');
+  if (error) throw error;
 }
 
 export interface PlatformAccount {

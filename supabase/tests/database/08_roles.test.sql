@@ -97,7 +97,7 @@ set local "request.jwt.claims" to '{"sub":"61000000-0000-0000-0000-000000000001"
 select throws_ok($$ select platform_accounts() $$, 'P0001', 'forbidden',
   'a ministry Admin is not on the platform team');
 set local "request.jwt.claims" to '{"sub":"61000000-0000-0000-0000-000000000004","role":"authenticated"}';
-select is(claim_platform_seat(), 'support', 'an invited platform member claims their seat by email');
+select is(claim_platform_seat() ->> 'role', 'support', 'an invited platform member claims their seat by email');
 select ok(jsonb_array_length(platform_accounts()) >= 2, 'Support sees every ministry account (metadata)');
 select ok(not is_platform_admin(), 'Support is not a platform Admin');
 

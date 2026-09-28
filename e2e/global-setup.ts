@@ -39,9 +39,10 @@ export default async function globalSetup() {
     if (error) throw error;
     owen = data.user;
   }
+  // Owen has already chosen his password (first sign-ins are tested in roles.spec).
   const { data: seat } = await sb.from('platform_team').select('id').eq('email', OWEN.email).maybeSingle();
-  if (!seat) {
-    const { error } = await sb.from('platform_team').insert({ email: OWEN.email, role: 'owner', name: 'Owen' });
-    if (error) throw error;
-  }
+  const { error: seatError } = seat
+    ? await sb.from('platform_team').update({ password_set: true }).eq('id', seat.id)
+    : await sb.from('platform_team').insert({ email: OWEN.email, role: 'owner', name: 'Owen', password_set: true });
+  if (seatError) throw seatError;
 }

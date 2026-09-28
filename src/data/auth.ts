@@ -1,13 +1,16 @@
 import { supabase } from '@/lib/supabase';
 import { env } from '@/lib/env';
+import { isPlatformHost } from '@/account/address';
 
 /** Auth actions (magic link). Kept out of components like the rest of src/data. */
 
 export async function sendMagicLink(email: string): Promise<void> {
   const redirectTo = env.siteUrl || window.location.origin;
+  // On ekkle.org the only thing to sign in to is the Ekklē team's console.
+  const landing = isPlatformHost() ? '/platform' : '/app';
   const { error } = await supabase.auth.signInWithOtp({
     email: email.trim(),
-    options: { emailRedirectTo: `${redirectTo}/app` },
+    options: { emailRedirectTo: `${redirectTo}${landing}` },
   });
   if (error) throw error;
 }

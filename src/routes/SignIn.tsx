@@ -18,7 +18,11 @@ import { EmailCode } from '@/ui/EmailCode';
 export default function SignIn() {
   const { ready, configured, session } = useSession();
   const account = useAccount();
-  const [mode, setMode] = useState<'magic' | 'password'>('magic');
+  // ekkle.org is only for the Ekklē team, who sign in with a password (their
+  // first time by emailed code, then they set one).
+  const [mode, setMode] = useState<'magic' | 'password'>(
+    account.status === 'platform' ? 'password' : 'magic',
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
@@ -144,7 +148,9 @@ export default function SignIn() {
           <form onSubmit={onPasswordSubmit} className="flex flex-col gap-4">
             <div>
               <h1 className="text-lg">Sign in with a password</h1>
-              <p className="mt-1 text-sm text-muted-strong">For admin accounts.</p>
+              <p className="mt-1 text-sm text-muted-strong">
+                {account.status === 'platform' ? 'For the Ekklē team.' : 'For admin accounts.'}
+              </p>
             </div>
             <TextInput
               label="Email"
@@ -176,7 +182,7 @@ export default function SignIn() {
                 }}
                 className="transition-colors hover:text-sage"
               >
-                Use a magic link instead
+                {account.status === 'platform' ? 'First time? Email me a code' : 'Use a magic link instead'}
               </button>
               <button
                 type="button"

@@ -73,8 +73,8 @@ for (const p of PERSONAS) {
       .from('platform_team').select('id').eq('email', p.email).maybeSingle();
     if (seatError) throw seatError;
     const { error } = seat
-      ? await sb.from('platform_team').update({ role: p.platform, auth_uid: user.id }).eq('id', seat.id)
-      : await sb.from('platform_team').insert({ email: p.email, role: p.platform, auth_uid: user.id, name: 'Demo admin' });
+      ? await sb.from('platform_team').update({ role: p.platform, auth_uid: user.id, password_set: true }).eq('id', seat.id)
+      : await sb.from('platform_team').insert({ email: p.email, role: p.platform, auth_uid: user.id, name: 'Demo admin', password_set: true });
     if (error) throw error;
   }
   console.log(`persona ready: ${p.email}`);

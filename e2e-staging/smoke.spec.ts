@@ -62,8 +62,7 @@ test('recipient → David → reply, on the real staging stack', async ({ browse
 
 test('the Ekklē team (admin persona) reaches the platform console on staging.ekkle.org', async ({ page }) => {
   const platform = process.env.STAGING_PLATFORM_URL || 'https://staging.ekkle.org';
-  await page.goto(`${platform}/sign-in`);
-  await page.getByRole('button', { name: 'Use a password instead' }).click();
+  await page.goto(`${platform}/sign-in`); // ekkle.org opens on the password form
   await page.getByLabel('Email').fill('admin@demo.ekkle.org');
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
