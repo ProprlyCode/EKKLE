@@ -4,7 +4,7 @@
 -- studies unlock within their series.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(22);
+select plan(23);
 
 insert into auth.users (id, email) values
   ('e1000000-0000-0000-0000-000000000001', 'owner@ed.test'),
@@ -48,6 +48,10 @@ select lives_ok($$ select publish_study((select v from ids where k = 's1')) $$, 
 insert into ids values ('s2', create_study((select v from ids where k = 'series'),
   '{"title":"Two","pages":[{"blocks":[{"t":"p","text":"No blanks"}]}],"answers":[]}'));
 select lives_ok($$ select publish_study((select v from ids where k = 's2')) $$, 'a second study is published');
+insert into ids values ('s5', create_study((select v from ids where k = 'series'),
+  '{"title":"Five","pages":[{"blocks":[{"t":"p","text":"I think {{}}"}]}],"answers":[""],"open":[true]}'));
+select lives_ok($$ select publish_study((select v from ids where k = 's5')) $$,
+  'a blank with no set answer publishes (0036)');
 insert into ids values ('s3', create_study((select v from ids where k = 'series'), '{"title":"Three","pages":[]}'));
 select throws_ok($$ select lock_study_series((select v from ids where k = 'series')) $$, 'P0001', 'unpublished_changes',
   'a series with unpublished work can''t be locked');

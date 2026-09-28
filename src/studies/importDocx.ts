@@ -21,6 +21,8 @@ export interface ImportedStudy {
   tagline: string | null;
   pages: Array<{ blocks: StudyBlock[] }>;
   answers: string[];
+  /** Blanks whose row in the answer table is empty: people answer in their own words. */
+  open: boolean[];
   blanks: number;
   /** Things to check before publishing. */
   warnings: string[];
@@ -220,6 +222,7 @@ export function importDocx(data: Uint8Array, fileName = ''): ImportedStudy {
   else if (found.length !== blanks)
     warnings.push(`The document has ${blanks} blanks and ${found.length} answers — check them below.`);
   const list = Array.from({ length: blanks }, (_, i) => found[i] ?? '');
+  const open = Array.from({ length: blanks }, (_, i) => answerTable !== null && i < found.length && !found[i]);
 
-  return { number, title, tagline, pages, answers: list, blanks, warnings };
+  return { number, title, tagline, pages, answers: list, open, blanks, warnings };
 }

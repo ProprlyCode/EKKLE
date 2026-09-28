@@ -436,13 +436,15 @@ function Results({
             <tbody>
               {Array.from({ length: total }, (_, i) => {
                 const mine = (answers[i] ?? '').trim();
-                const same = mine.toLowerCase() === (intended[i] ?? '').trim().toLowerCase();
+                const expected = (intended[i] ?? '').trim();
+                // No set answer: what they wrote is the answer.
+                const same = !expected || mine.toLowerCase() === expected.toLowerCase();
                 return (
                   <tr key={i} className="border-b border-edge/60">
                     <td className="py-2 tabular-nums text-muted">{i + 1}</td>
                     <td className="py-2 text-muted-strong">{mine || '—'}</td>
                     <td className={'py-2 ' + (same ? 'text-muted-strong' : 'font-medium text-sage')}>
-                      {intended[i] ?? ''}
+                      {expected || <span className="text-muted">Your own words</span>}
                     </td>
                   </tr>
                 );

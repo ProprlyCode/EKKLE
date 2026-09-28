@@ -12,8 +12,10 @@ export interface StudyContent {
   title: string;
   tagline: string | null;
   pages: Array<{ blocks: StudyBlock[] }>;
-  /** One per blank, in order. */
+  /** One per blank, in order ('' for a blank answered in their own words). */
   answers: string[];
+  /** Blanks with no set answer — people write their own (one per blank). */
+  open?: boolean[];
 }
 
 export interface LibraryStudy {
@@ -79,6 +81,8 @@ export async function editorStudy(id: string): Promise<EditorStudy> {
     tagline: c.tagline ?? null,
     pages: c.pages ?? [],
     answers: c.answers ?? [],
+    // Published studies keep an open blank as an empty answer.
+    open: c.open ?? (c.answers ?? []).map((a) => study.status === 'approved' && !a),
   };
   return study;
 }

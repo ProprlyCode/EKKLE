@@ -92,6 +92,7 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
           tagline: study.tagline,
           pages: study.pages,
           answers: study.answers,
+          open: study.open,
         });
         report.push(
           `${study.title}: ${study.pages.length} pages, ${study.blanks} blanks` +

@@ -52,10 +52,11 @@ test('import a study from Word, check it, preview, publish, lock the series', as
     await expect(page.getByLabel('Page 1', { exact: true })).toHaveValue(/# Discover[\s\S]*God _____ the world\./);
     await expect(page.getByLabel('Answer 1')).toHaveValue('loved');
     await expect(page.getByLabel('Answer 2')).toHaveValue('');
-    await expect(page.getByText('1 of 2 blanks still need an answer.')).toBeVisible();
+    await expect(page.getByText(/1 of 2 blanks still need an answer/)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
 
-    await page.getByLabel('Answer 2').fill('made');
+    // The second blank has no single right answer: people write their own.
+    await page.getByLabel('Blank 2: no set answer').check();
     await expect(page.getByText('Draft saved')).toBeVisible();
 
     // Preview: the reader as people see it; answers show once submitted.
@@ -67,7 +68,7 @@ test('import a study from Word, check it, preview, publish, lock the series', as
     await preview.getByRole('button', { name: 'Next page' }).click();
     await preview.getByRole('button', { name: 'Submit answers' }).click();
     await expect(preview.getByRole('heading', { name: 'Study complete' })).toBeVisible();
-    await expect(preview.getByRole('row').filter({ hasText: 'saved' })).toContainText('made');
+    await expect(preview.getByRole('row').filter({ hasText: 'saved' })).toContainText('Your own words');
     await preview.getByRole('button', { name: 'Close preview' }).last().click();
 
     await page.getByRole('button', { name: 'Publish' }).click();

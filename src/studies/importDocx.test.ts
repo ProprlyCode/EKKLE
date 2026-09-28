@@ -50,6 +50,15 @@ describe('importDocx', () => {
     expect(s.warnings[0]).toMatch(/No answer table/);
   });
 
+  it('an empty answer cell means no set answer (their own words)', () => {
+    const s = importDocx(
+      docx(p('One ____ and ____.') + `<w:tbl>${row('Submitted', 'Answer')}${row('', 'love')}${row('', '')}</w:tbl>`),
+    );
+    expect(s.answers).toEqual(['love', '']);
+    expect(s.open).toEqual([false, true]);
+    expect(s.warnings).toEqual([]);
+  });
+
   it('marks blanks, dropping quotes around them', () => {
     expect(markBlanks('a “_____” b ___ c').text).toBe('a {{}} b {{}} c');
   });

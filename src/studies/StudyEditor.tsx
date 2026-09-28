@@ -33,6 +33,8 @@ export function StudyEditor({ base }: { base: string }) {
   const [tagline, setTagline] = useState('');
   const [pages, setPages] = useState<string[]>([]);
   const [answers, setAnswers] = useState<string[]>([]);
+  // Blanks with no set answer: people write their own.
+  const [open, setOpen] = useState<boolean[]>([]);
   const images = useRef<string[]>([]);
   const [save, setSave] = useState<SaveState>('saved');
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +53,7 @@ export function StudyEditor({ base }: { base: string }) {
     setPages(texts.length ? texts : ['']);
     const blanks = s.content.pages.reduce((n, p) => n + countBlanks(p.blocks ?? []), 0);
     setAnswers(Array.from({ length: blanks }, (_, i) => s.content.answers[i] ?? ''));
+    setOpen(Array.from({ length: blanks }, (_, i) => !!s.content.open?.[i]));
     dirty.current = false;
     setSave('saved');
   }
@@ -71,9 +74,10 @@ export function StudyEditor({ base }: { base: string }) {
       title: title.trim(),
       tagline: tagline.trim() || null,
       pages: blocks.map((b) => ({ blocks: b })),
-      answers: answers.map((a) => a.trim()),
+      answers: answers.map((a, i) => (open[i] ? '' : a.trim())),
+      open,
     }),
-    [title, tagline, blocks, answers],
+    [title, tagline, blocks, answers, open],
   );
 
   // Save the draft a moment after each change.
@@ -102,12 +106,14 @@ export function StudyEditor({ base }: { base: string }) {
     const after = countBlanks(textToBlocks(text, images.current));
     const at = starts[i] + Math.min(before, after);
     if (after !== before) {
-      setAnswers((prev) => {
+      const splice = <T,>(prev: T[], blank: T) => {
         const next = [...prev];
-        if (after > before) next.splice(at, 0, ...Array(after - before).fill(''));
+        if (after > before) next.splice(at, 0, ...Array<T>(after - before).fill(blank));
         else next.splice(at, before - after);
         return next;
-      });
+      };
+      setAnswers((prev) => splice(prev, ''));
+      setOpen((prev) => splice(prev, false));
     }
     change(setPages)(pages.map((p, j) => (j === i ? text : p)));
   }
@@ -124,11 +130,12 @@ export function StudyEditor({ base }: { base: string }) {
   }
 
   const totalBlanks = counts.reduce((a, b) => a + b, 0);
-  const missing = answers.filter((a) => !a.trim()).length;
+  const missing = answers.filter((a, i) => !open[i] && !a.trim()).length;
   const problems = [
     !title.trim() && 'Give the study a title.',
     !blocks.some((b) => b.length) && 'Add some content.',
-    missing > 0 && `${missing} of ${totalBlanks} blanks still need an answer.`,
+    missing > 0 &&
+      `${missing} of ${totalBlanks} blanks still need an answer (or tick “No set answer”).`,
   ].filter(Boolean) as string[];
 
   async function onPublish() {
@@ -230,7 +237,8 @@ export function StudyEditor({ base }: { base: string }) {
           <p className="text-[12px] leading-relaxed text-muted">
             On each page: start a line with <code># </code> for a heading, type <code>_____</code> (three or more
             underscores) for a blank, and leave a blank line between paragraphs. Images show as{' '}
-            <code>[image 1]</code>.
+            <code>[image 1]</code>. A blank with no single right answer (their own thoughts): tick
+            “No set answer”.
           </p>
         )}
       </Card>
@@ -272,25 +280,39 @@ export function StudyEditor({ base }: { base: string }) {
               <p className="text-[13px] font-medium text-muted-strong">Answers</p>
               {blankContexts(blocks[i]).map((ctx, k) => {
                 const n = starts[i] + k;
+                const isOpen = !!open[n];
                 return (
-                  <label key={n} className="flex items-center gap-3 text-[13px]">
+                  <div key={n} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
                     <span className="w-7 shrink-0 tabular-nums text-muted">{n + 1}</span>
                     <span className="min-w-0 flex-1 truncate text-muted" title={ctx}>
                       …{ctx} <span className="text-sage">_____</span>
                     </span>
                     <input
                       aria-label={`Answer ${n + 1}`}
-                      value={answers[n] ?? ''}
+                      value={isOpen ? '' : (answers[n] ?? '')}
+                      placeholder={isOpen ? 'Their own words' : ''}
                       readOnly={readOnly}
+                      disabled={isOpen}
                       onChange={(e) =>
                         change(setAnswers)(answers.map((a, j) => (j === n ? e.target.value : a)))
                       }
                       className={
-                        'w-40 rounded-md border bg-canvas px-2 py-1 text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40 ' +
-                        (answers[n]?.trim() ? 'border-edge' : 'border-sage/60')
+                        'w-40 rounded-md border bg-canvas px-2 py-1 text-sage placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40 disabled:opacity-60 ' +
+                        (isOpen || answers[n]?.trim() ? 'border-edge' : 'border-sage/60')
                       }
                     />
-                  </label>
+                    <label className="flex items-center gap-1.5 text-[12px] text-muted-strong">
+                      <input
+                        type="checkbox"
+                        checked={isOpen}
+                        disabled={readOnly}
+                        onChange={(e) => change(setOpen)(open.map((o, j) => (j === n ? e.target.checked : o)))}
+                        aria-label={`Blank ${n + 1}: no set answer`}
+                        className="h-3.5 w-3.5 accent-sage"
+                      />
+                      No set answer
+                    </label>
+                  </div>
                 );
               })}
             </div>
