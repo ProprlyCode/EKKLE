@@ -6,6 +6,7 @@ import {
   moveStudy,
   reason,
   saveSeries,
+  setSeriesCredit,
   studyLibrary,
   type LibrarySeries,
 } from '@/data/studyEditor';
@@ -30,6 +31,7 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
   const [newSeries, setNewSeries] = useState('');
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
   const [confirmLock, setConfirmLock] = useState<string | null>(null);
+  const [crediting, setCrediting] = useState<{ id: string; credit: string; url: string } | null>(null);
 
   async function refresh() {
     try {
@@ -131,6 +133,16 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
     });
   }
 
+  function onCredit(e: FormEvent) {
+    e.preventDefault();
+    if (!crediting) return;
+    const { id, credit, url } = crediting;
+    void act(`credit-${id}`, async () => {
+      await setSeriesCredit(id, credit, url);
+      setCrediting(null);
+    });
+  }
+
   function onRename(e: FormEvent) {
     e.preventDefault();
     if (!renaming) return;
@@ -189,7 +201,22 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
                 </form>
               ) : (
                 <>
-                  <h2 className="flex-1 text-base">{sr.title}</h2>
+                  <span className="min-w-0 flex-1">
+                    <h2 className="text-base">{sr.title}</h2>
+                    <span className="block text-[12px] text-muted">
+                      {sr.credit ? `A study from ${sr.credit}${sr.credit_url ? ` · ${sr.credit_url}` : ''}` : 'No credit line'}
+                      {' · '}
+                      <button
+                        onClick={() =>
+                          setCrediting({ id: sr.id, credit: sr.credit ?? '', url: sr.credit_url ?? '' })
+                        }
+                        className="underline-offset-2 hover:text-sage hover:underline"
+                        aria-label={`Edit the credit for ${sr.title}`}
+                      >
+                        Edit credit
+                      </button>
+                    </span>
+                  </span>
                   {sr.locked ? (
                     <span className="eyebrow">Locked</span>
                   ) : (
@@ -205,6 +232,32 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
                 </>
               )}
             </div>
+
+            {crediting?.id === sr.id && (
+              <form
+                onSubmit={onCredit}
+                className="flex flex-wrap items-end gap-2 border-b border-edge/70 bg-canvas px-5 py-3"
+              >
+                <TextInput
+                  label="Studies from"
+                  placeholder="e.g. [truth]Link"
+                  value={crediting.credit}
+                  onChange={(e) => setCrediting({ ...crediting, credit: e.target.value })}
+                />
+                <TextInput
+                  label="Link"
+                  placeholder="https://…"
+                  value={crediting.url}
+                  onChange={(e) => setCrediting({ ...crediting, url: e.target.value })}
+                />
+                <Button type="submit" size="sm" disabled={!!busy}>
+                  Save credit
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setCrediting(null)}>
+                  Cancel
+                </Button>
+              </form>
+            )}
 
             {confirmLock === sr.id && (
               <div className="flex flex-wrap items-center gap-3 border-b border-edge/70 bg-canvas px-5 py-3 text-sm text-muted-strong">

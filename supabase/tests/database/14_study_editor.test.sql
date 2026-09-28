@@ -4,7 +4,7 @@
 -- studies unlock within their series.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(23);
+select plan(27);
 
 insert into auth.users (id, email) values
   ('e1000000-0000-0000-0000-000000000001', 'owner@ed.test'),
@@ -61,6 +61,8 @@ select throws_ok($$ select save_study_draft((select v from ids where k = 's1'), 
   'a locked series can''t be edited');
 select throws_ok($$ select create_study((select v from ids where k = 'series'), '{"title":"Four","pages":[]}') $$,
   'P0001', 'series_locked', '…or added to');
+select lives_ok($$ select set_study_series_credit((select v from ids where k = 'series'), 'Test Source', 'example.org') $$,
+  'the credit can still be set on a locked series (0037)');
 
 reset role;
 select is((select count(*)::int from study_pages where study_id = (select v from ids where k = 's1')), 2,
@@ -79,6 +81,8 @@ set local "request.jwt.claims" to '{"sub":"e1000000-0000-0000-0000-000000000003"
 select throws_ok($$ select editor_study((select v from ids where k = 's1')) $$, 'P0001', 'forbidden',
   'a Leader can''t edit Ekklē''s studies');
 select is(jsonb_array_length(study_library()), 0, 'a Leader''s library starts empty (only their own)');
+select throws_ok($$ select set_study_series_credit((select v from ids where k = 'series'), 'Mine', null) $$,
+  'P0001', 'forbidden', 'a Leader can''t change Ekklē''s credit');
 select lives_ok($$ select create_study(save_study_series(null, 'Ours'), '{"title":"Ours one","pages":[]}') $$,
   'a Leader starts their own series and study');
 
@@ -91,6 +95,8 @@ select is(seeker_study((select v from ids where k = 's1')) -> 'answers', 'null':
 select lives_ok($$ select seeker_complete_study((select v from ids where k = 's1'), '{"0":"love","1":"life"}') $$, 'the study is submitted');
 select is(seeker_study((select v from ids where k = 's1')) -> 'answers', '["love", "light"]'::jsonb,
   'after submitting, people see the answers');
+select is(seeker_study((select v from ids where k = 's1')) ->> 'credit', 'Test Source', 'people see where the study comes from');
+select is(seeker_study((select v from ids where k = 's1')) ->> 'credit_url', 'https://example.org', '…with a proper link');
 
 select * from finish();
 rollback;

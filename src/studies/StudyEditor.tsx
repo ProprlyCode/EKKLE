@@ -192,6 +192,8 @@ export function StudyEditor({ base }: { base: string }) {
     locked: false,
     pages: content.pages.map((p, i) => ({ page_number: i + 1, blocks: p.blocks })),
     answers: content.answers,
+    credit: study.series.credit,
+    credit_url: study.series.credit_url,
     progress: null,
   };
 

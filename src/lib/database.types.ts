@@ -628,6 +628,7 @@ export interface Database {
       study_library: { Args: Record<string, never>; Returns: Json };
       save_study_series: { Args: { p_id: string | null; p_title: string }; Returns: string };
       lock_study_series: { Args: { p_id: string }; Returns: undefined };
+      set_study_series_credit: { Args: { p_id: string; p_credit: string; p_url: string }; Returns: undefined };
       create_study: { Args: { p_series: string; p_draft: Json }; Returns: string };
       editor_study: { Args: { p_id: string }; Returns: Json };
       save_study_draft: { Args: { p_id: string; p_draft: Json }; Returns: undefined };

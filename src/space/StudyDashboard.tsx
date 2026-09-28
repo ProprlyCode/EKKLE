@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { listStudies, type StudySummary } from '@/data/studies';
 import { Spinner } from '@/ui/states';
+import { Credit } from './StudyReader';
 
 /**
  * The student dashboard (/studies) — a signed-in home: resume where you left
@@ -111,7 +112,10 @@ export default function StudyDashboard() {
           {/* Full list */}
           {groupBySeries(studies).map(([series, list], g, groups) => (
             <section key={series ?? g} className="flex flex-col gap-3">
-              <span className="eyebrow">{groups.length > 1 && series ? series : 'all studies'}</span>
+              <span className="flex flex-col gap-0.5">
+                <span className="eyebrow">{groups.length > 1 && series ? series : 'all studies'}</span>
+                {list[0]?.credit && <Credit credit={list[0].credit} url={list[0].credit_url} className="" />}
+              </span>
               <ol className="flex flex-col gap-3">
                 {list.map((s, i) => (
                   <StudyRow key={s.id} study={s} index={i} />

@@ -105,6 +105,7 @@ export function StudyBank() {
                 <span className="block text-[12px] text-muted">
                   {s.pages} {s.pages === 1 ? 'page' : 'pages'} · {s.seekers_started} started ·{' '}
                   {s.seekers_completed} finished
+                  {s.credit ? ` · from ${s.credit}` : ''}
                 </span>
               </span>
               <Link

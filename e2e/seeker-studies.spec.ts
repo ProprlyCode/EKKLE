@@ -21,6 +21,8 @@ test('a seeker signs up by email and opens their first study', async ({ page }) 
   await expect(study).toBeVisible();
   await study.click();
   await expect(page.getByText(/Page 1 of \d+/)).toBeVisible();
+  // Where the study comes from, with a link (0037).
+  await expect(page.getByRole('link', { name: '[truth]Link' })).toHaveAttribute('href', 'https://truthlink.org');
 
   // A reference in the study opens the passage right there.
   await page.getByRole('button', { name: 'Genesis 1:27' }).first().click();

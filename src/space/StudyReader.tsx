@@ -191,6 +191,7 @@ export default function StudyReader({
         <h1 className="mt-1 font-serif text-2xl leading-tight text-sage">
           {study.title}
         </h1>
+        {study.credit && <Credit credit={study.credit} url={study.credit_url} />}
       </div>
 
       {/* Body */}
@@ -399,6 +400,22 @@ function SubmitPage({
         {submitting ? 'Saving…' : 'Submit answers'}
       </Button>
     </div>
+  );
+}
+
+/** Where the study comes from, e.g. "A study from [truth]Link". */
+export function Credit({ credit, url, className = 'mt-1' }: { credit: string; url?: string | null; className?: string }) {
+  return (
+    <p className={`${className} text-[13px] text-muted`}>
+      A study from{' '}
+      {url ? (
+        <a href={url} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:text-sage hover:underline">
+          {credit}
+        </a>
+      ) : (
+        credit
+      )}
+    </p>
   );
 }
 

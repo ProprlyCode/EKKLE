@@ -25,6 +25,9 @@ export interface StudySummary {
   started: boolean;
   last_page: number;
   series?: string | null;
+  /** Where the series' studies come from (0037). */
+  credit?: string | null;
+  credit_url?: string | null;
 }
 
 export interface StudyDetail {
@@ -35,6 +38,8 @@ export interface StudyDetail {
   locked: boolean;
   /** The series it belongs to. */
   series?: string | null;
+  credit?: string | null;
+  credit_url?: string | null;
   pages: StudyPage[];
   /** The intended answers — once the study is submitted (and in previews). */
   answers?: string[] | null;
@@ -95,6 +100,7 @@ export interface BankStudy {
   tagline: string | null;
   source: 'ekkle' | 'ministry';
   series?: string | null;
+  credit?: string | null;
   enabled: boolean;
   /** Its place in the unlock order (only when on). */
   number: number | null;

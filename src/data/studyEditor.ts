@@ -31,13 +31,16 @@ export interface LibrarySeries {
   id: string;
   title: string;
   locked: boolean;
+  /** Where its studies come from, e.g. "[truth]Link" (0037). */
+  credit: string | null;
+  credit_url: string | null;
   studies: LibraryStudy[];
 }
 
 export interface EditorStudy {
   id: string;
   status: 'draft' | 'approved';
-  series: { id: string; title: string; locked: boolean };
+  series: { id: string; title: string; locked: boolean; credit: string | null; credit_url: string | null };
   has_draft: boolean;
   content: StudyContent;
   people_started: number;
@@ -58,6 +61,12 @@ export async function saveSeries(id: string | null, title: string): Promise<stri
   const { data, error } = await supabase.rpc('save_study_series', { p_id: id, p_title: title });
   if (error) throw error;
   return data as string;
+}
+
+/** Set (or clear) where a series' studies come from. Allowed after locking. */
+export async function setSeriesCredit(id: string, credit: string, url: string): Promise<void> {
+  const { error } = await supabase.rpc('set_study_series_credit', { p_id: id, p_credit: credit, p_url: url });
+  if (error) throw error;
 }
 
 export async function lockSeries(id: string): Promise<void> {
