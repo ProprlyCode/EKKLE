@@ -641,6 +641,9 @@ export interface Database {
       cancel_address_request: { Args: Record<string, never>; Returns: undefined };
       platform_address_requests: { Args: Record<string, never>; Returns: Json };
       decide_address_request: { Args: { p_id: string; p_approve: boolean; p_reason: string }; Returns: undefined };
+      getting_started: { Args: { p_area: string }; Returns: Json };
+      mark_getting_started: { Args: { p_area: string; p_step: string }; Returns: undefined };
+      dismiss_getting_started: { Args: { p_area: string; p_hide: boolean }; Returns: undefined };
       ministry_outcomes: { Args: { p_days: number | null }; Returns: Json };
       my_outcomes: { Args: { p_days: number | null }; Returns: Json };
       platform_outcomes: { Args: { p_days: number | null }; Returns: Json };

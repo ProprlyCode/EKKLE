@@ -6,6 +6,7 @@ import { listSeekerResources, type SeekerResourceSummary } from '@/data/resource
 import { Spinner } from '@/ui/states';
 import { lastMessage } from '@/components/MessageList';
 import { InstallHint } from './InstallHint';
+import { GetStarted } from '@/components/GetStarted';
 import { listPlans, type PlanSummary } from '@/bible/plans';
 
 /**
@@ -63,6 +64,8 @@ export default function SpaceHome() {
           Your conversation and your studies, kept together — on any device.
         </p>
       </header>
+
+      <GetStarted area="seeker" />
 
       {member && (
         <Link

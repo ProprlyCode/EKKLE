@@ -22,6 +22,8 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | N3 Seeker experience | **Built** (0041) — installable; who-you're-talking-to card with photo; delete my details; weekly study reminder |
 | N4 Leader & member tools | **Built** (0042) — outcomes (member, ministry, Ekklē team; 30/90 days/all time), wallet cards, reply box on phones |
 | Address change requests | **Built** (0043) — Admin asks in Account; Ekklē team approves in Platform → Accounts; old addresses keep working |
+| Get started checklists | **Built** (0044) — Admins (Overview), members (QR page), seekers (Your space home) |
+| "What fits you?" quiz | Idea — recommend a reading plan, pace and reminder from time, read/listen, familiarity; listening needs a licensed Bible audio source |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
 | Custom domains · Visit us card · age question · Tailwind 4 | On hold |
 
@@ -199,6 +201,28 @@ requests (step 4) are built (0043, below); self-serve sign-up with approval
 - Nothing to change in Vercel (wildcard `*.ekkle.org`) or in Supabase Auth
   (wildcard redirect). Emails: the team hears of a request; the Admin hears
   the decision.
+
+## Get started checklists — built (0044, 28 Sep 2026)
+
+A card with four steps that tick themselves off, each linking to where it's
+done; hidden once all are done or when the person hides it.
+
+- Admins (Overview): logo and colour · invite a Leader or Admin · look over
+  the introduction (ticked on opening a flow) · invite members.
+- Members (QR page): photo · short message · share the code (ticked when
+  someone opens it) · print wallet cards (ticked on opening the sheet).
+- Seekers (Your space home): start a study · open the Bible · weekly
+  reminder · add to home screen (ticked when opened from the home screen).
+- `getting_started(area)`, `mark_getting_started` (only the three app-marked
+  steps), `dismiss_getting_started`.
+
+## "What fits you?" (idea, agreed Sep 2026 — not planned in detail)
+
+Not "learning styles" (matching teaching to a visual/auditory style isn't
+supported by research). A few questions — time available, read or listen,
+new or familiar, alone or together, slow and deep or steady — that recommend
+a reading plan, pace and reminder time. Listening needs a licensed Bible
+audio source first.
 
 ## On hold
 

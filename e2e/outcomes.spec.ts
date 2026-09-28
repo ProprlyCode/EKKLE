@@ -16,7 +16,7 @@ test('outcomes for a member, their leaders and the Ekklē team; wallet cards', a
   await david.getByRole('radio', { name: 'All time' }).first().click();
   await expect(david.getByRole('radio', { name: 'All time' }).first()).toHaveAttribute('aria-checked', 'true');
 
-  await david.getByRole('link', { name: 'Print wallet cards' }).click();
+  await david.getByRole('link', { name: 'Print wallet cards', exact: true }).click();
   await david.waitForURL('**/app/wallet-cards');
   const sheet = david.getByLabel('Sheet of wallet cards');
   await expect(sheet.locator('img')).toHaveCount(8);

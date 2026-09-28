@@ -5,6 +5,7 @@ import { useAccount } from '@/account/AccountProvider';
 import { env } from '@/lib/env';
 import { useQrDataUrl } from '@/ui/QrCode';
 import { Button } from '@/ui/Button';
+import { markStarted } from '@/data/gettingStarted';
 
 /**
  * Wallet cards to print (N4): a US Letter sheet of eight business-card-sized
@@ -23,6 +24,7 @@ export default function WalletCards() {
 
   useEffect(() => {
     document.title = 'Wallet cards';
+    void markStarted('member', 'cards').catch(() => undefined);
   }, []);
 
   if (!membership) return null;

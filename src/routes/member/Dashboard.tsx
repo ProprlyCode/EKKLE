@@ -14,6 +14,7 @@ import FlowPreview from '@/recipient/FlowPreview';
 import { FaithInAction } from './FaithInAction';
 import { PersonPhoto } from '@/components/TalkingTo';
 import { MyOutcomes } from '@/outcomes/MyOutcomes';
+import { GetStarted } from '@/components/GetStarted';
 
 /**
  * Member home. The focal element is the keepsake card — the thing a member is
@@ -33,6 +34,7 @@ export default function MemberDashboard() {
 
   return (
     <div className="flex flex-col gap-8">
+      <GetStarted area="member" />
       <KeepsakeCard
         name={membership.name}
         message={membership.short_message}
@@ -92,7 +94,7 @@ function KeepsakeCard({
   }
 
   return (
-    <section aria-label="Your code to share" className="flex flex-col items-center gap-5">
+    <section id="your-code" aria-label="Your code to share" className="scroll-mt-20 flex flex-col items-center gap-5">
       {/* The framed keepsake — ringed in space, letterpress feel */}
       <div className="w-full max-w-sm rounded-2xl border border-edge bg-card p-8">
         <div className="flex flex-col items-center gap-5 text-center">
@@ -269,7 +271,7 @@ function ProfileEditor({
   }
 
   return (
-    <Card className="flex flex-col gap-4">
+    <Card id="how-you-appear" className="scroll-mt-20 flex flex-col gap-4">
       <div>
         <h2 className="text-base">How you appear</h2>
         <p className="mt-1 text-sm text-muted-strong">
@@ -337,7 +339,7 @@ function PhotoEditor({ member, onChange }: { member: Member; onChange: () => Pro
   }
 
   return (
-    <Card className="flex flex-col gap-4">
+    <Card id="your-photo" className="scroll-mt-20 flex flex-col gap-4">
       <div>
         <h2 className="text-base">Your photo</h2>
         <p className="mt-1 text-sm text-muted-strong">

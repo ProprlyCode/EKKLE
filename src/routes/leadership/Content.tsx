@@ -16,6 +16,7 @@ import {
   type Cta,
 } from '@/data/sequences';
 import { Card } from '@/ui/Card';
+import { markStarted } from '@/data/gettingStarted';
 import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
@@ -44,6 +45,11 @@ export default function Content() {
   useEffect(() => {
     void refresh();
   }, []);
+
+  // Get started (Admins): opening a flow shows its live preview.
+  useEffect(() => {
+    if (view.mode === 'edit') void markStarted('admin', 'preview_intro').catch(() => undefined);
+  }, [view]);
 
   async function newFlow() {
     if (!membership) return;

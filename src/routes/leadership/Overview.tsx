@@ -8,6 +8,7 @@ import { Spinner, ErrorNote } from '@/ui/states';
 import { PersonPhoto } from '@/components/TalkingTo';
 import { Funnel, OutcomesTable, RangePicker } from '@/outcomes/Outcomes';
 import { ConversationsCard } from './ConversationsCard';
+import { GetStarted } from '@/components/GetStarted';
 
 /**
  * Leadership → Overview (Admins and Leaders): the ministry's outcomes — from a
@@ -55,6 +56,8 @@ export default function Overview() {
         </div>
         <RangePicker value={range} onChange={setRange} />
       </div>
+
+      <GetStarted area="admin" />
 
       <Card className="flex flex-col gap-4">
         <span className="eyebrow">outcomes</span>

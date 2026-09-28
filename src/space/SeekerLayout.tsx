@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { markStarted } from '@/data/gettingStarted';
 import { AccountLogo } from '@/account/AccountMark';
 
 /**
@@ -17,6 +19,14 @@ const TABS = [
 ];
 
 export default function SeekerLayout() {
+  // Get started: opened from the home screen, so it's installed.
+  useEffect(() => {
+    const standalone =
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (standalone) void markStarted('seeker', 'install').catch(() => undefined);
+  }, []);
+
   return (
     <div className="min-h-full bg-canvas">
       <header className="sticky top-0 z-10 border-b border-edge/70 bg-canvas/95 backdrop-blur">
