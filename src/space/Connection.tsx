@@ -61,7 +61,7 @@ export default function Connection() {
       )
     )
       return;
-    const reason = prompt('Optionally tell us why (this goes to the church’s leaders):') ?? '';
+    const reason = prompt('Optionally tell us why (this goes to the ministry’s leaders):') ?? '';
     try {
       await blockSeekerConnection(reason);
       setConvo(await getSeekerConnection());
@@ -84,7 +84,7 @@ export default function Connection() {
       <div className="card px-6 py-10 text-center">
         <h1 className="font-serif text-xl text-sage">No one to reach just yet</h1>
         <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-strong">
-          Once you’re connected to someone from the church, your conversation will
+          Once you’re connected to someone from the ministry, your conversation will
           live here.
         </p>
       </div>

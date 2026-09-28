@@ -37,7 +37,7 @@ export default function People() {
       <div>
         <h1 className="text-xl">People</h1>
         <p className="mt-1 text-sm text-muted-strong">
-          Everyone who can share in your church’s space.
+          Everyone who can share in your ministry’s space.
         </p>
       </div>
 
@@ -256,7 +256,7 @@ function InviteForm({ onInvited }: { onInvited: () => Promise<void> }) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="them@church.org"
+          placeholder="them@ministry.org"
         />
         <Button type="submit" disabled={busy || !email}>
           {busy ? 'Inviting…' : done ? 'Invited' : 'Invite'}

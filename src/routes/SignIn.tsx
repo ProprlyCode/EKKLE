@@ -123,7 +123,7 @@ export default function SignIn() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@church.org"
+              placeholder="you@ministry.org"
             />
             {error && <ErrorNote>{error}</ErrorNote>}
             <Button type="submit" disabled={status === 'sending' || !email}>

@@ -45,9 +45,11 @@ test('a signed-in member opening the front door goes to the app', async ({ page 
   await page.waitForURL(`${ACCOUNT}/app`);
 });
 
-test('ekkle.org doesn\'t advertise sign-in; /sign-in still works and points to accounts', async ({ page }) => {
-  await page.goto(`${PLATFORM}for-churches`);
-  await expect(page.getByRole('link', { name: 'Sign in' })).toHaveCount(0);
+test('For ministries: sign-in finds your ministry; /sign-in still points to accounts', async ({ page }) => {
+  await page.goto(`${PLATFORM}for-churches`); // the old address still works
+  await page.waitForURL(`${PLATFORM}for-ministries`);
+  await page.getByRole('link', { name: 'Sign in' }).click();
+  await expect(page.getByRole('heading', { name: 'Find your church or ministry' })).toBeVisible();
   await page.goto(`${PLATFORM}sign-in`);
   await page.getByRole('link', { name: 'Looking for your church or ministry?' }).click();
   await expect(page.getByRole('heading', { name: 'Find your church or ministry' })).toBeVisible();

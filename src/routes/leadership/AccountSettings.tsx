@@ -132,7 +132,7 @@ export default function AccountSettings() {
       <div>
         <h1 className="text-xl">Account</h1>
         <p className="mt-1 text-sm text-muted-strong">
-          How {account.kind === 'church' ? 'your church' : 'your ministry'} appears at{' '}
+          How your ministry appears at{' '}
           <a href={accountUrl(account)} className="text-sage underline-offset-2 hover:underline">
             {new URL(accountUrl(account)).host}
           </a>{' '}

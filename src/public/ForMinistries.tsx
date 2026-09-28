@@ -3,29 +3,31 @@ import { PublicLayout } from './PublicLayout';
 import { Marker } from '@/ui/Card';
 
 /**
- * Church-adoption page (/for-churches) — for leaders deciding whether to trust
- * and adopt the platform. Considered, trustworthy, reverent per the brand guide.
+ * For ministries (/for-ministries; /for-churches redirects here) — for leaders
+ * of churches and personal ministries deciding whether to trust and adopt the
+ * platform. Considered, trustworthy, reverent per the brand guide.
  */
-export default function ForChurches() {
+export default function ForMinistries() {
   return (
     <PublicLayout>
       <section className="mx-auto max-w-3xl px-5 pb-14 pt-16 text-center sm:pt-24">
         <div className="mb-5 flex flex-col items-center gap-3">
-          <span className="eyebrow">for churches</span>
+          <span className="eyebrow">for ministries</span>
           <Marker />
         </div>
         <h1 className="text-balance font-serif text-4xl leading-[1.15] text-sage sm:text-5xl">
           personal evangelism, without the awkward hand-off
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-pretty text-[17px] leading-relaxed text-muted-strong">
-          Ekklē gives every member a personal way to invite someone in — and keeps
-          the relationship with the person who actually built it, not a random staff
-          member. You stay in support, not in the middle.
+          Whether you lead a church or a personal ministry, Ekklē gives everyone
+          who shares a personal way to invite someone in — and keeps the
+          relationship with the person who actually built it, not a stranger.
+          You stay in support, not in the middle.
         </p>
         <div className="mt-8">
           <a
-            href="mailto:hello@ekkle.org?subject=Ekkl%C4%93%20for%20our%20church"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-sage px-6 text-sm font-medium text-canvas transition-colors hover:bg-sage-soft"
+            href="mailto:hello@ekkle.org?subject=Ekkl%C4%93%20for%20our%20ministry"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-accent px-6 text-sm font-medium text-canvas transition-colors hover:bg-accent-soft"
           >
             Start a conversation
           </a>
@@ -37,7 +39,7 @@ export default function ForChurches() {
           {[
             {
               t: 'Your people, their relationships',
-              b: 'Members share a personal link. When someone responds, it goes back to that member — the connection stays theirs.',
+              b: 'Everyone shares a personal link. When someone responds, it goes back to the person who shared — the connection stays theirs.',
             },
             {
               t: 'You author the welcome',
@@ -59,16 +61,16 @@ export default function ForChurches() {
 
       <section className="mx-auto max-w-2xl px-5 py-16 text-center">
         <h2 className="font-serif text-2xl leading-snug text-sage">
-          Bring it to your church
+          Bring it to your ministry
         </h2>
         <p className="mx-auto mt-4 max-w-lg text-[16px] leading-relaxed text-muted-strong">
-          We’re partnering with a small number of churches to start. If that’s you,
-          we’d love to talk.
+          We’re starting with a small number of churches and ministries. If that’s
+          you, we’d love to talk.
         </p>
         <div className="mt-7 flex flex-col items-center gap-3">
           <a
-            href="mailto:hello@ekkle.org?subject=Ekkl%C4%93%20for%20our%20church"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-sage px-6 text-sm font-medium text-canvas transition-colors hover:bg-sage-soft"
+            href="mailto:hello@ekkle.org?subject=Ekkl%C4%93%20for%20our%20ministry"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-accent px-6 text-sm font-medium text-canvas transition-colors hover:bg-accent-soft"
           >
             Start a conversation
           </a>

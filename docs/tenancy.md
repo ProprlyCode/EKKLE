@@ -7,7 +7,7 @@ and leaders never need to see ekkle.org.
 |---|---|
 | `<account>.ekkle.org` — automatic | Everything for that account: member links `/r/<name>`, `/offer`, Your space `/space`, the members' & leaders' app `/app` |
 | `space.theirchurch.org` — optional | The same, on their own domain (they add one DNS record) |
-| `ekkle.org` | Ekklē itself: the homepage story, For churches, the waitlist, the platform console, and "find your church" sign-in |
+| `ekkle.org` | Ekklē itself: the homepage story, For ministries, the waitlist, the platform console, and "find your church" sign-in |
 
 ## Decisions (Jonathan)
 

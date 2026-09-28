@@ -16,11 +16,9 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             <BrandName className="font-serif text-xl font-medium tracking-tight text-sage" />
           </Link>
           <nav className="flex items-center gap-5 text-sm">
-            <Link
-              to="/for-churches"
-              className="text-muted-strong transition-colors hover:text-sage"
-            >
-              For churches
+            {/* People sign in on their own ministry's address; this finds it. */}
+            <Link to="/find" className="text-muted-strong transition-colors hover:text-sage">
+              Sign in
             </Link>
           </nav>
         </div>

@@ -83,7 +83,7 @@ export default function Onboarding() {
           />
           <TextInput
             label="Join code"
-            hint="From your church leader."
+            hint="From your ministry’s leader."
             required
             value={code}
             onChange={(e) => setCode(e.target.value)}

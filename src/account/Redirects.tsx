@@ -13,7 +13,7 @@ export function GoTo({ url }: { url: string }) {
   return <FullPageLoading />;
 }
 
-/** An Ekklē page (homepage, For churches) opened on an account's address. */
+/** An Ekklē page (homepage, For ministries) opened on an account's address. */
 export function ToPlatform() {
   const { pathname, search } = useLocation();
   return <GoTo url={platformUrl(`${pathname}${search}`)} />;

@@ -157,10 +157,10 @@ function Settings({
     <Card className="flex flex-col gap-5">
       <div>
         <h2 className="text-base">Settings</h2>
-        <p className="mt-1 text-sm text-muted-strong">Platform controls for this church.</p>
+        <p className="mt-1 text-sm text-muted-strong">Platform controls for this ministry.</p>
       </div>
 
-      <TextInput label="Church name" value={name} onChange={(e) => setName(e.target.value)} />
+      <TextInput label="Ministry name" value={name} onChange={(e) => setName(e.target.value)} />
 
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-medium text-muted-strong">

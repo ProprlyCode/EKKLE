@@ -37,12 +37,12 @@ import Resources from '@/routes/leadership/Resources';
 import AccountSettings from '@/routes/leadership/AccountSettings';
 // The cinematic homepage is code-split so GSAP/Lenis never load in the product.
 const Home = lazy(() => import('@/public/home/Home'));
-import ForChurches from '@/public/ForChurches';
+import ForMinistries from '@/public/ForMinistries';
 import Offer from '@/public/Offer';
 
 /**
  * Route map (docs/tenancy.md). The address decides which set applies:
- *  - ekkle.org (platform): Ekklē itself — the homepage story, For churches,
+ *  - ekkle.org (platform): Ekklē itself — the homepage story, For ministries,
  *    the platform console. Old account links are sent on to their account.
  *  - an account's address (<sub>.ekkle.org or its own domain): member links,
  *    the offer page, Your space, and the members' & leaders' app.
@@ -65,7 +65,8 @@ function PlatformRoutes() {
           </Suspense>
         }
       />
-      <Route path="/for-churches" element={<ForChurches />} />
+      <Route path="/for-ministries" element={<ForMinistries />} />
+      <Route path="/for-churches" element={<Navigate to="/for-ministries" replace />} />
       {/* Not linked from the marketing pages: platform admins use /sign-in;
           members and seekers sign in on their account's own address. */}
       <Route path="/sign-in" element={<SignIn />} />
@@ -99,6 +100,7 @@ function AccountRoutes() {
   return (
     <Routes>
       <Route path="/" element={<AccountHome />} />
+      <Route path="/for-ministries" element={<ToPlatform />} />
       <Route path="/for-churches" element={<ToPlatform />} />
       <Route path="/offer" element={<Offer />} />
       <Route path="/sign-in" element={<SignIn />} />

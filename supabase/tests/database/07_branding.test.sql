@@ -2,7 +2,7 @@
 -- accent must read clearly; logos live in the account's own folder.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(11);
+select plan(13);
 
 -- A leader (Sarah) and a member (David) of the pilot account, signed in.
 insert into auth.users (id, email) values
@@ -43,6 +43,15 @@ reset role;
 set local role anon;
 select is(resolve_account('pilot.ekkle.org') ->> 'name', 'Grace Chapel', 'the new name shows on the account''s address');
 select is(resolve_account('pilot.ekkle.org') ->> 'logo_path', '00000000-0000-0000-0000-0000000000a1/1/logo.png', 'and the logo');
+
+-- Anyone may update an account directly where they're allowed to (the
+-- service key, maintenance): the colour check itself needs no special rights.
+reset role;
+set local role service_role;
+select lives_ok($$ update organizations set accent_color = null where id = '00000000-0000-0000-0000-0000000000a1' $$,
+  'the service key can update an account (the check needs no private rights)');
+select throws_ok($$ update organizations set accent_color = '#ffcc00' where id = '00000000-0000-0000-0000-0000000000a1' $$,
+  '23514', null, 'and an unreadable accent is still refused on the table');
 
 select * from finish();
 rollback;

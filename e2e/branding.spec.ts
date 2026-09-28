@@ -9,10 +9,11 @@ import { admin, SARAH } from './support/supabase';
 const PILOT = '00000000-0000-0000-0000-0000000000a1';
 
 test.afterEach(async () => {
-  await admin()
+  const { error } = await admin()
     .from('organizations')
     .update({ name: 'Grace Chapel (pilot)', accent_color: null, logo_path: null })
     .eq('id', PILOT);
+  if (error) throw new Error(`Couldn't restore the demo account: ${error.message}`);
 });
 
 test('a leader brands the account and visitors see it', async ({ browser }) => {

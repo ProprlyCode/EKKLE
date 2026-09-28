@@ -32,8 +32,8 @@ export function Footer() {
     <footer className="relative z-10 flex items-center justify-between gap-4 bg-home-ink px-6 py-8 text-[13px] text-home-stone-dim md:px-10">
       <BrandName className="font-serif text-base text-home-stone" />
       <nav className="flex items-center gap-6">
-        <Link to="/for-churches" className="home-focus transition-colors hover:text-home-stone">
-          For churches
+        <Link to="/for-ministries" className="home-focus transition-colors hover:text-home-stone">
+          For ministries
         </Link>
       </nav>
     </footer>
