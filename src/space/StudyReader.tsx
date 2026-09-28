@@ -9,6 +9,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   getStudy,
+  previewStudy,
   saveStudyProgress,
   completeStudy,
   type StudyBlock,
@@ -39,9 +40,15 @@ function countBlanks(page: StudyPage): number {
   );
 }
 
-export default function StudyReader() {
+/**
+ * `preview`: Admins and Leaders reading a study exactly as seekers see it
+ * (Resources → Bible studies). Every page and blank works; nothing is saved,
+ * and the closing page returns to Resources.
+ */
+export default function StudyReader({ preview = false }: { preview?: boolean }) {
   const { studyId = '' } = useParams();
   const navigate = useNavigate();
+  const backTo = preview ? '/leadership/resources' : '/space/studies';
   const [study, setStudy] = useState<StudyDetail | null | undefined>(undefined);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1); // 1-indexed; last page is the submit page
@@ -49,7 +56,7 @@ export default function StudyReader() {
 
   useEffect(() => {
     let active = true;
-    getStudy(studyId)
+    (preview ? previewStudy(studyId) : getStudy(studyId))
       .then((data) => {
         if (!active) return;
         setStudy(data);
@@ -62,7 +69,7 @@ export default function StudyReader() {
     return () => {
       active = false;
     };
-  }, [studyId]);
+  }, [studyId, preview]);
 
   // Blank offsets: the global index of the first blank on each content page.
   const pageBlankStart = useMemo(() => {
@@ -81,7 +88,7 @@ export default function StudyReader() {
   // Persist place + answers, debounced, whenever they change.
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!study || study.locked) return;
+    if (!study || study.locked || preview) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       void saveStudyProgress(study.id, page, answers);
@@ -89,7 +96,7 @@ export default function StudyReader() {
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [study, page, answers]);
+  }, [study, page, answers, preview]);
 
   if (study === undefined) {
     return (
@@ -114,8 +121,8 @@ export default function StudyReader() {
               ? 'It may have moved. Head back to the library to keep going.'
               : 'Finish the study before this one, and it opens up next.'}
           </p>
-          <Button variant="quiet" onClick={() => navigate('/space/studies')} className="mt-2">
-            Back to studies
+          <Button variant="quiet" onClick={() => navigate(backTo)} className="mt-2">
+            {preview ? 'Back to resources' : 'Back to studies'}
           </Button>
         </div>
       </Shell>
@@ -132,6 +139,7 @@ export default function StudyReader() {
 
   async function onSubmit() {
     if (!study) return;
+    if (preview) return navigate(backTo);
     setSubmitting(true);
     try {
       await completeStudy(study.id, answers);
@@ -143,6 +151,14 @@ export default function StudyReader() {
 
   return (
     <Shell>
+      {preview && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-edge bg-card px-3 py-2 text-[13px] text-muted-strong">
+          <span>Preview — what seekers see. Nothing is saved.</span>
+          <button onClick={() => navigate(backTo)} className="text-sage underline-offset-2 hover:underline">
+            Back to resources
+          </button>
+        </div>
+      )}
       {/* Header: lesson + title */}
       <div className="border-b border-edge/70 pb-4">
         {study.number != null && (

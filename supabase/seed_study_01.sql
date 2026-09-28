@@ -1,14 +1,14 @@
 -- Seed: Study 1 — "The Logic of Love" (of 27). Idempotent.
--- Run once in the Supabase SQL editor after migration 0013. Re-runnable.
--- Attaches to the pilot org (the first/sole organization).
+-- Part of the Ekklē study bank (studies.org_id is null — migration 0031):
+-- every ministry gets it, and chooses which bank studies to offer and in what
+-- order. Re-runnable.
 do $$
-declare v_org uuid; v_study uuid;
+declare v_study uuid;
 begin
-  select id into v_org from organizations order by created_at asc limit 1;
-  select id into v_study from studies where org_id = v_org and number = 1 limit 1;
+  select id into v_study from studies where org_id is null and number = 1 limit 1;
   if v_study is null then
     insert into studies (org_id, sort_order, number, title, tagline, status)
-    values (v_org, 1, 1, 'The Logic of Love', 'One of the most self-evident things about love is that it requires communication in order to exist and flourish', 'approved')
+    values (null, 1, 1, 'The Logic of Love', 'One of the most self-evident things about love is that it requires communication in order to exist and flourish', 'approved')
     returning id into v_study;
   else
     update studies set title='The Logic of Love', tagline='One of the most self-evident things about love is that it requires communication in order to exist and flourish', sort_order=1, status='approved' where id=v_study;

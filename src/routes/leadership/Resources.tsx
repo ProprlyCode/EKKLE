@@ -16,9 +16,11 @@ import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
 import { ResourceView } from '@/space/ResourceView';
+import { StudyBank } from './StudyBank';
 
 /**
- * Leadership → Resources. Reading, video and links for seekers' Your space:
+ * Leadership → Resources. The Bible studies seekers get (the Ekklē study bank:
+ * choose, order, preview), then reading, video and links for their Your space —
  * a list, and an editor with a live preview of exactly what seekers see.
  * Only published resources reach seekers.
  */
@@ -69,11 +71,15 @@ export default function Resources() {
         <div>
           <h1 className="text-xl">Resources</h1>
           <p className="mt-1 text-sm text-muted-strong">
-            Reading, video and links for people’s Your space.
+            Bible studies, reading, video and links for people’s Your space.
           </p>
         </div>
         <Button onClick={add}>New resource</Button>
       </div>
+
+      <StudyBank />
+
+      <h2 className="-mb-4 text-base">Reading, video and links</h2>
 
       {error && <ErrorNote>{error}</ErrorNote>}
 

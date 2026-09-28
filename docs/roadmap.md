@@ -101,3 +101,16 @@ sign-up, church owners manage admins, per-church branding, platform console.
 
 - Seeker age question at sign-up (needs a policy decision).
 - Tailwind 4 (browser support for seekers on older phones).
+
+## Bible study bank (Sep 2026)
+
+- *Built (0031).* Ekklē keeps a shared bank of studies (`studies.org_id` null);
+  every ministry gets them, next to any of its own. In Resources → Bible
+  studies, Admins and Leaders choose which studies their seekers get, set the
+  unlock order and preview each study exactly as seekers see it (nothing
+  saved). New bank studies appear for everyone, on, at the end. Seekers keep
+  their own Studies tab, which follows the ministry's choice and order.
+- Fixed with it: a seeker's next study now stays locked until the one before
+  is finished (it unlocked as soon as the previous one was listed).
+- *Next:* the study editor — for a ministry's own studies, and for the Ekklē
+  team to keep the bank (studies 2–27 as their files arrive).

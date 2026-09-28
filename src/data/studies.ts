@@ -79,3 +79,39 @@ export async function completeStudy(
   });
   if (error) throw error;
 }
+
+// ---------------------------------------------------------------- the bank
+// Admins and Leaders (Resources → Bible studies): Ekklē's shared studies and
+// the ministry's own — which seekers get, and in what order.
+
+export interface BankStudy {
+  id: string;
+  title: string;
+  tagline: string | null;
+  source: 'ekkle' | 'ministry';
+  enabled: boolean;
+  /** Its place in the unlock order (only when on). */
+  number: number | null;
+  pages: number;
+  seekers_started: number;
+  seekers_completed: number;
+}
+
+export async function listStudyBank(): Promise<BankStudy[]> {
+  const { data, error } = await supabase.rpc('ministry_study_bank');
+  if (error) throw error;
+  return (data as unknown as BankStudy[]) ?? [];
+}
+
+/** Save the whole list: every study in order, each on or off. */
+export async function saveStudyBank(items: Array<{ id: string; enabled: boolean }>): Promise<void> {
+  const { error } = await supabase.rpc('save_ministry_studies', { p_items: items });
+  if (error) throw error;
+}
+
+/** A study exactly as seekers see it (all pages), for Admins and Leaders. */
+export async function previewStudy(studyId: string): Promise<StudyDetail | null> {
+  const { data, error } = await supabase.rpc('preview_study', { p_study_id: studyId });
+  if (error) throw error;
+  return (data as StudyDetail | null) ?? null;
+}

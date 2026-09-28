@@ -141,6 +141,10 @@ function AccountRoutes() {
         <Route path="/welcome" element={<Onboarding />} />
 
         <Route element={<RequireMembership />}>
+          {/* A study exactly as seekers see it (full-screen reader, no saving). */}
+          <Route element={<RequireLeadership />}>
+            <Route path="/leadership/studies/:studyId" element={<StudyReader preview />} />
+          </Route>
           <Route element={<AuthedLayout />}>
             <Route path="/app" element={<MemberDashboard />} />
             <Route path="/app/messages" element={<Inbox />} />
