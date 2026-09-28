@@ -34,6 +34,7 @@ import SeekerGate from '@/space/SeekerGate';
 import SeekerLayout from '@/space/SeekerLayout';
 import StudyDashboard from '@/space/StudyDashboard';
 import StudyReader from '@/space/StudyReader';
+import BibleReader from '@/bible/BibleReader';
 import Connection from '@/space/Connection';
 import Account from '@/space/Account';
 import SpaceHome from '@/space/SpaceHome';
@@ -126,6 +127,8 @@ function AccountRoutes() {
           <Route path="/space" element={<SpaceHome />} />
           <Route path="/space/messages" element={<Connection />} />
           <Route path="/space/studies" element={<StudyDashboard />} />
+          <Route path="/space/bible" element={<BibleReader base="/space/bible" stickyTop="top-[53px]" />} />
+          <Route path="/space/bible/:book/:chapter" element={<BibleReader base="/space/bible" stickyTop="top-[53px]" />} />
           <Route path="/space/resources" element={<ResourcesLibrary />} />
           <Route path="/space/resources/:resourceId" element={<ResourcePage />} />
           <Route path="/space/account" element={<Account />} />
@@ -148,6 +151,8 @@ function AccountRoutes() {
           <Route element={<AuthedLayout />}>
             <Route path="/app" element={<MemberDashboard />} />
             <Route path="/app/messages" element={<Inbox />} />
+            <Route path="/app/bible" element={<BibleReader base="/app/bible" />} />
+            <Route path="/app/bible/:book/:chapter" element={<BibleReader base="/app/bible" />} />
             <Route path="/app/messages/:conversationId" element={<Thread />} />
 
             <Route element={<RequireLeadership />}>

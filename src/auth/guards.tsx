@@ -85,6 +85,7 @@ export function AuthedLayout() {
   const nav: NavItem[] = [
     { to: '/app', label: 'Your code' },
     { to: '/app/messages', label: 'Messages', dot: unread > 0 },
+    { to: '/app/bible', label: 'Bible', end: false },
     ...(leader
       ? [
           { to: '/leadership/overview', label: 'Overview' },

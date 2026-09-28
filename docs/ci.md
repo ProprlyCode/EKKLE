@@ -34,7 +34,9 @@ off (`vercel.json`), so nothing skips the line.
 `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `VERCEL_TOKEN` (Ekkle team),
 `STAGING_DB_PASSWORD` + `STAGING_DEMO_PASSWORD` (staging; until both exist the
 staging job skips with a notice), and `RESEND_API_KEY` (optional — turns email
-on: see below).
+on: see below), and `ESV_API_KEY` (optional — turns the ESV on in the Bible:
+the `bible-esv` function is deployed to staging and production with it; without
+it the Bible offers BSB and KJV only).
 
 ## Staging (staging.ekkle.org)
 

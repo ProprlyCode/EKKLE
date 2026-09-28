@@ -114,3 +114,18 @@ sign-up, church owners manage admins, per-church branding, platform console.
   is finished (it unlocked as soon as the previous one was listed).
 - *Next:* the study editor — for a ministry's own studies, and for the Ekklē
   team to keep the bank (studies 2–27 as their files arrive).
+
+## Built-in Bible (Sep 2026)
+
+- *Built (0033).* A Bible tab in Your space and in the app (for the team):
+  read by book and chapter, search, highlight verses (four colours) and keep
+  notes, and a Notes list. Scripture references in studies are tappable and
+  open the passage, with "Open in the Bible".
+- Translations: **BSB** (default) and **KJV** are public domain and served as
+  static files (`public/bible/<t>/<BOOK>.json`, built by
+  `scripts/bible/build.mjs` from scrollmapper/bible_databases). **ESV** comes
+  live from api.esv.org through the `bible-esv` edge function (key server-side,
+  signed-in users only, 20 requests a minute each) and appears once
+  `ESV_API_KEY` is set.
+- ESV terms: non-commercial, never stored (the database keeps only references
+  — `bible_marks`, `bible_state`), copyright notice shown under ESV text.

@@ -33,6 +33,36 @@ export type ResourceKind = 'text' | 'video' | 'link';
 export interface Database {
   public: {
     Tables: {
+      bible_marks: {
+        Row: {
+          id: UUID;
+          auth_uid: UUID;
+          book: string;
+          chapter: number;
+          verse: number;
+          color: 'yellow' | 'green' | 'blue' | 'pink' | null;
+          note: string | null;
+          created_at: Timestamp;
+          updated_at: Timestamp;
+        };
+        Insert: {
+          id?: UUID;
+          auth_uid?: UUID;
+          book: string;
+          chapter: number;
+          verse: number;
+          color?: 'yellow' | 'green' | 'blue' | 'pink' | null;
+          note?: string | null;
+        };
+        Update: Partial<Database['public']['Tables']['bible_marks']['Insert']>;
+        Relationships: [];
+      };
+      bible_state: {
+        Row: { auth_uid: UUID; translation: string; book: string; chapter: number; updated_at: Timestamp };
+        Insert: { auth_uid?: UUID; translation?: string; book?: string; chapter?: number; updated_at?: Timestamp };
+        Update: Partial<Database['public']['Tables']['bible_state']['Insert']>;
+        Relationships: [];
+      };
       organizations: {
         Row: {
           id: UUID;

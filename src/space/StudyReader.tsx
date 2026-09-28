@@ -18,6 +18,7 @@ import {
 } from '@/data/studies';
 import { Button } from '@/ui/Button';
 import { Spinner } from '@/ui/states';
+import { BibleBase, ScriptureText } from '@/bible/ScriptureText';
 
 /**
  * The study reader — a paginated, brand-styled workbook. One page at a time
@@ -150,6 +151,7 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
   }
 
   return (
+    <BibleBase.Provider value={preview ? '/app/bible' : '/space/bible'}>
     <Shell>
       {preview && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-edge bg-card px-3 py-2 text-[13px] text-muted-strong">
@@ -206,6 +208,7 @@ export default function StudyReader({ preview = false }: { preview?: boolean }) 
         />
       </div>
     </Shell>
+    </BibleBase.Provider>
   );
 }
 
@@ -285,7 +288,7 @@ function renderBlock(
   let idx = startIndex;
   const nodes: ReactNode[] = [];
   parts.forEach((chunk, i) => {
-    if (chunk) nodes.push(<Fragment key={`t${i}`}>{chunk}</Fragment>);
+    if (chunk) nodes.push(<ScriptureText key={`t${i}`} text={chunk} />);
     if (i < parts.length - 1) {
       const at = idx++;
       nodes.push(

@@ -1,19 +1,19 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { AccountLogo } from '@/account/AccountMark';
 
 /**
- * Chrome for Your space (/space) — a seeker's own signed-in home: their
- * conversation, their studies, resources, and their account (sign out lives
- * there). Wider screens get a quiet top bar; phones get an app-style bottom
- * tab bar, so all five fit and it feels right once installed. The study
- * reader stays immersive (no bar).
+ * Chrome for Your space (/space) — a person's own signed-in home: their
+ * conversation, their studies, the Bible, resources, and (top corner) their
+ * account, where sign out lives. Wider screens get a quiet top bar; phones get
+ * an app-style bottom tab bar, so all five fit and it feels right once
+ * installed. The study reader stays immersive (no bar).
  */
 const TABS = [
   { to: '/space', label: 'Home', end: true },
   { to: '/space/messages', label: 'Messages' },
   { to: '/space/studies', label: 'Studies' },
+  { to: '/space/bible', label: 'Bible' },
   { to: '/space/resources', label: 'Resources' },
-  { to: '/space/account', label: 'Account' },
 ];
 
 export default function SeekerLayout() {
@@ -38,6 +38,9 @@ export default function SeekerLayout() {
               </NavLink>
             ))}
           </nav>
+          <Link to="/space/account" className="ml-auto text-[13px] text-muted hover:text-sage">
+            Account
+          </Link>
         </div>
       </header>
 

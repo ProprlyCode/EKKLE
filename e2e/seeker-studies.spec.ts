@@ -21,4 +21,15 @@ test('a seeker signs up by email and opens their first study', async ({ page }) 
   await expect(study).toBeVisible();
   await study.click();
   await expect(page.getByText(/Page 1 of \d+/)).toBeVisible();
+
+  // A reference in the study opens the passage right there.
+  await page.getByRole('button', { name: 'Genesis 1:27' }).first().click();
+  const passage = page.getByRole('dialog', { name: 'Genesis 1:27' });
+  await expect(passage).toContainText('So God created man in His own image');
+  await passage.getByRole('button', { name: 'Close' }).click();
+
+  // …and the Bible is a tab of its own.
+  await page.goto('/space/bible/JHN/3');
+  await expect(page.getByRole('heading', { name: 'John 3' })).toBeVisible();
+  await expect(page.getByText('For God so loved the world')).toBeVisible();
 });

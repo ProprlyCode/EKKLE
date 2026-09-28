@@ -238,6 +238,19 @@ jobs:
           fi
           SUPABASE_URL="https://$STAGING_REF.supabase.co" SUPABASE_SERVICE_ROLE_KEY="$KEY" \
             node scripts/staging/personas.mjs
+      # The built-in Bible's ESV (supabase/functions/bible-esv): on once the
+      # ESV_API_KEY secret exists. The key lives only in the function.
+      - name: Staging Bible (ESV)
+        if: steps.gate.outputs.on == 'true'
+        env:
+          ESV_API_KEY: ${{ secrets.ESV_API_KEY }}
+        run: |
+          if [ -z "$ESV_API_KEY" ]; then
+            echo "::notice::ESV_API_KEY is not set, so the Bible offers BSB and KJV only."
+            exit 0
+          fi
+          supabase secrets set --project-ref "$STAGING_REF" ESV_API_KEY="$ESV_API_KEY"
+          supabase functions deploy bible-esv --project-ref "$STAGING_REF"
       # A preview deploy of this commit: Vercel's Preview environment variables
       # point it at the staging database. Then staging.ekkle.org → it.
       - name: Staging site
@@ -396,6 +409,17 @@ jobs:
             exit 1
           fi
           echo "Email is on: notifications deployed; sign-in email sends in each account's name."
+
+      - name: Bible (ESV)
+        env:
+          ESV_API_KEY: ${{ secrets.ESV_API_KEY }}
+        run: |
+          if [ -z "$ESV_API_KEY" ]; then
+            echo "::notice::ESV_API_KEY is not set, so the Bible offers BSB and KJV only."
+            exit 0
+          fi
+          supabase secrets set --project-ref "$SUPABASE_PROJECT_ID" ESV_API_KEY="$ESV_API_KEY"
+          supabase functions deploy bible-esv --project-ref "$SUPABASE_PROJECT_ID"
 
   deploy-site:
     name: Deploy site to Vercel

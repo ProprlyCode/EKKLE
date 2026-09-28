@@ -13,6 +13,8 @@ export interface NavItem {
   to: string;
   label: string;
   dot?: boolean;
+  /** Match only this exact path (default); false also matches pages under it. */
+  end?: boolean;
 }
 
 export function AppShell({
@@ -54,7 +56,7 @@ export function AppShell({
               <li key={item.to}>
                 <NavLink
                   to={item.to}
-                  end
+                  end={item.end ?? true}
                   className={({ isActive }) =>
                     cn(
                       'inline-block px-3 py-2 text-sm font-medium -mb-px border-b-2 transition-colors',
