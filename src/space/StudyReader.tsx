@@ -187,7 +187,7 @@ export default function StudyReader({
       {preview && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-edge bg-card px-3 py-2 text-[13px] text-muted-strong">
           <span>Preview — what people see. Nothing is saved.</span>
-          <button onClick={leave} className="text-sage underline-offset-2 hover:underline">
+          <button onClick={leave} className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
             {onClose ? 'Close preview' : 'Back to resources'}
           </button>
         </div>

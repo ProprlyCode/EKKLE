@@ -28,7 +28,7 @@ export function FaithInAction() {
         <button
           onClick={() => setOpen(!open)}
           aria-expanded={open}
-          className="self-start text-[13px] text-sage underline-offset-2 hover:underline"
+          className="self-start text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
         >
           {open ? 'Fewer ideas' : 'More ideas'}
         </button>

@@ -68,7 +68,7 @@ export function StudyBank() {
           </p>
           <Link
             to="/leadership/study-editor"
-            className="mt-1 inline-block text-[13px] text-sage underline-offset-2 hover:underline"
+            className="mt-1 inline-block text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
           >
             Write or import your own studies →
           </Link>
@@ -116,7 +116,7 @@ export function StudyBank() {
               </span>
               <Link
                 to={`/leadership/studies/${s.id}`}
-                className="text-[13px] text-sage underline-offset-2 hover:underline"
+                className="text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
               >
                 Preview
               </Link>
@@ -160,7 +160,7 @@ export function StudyBank() {
                   onClick={() => setSongFor(songFor === s.id ? null : s.id)}
                   aria-expanded={songFor === s.id}
                   aria-label={`Song for ${s.title}`}
-                  className="text-sage underline-offset-2 hover:underline"
+                  className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
                 >
                   Change
                 </button>

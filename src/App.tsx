@@ -17,42 +17,47 @@ import { platformUrl } from '@/account/address';
 import SignIn from '@/routes/SignIn';
 import ResetPassword from '@/routes/ResetPassword';
 import Onboarding from '@/routes/Onboarding';
-import MemberDashboard from '@/routes/member/Dashboard';
-import Inbox from '@/routes/member/Inbox';
-import Thread from '@/routes/member/Thread';
-import People from '@/routes/leadership/People';
-import Content from '@/routes/leadership/Content';
-import Overview from '@/routes/leadership/Overview';
 import { PlatformGate } from '@/platform/PlatformGate';
-import PlatformLayout from '@/platform/PlatformLayout';
-import PlatformAccounts from '@/platform/Accounts';
-import PlatformSettings from '@/platform/Settings';
-import PlatformTeam from '@/platform/Team';
-import PlatformWaitlist from '@/platform/Waitlist';
-import PlatformOutcomes from '@/platform/Outcomes';
-import WalletCards from '@/routes/member/WalletCards';
 import RecipientExperience from '@/recipient/RecipientExperience';
 import SeekerGate from '@/space/SeekerGate';
 import SeekerLayout from '@/space/SeekerLayout';
-import StudyDashboard from '@/space/StudyDashboard';
-import StudyReader from '@/space/StudyReader';
-import BibleReader from '@/bible/BibleReader';
-import { PlanList, PlanPage } from '@/bible/ReadingPlans';
-import { PlanEditor, PlanLibrary } from '@/bible/PlanLibrary';
-import { PromptLibrary } from '@/prompts/PromptLibrary';
 import Connection from '@/space/Connection';
 import Account, { DetailsDeleted } from '@/space/Account';
 import SpaceHome from '@/space/SpaceHome';
-import ResourcesLibrary from '@/space/ResourcesLibrary';
-import ResourcePage from '@/space/ResourcePage';
-import Resources from '@/routes/leadership/Resources';
-import AccountSettings from '@/routes/leadership/AccountSettings';
-import { StudyLibrary } from '@/studies/StudyLibrary';
-import { StudyEditor } from '@/studies/StudyEditor';
-// The cinematic homepage is code-split so GSAP/Lenis never load in the product.
-const Home = lazy(() => import('@/public/home/Home'));
-import ForMinistries from '@/public/ForMinistries';
 import Offer from '@/public/Offer';
+
+// Loaded when first opened, so someone opening a member's link or signing in
+// to Your space downloads only what they need (pilot readiness, slow phones).
+// The cinematic homepage too, so GSAP/Lenis never load in the product.
+const Home = lazy(() => import('@/public/home/Home'));
+const ForMinistries = lazy(() => import('@/public/ForMinistries'));
+const MemberDashboard = lazy(() => import('@/routes/member/Dashboard'));
+const Inbox = lazy(() => import('@/routes/member/Inbox'));
+const Thread = lazy(() => import('@/routes/member/Thread'));
+const StudyDashboard = lazy(() => import('@/space/StudyDashboard'));
+const StudyReader = lazy(() => import('@/space/StudyReader'));
+const ResourcesLibrary = lazy(() => import('@/space/ResourcesLibrary'));
+const ResourcePage = lazy(() => import('@/space/ResourcePage'));
+const BibleReader = lazy(() => import('@/bible/BibleReader'));
+const PlanList = lazy(() => import('@/bible/ReadingPlans').then((m) => ({ default: m.PlanList })));
+const PlanPage = lazy(() => import('@/bible/ReadingPlans').then((m) => ({ default: m.PlanPage })));
+const WalletCards = lazy(() => import('@/routes/member/WalletCards'));
+const Overview = lazy(() => import('@/routes/leadership/Overview'));
+const Content = lazy(() => import('@/routes/leadership/Content'));
+const People = lazy(() => import('@/routes/leadership/People'));
+const Resources = lazy(() => import('@/routes/leadership/Resources'));
+const AccountSettings = lazy(() => import('@/routes/leadership/AccountSettings'));
+const StudyLibrary = lazy(() => import('@/studies/StudyLibrary').then((m) => ({ default: m.StudyLibrary })));
+const StudyEditor = lazy(() => import('@/studies/StudyEditor').then((m) => ({ default: m.StudyEditor })));
+const PlanLibrary = lazy(() => import('@/bible/PlanLibrary').then((m) => ({ default: m.PlanLibrary })));
+const PlanEditor = lazy(() => import('@/bible/PlanLibrary').then((m) => ({ default: m.PlanEditor })));
+const PromptLibrary = lazy(() => import('@/prompts/PromptLibrary').then((m) => ({ default: m.PromptLibrary })));
+const PlatformLayout = lazy(() => import('@/platform/PlatformLayout'));
+const PlatformAccounts = lazy(() => import('@/platform/Accounts'));
+const PlatformSettings = lazy(() => import('@/platform/Settings'));
+const PlatformTeam = lazy(() => import('@/platform/Team'));
+const PlatformWaitlist = lazy(() => import('@/platform/Waitlist'));
+const PlatformOutcomes = lazy(() => import('@/platform/Outcomes'));
 
 /**
  * Route map (docs/tenancy.md). The address decides which set applies:
@@ -67,7 +72,11 @@ export default function App() {
   if (account.status === 'unknown') return <UnknownAddress />;
   if (account.status === 'account' && account.account.status === 'suspended')
     return <PausedAddress name={account.account.name} />;
-  return account.status === 'platform' ? <PlatformRoutes /> : <AccountRoutes />;
+  return (
+    <Suspense fallback={<FullPageLoading />}>
+      {account.status === 'platform' ? <PlatformRoutes /> : <AccountRoutes />}
+    </Suspense>
+  );
 }
 
 function PlatformRoutes() {
@@ -228,7 +237,7 @@ function UnknownAddress() {
         <p className="mt-3 text-sm leading-relaxed text-muted-strong">
           No church or ministry uses it yet. Check the link you were given.
         </p>
-        <a href={platformUrl('/')} className="mt-4 inline-block text-sm text-sage underline-offset-2 hover:underline">
+        <a href={platformUrl('/')} className="mt-4 inline-block text-sm text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
           Go to Ekklē
         </a>
       </div>

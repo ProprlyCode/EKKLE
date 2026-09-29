@@ -96,7 +96,7 @@ export function AddressCard({ subdomain }: { subdomain: string }) {
         <h2 className="text-base">Address</h2>
         <p className="mt-1 text-sm text-muted-strong">
           Your ministry is at{' '}
-          <a href={accountUrl({ subdomain })} className="text-sage underline-offset-2 hover:underline">
+          <a href={accountUrl({ subdomain })} className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
             {subdomain}.ekkle.org
           </a>
           . A new address is set by the Ekklē team on request.

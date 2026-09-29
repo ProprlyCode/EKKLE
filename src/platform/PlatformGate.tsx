@@ -69,7 +69,7 @@ export function PlatformGate() {
             {session.user.email} isn’t on the Ekklē team. Your church or ministry has its own
             address — find it to sign in there.
           </p>
-          <Link to="/find" className="text-sm text-sage underline-offset-2 hover:underline">
+          <Link to="/find" className="text-sm text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
             Find your church or ministry
           </Link>
           <Button variant="ghost" size="sm" onClick={() => void signOut()}>

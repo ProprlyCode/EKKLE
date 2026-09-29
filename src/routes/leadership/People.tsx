@@ -292,7 +292,7 @@ function MemberRow({
           {canManage && pending && member.email && (
             <button
               onClick={() => onAct(() => sendInvitation(member.email!, landing), `Invitation sent again to ${member.email}.`)}
-              className="text-sage underline-offset-2 hover:underline"
+              className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
             >
               Resend
             </button>

@@ -110,7 +110,7 @@ function PassageSheet({ reference, onClose }: { reference: Reference; onClose: (
         <span className="mt-4 flex items-center justify-between">
           <Link
             to={`${base}/${reference.book.id}/${reference.chapter}`}
-            className="text-sm text-sage underline-offset-2 hover:underline"
+            className="text-sm text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
           >
             Open in the Bible
           </Link>

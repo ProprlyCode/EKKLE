@@ -297,7 +297,7 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
                     </span>
                     <Link
                       to={`${base}/${s.id}`}
-                      className="text-[13px] text-sage underline-offset-2 hover:underline"
+                      className="text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
                       aria-label={`${sr.locked ? 'View' : 'Edit'} ${s.title}`}
                     >
                       {sr.locked ? 'View' : 'Edit'}

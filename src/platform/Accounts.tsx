@@ -221,7 +221,7 @@ function AccountRow({
             <span key={email} className="flex items-center gap-2">
               Admin invited: {email}
               {canManage && (
-                <button onClick={() => resend(email)} disabled={busy} className="text-sage underline-offset-2 hover:underline">
+                <button onClick={() => resend(email)} disabled={busy} className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
                   Resend
                 </button>
               )}

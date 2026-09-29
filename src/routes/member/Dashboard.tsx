@@ -132,7 +132,7 @@ function KeepsakeCard({
         </div>
         <Link
           to="/app/wallet-cards"
-          className="text-center text-[13px] text-sage underline-offset-2 hover:underline"
+          className="text-center text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
         >
           Print wallet cards
         </Link>

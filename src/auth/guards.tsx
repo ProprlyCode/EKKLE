@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSession } from './SessionProvider';
 import { isAccountAdmin, isLeader } from './roles';
@@ -106,7 +106,9 @@ export function AuthedLayout() {
         </Button>
       }
     >
-      <Outlet />
+      <Suspense fallback={<FullPageLoading />}>
+        <Outlet />
+      </Suspense>
     </AppShell>
   );
 }

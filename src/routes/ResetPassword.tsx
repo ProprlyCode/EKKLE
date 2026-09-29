@@ -40,7 +40,7 @@ export default function ResetPassword() {
           </p>
           <Link
             to={src === 'seeker' ? '/space' : '/sign-in'}
-            className="mt-4 inline-block text-sm text-sage underline-offset-2 hover:underline"
+            className="mt-4 inline-block text-sm text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
           >
             Back to sign in
           </Link>

@@ -86,7 +86,8 @@ export function OutcomesTable({
   nameHeader: string;
 }) {
   return (
-    <div className="overflow-x-auto">
+    // Scrolls sideways on phones; focusable so it scrolls from the keyboard too.
+    <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={caption}>
       <table className="w-full min-w-[720px] text-[13px]">
         <caption className="sr-only">{caption}</caption>
         <thead>

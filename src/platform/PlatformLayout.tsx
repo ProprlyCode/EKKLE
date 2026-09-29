@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
+import { FullPageLoading } from '@/ui/states';
 import { useSession } from '@/auth/SessionProvider';
 import { AppShell, type NavItem } from '@/ui/AppShell';
 import { Button } from '@/ui/Button';
@@ -32,7 +34,9 @@ export default function PlatformLayout() {
         </span>
       }
     >
-      <Outlet />
+      <Suspense fallback={<FullPageLoading />}>
+        <Outlet />
+      </Suspense>
     </AppShell>
   );
 }

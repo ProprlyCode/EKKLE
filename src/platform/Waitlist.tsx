@@ -48,7 +48,7 @@ export default function Waitlist() {
                 {canCreate && (
                   <Link
                     to={`/platform?${new URLSearchParams({ new: '1', name: w.ministry_name, admin: w.name, email: w.email })}`}
-                    className="text-[13px] text-sage underline-offset-2 hover:underline"
+                    className="text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
                   >
                     Create account
                   </Link>

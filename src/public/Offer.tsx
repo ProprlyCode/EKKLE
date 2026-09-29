@@ -59,7 +59,7 @@ export default function Offer() {
                 setSent(false);
                 setSubmitting(false);
               }}
-              className="text-sage underline-offset-2 hover:underline"
+              className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
             >
               try another email
             </button>

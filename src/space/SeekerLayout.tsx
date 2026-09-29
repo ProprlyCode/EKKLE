@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { markStarted } from '@/data/gettingStarted';
+import { FullPageLoading } from '@/ui/states';
 import { AccountLogo } from '@/account/AccountMark';
 
 /**
@@ -56,7 +57,9 @@ export default function SeekerLayout() {
       </header>
 
       <main className="mx-auto max-w-2xl px-5 pb-28 pt-8 sm:pb-8">
-        <Outlet />
+        <Suspense fallback={<FullPageLoading />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <nav

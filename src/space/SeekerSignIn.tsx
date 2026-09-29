@@ -175,7 +175,7 @@ export default function SeekerSignIn() {
 
             <p className="mt-8 text-center text-[13px] text-muted">
               New here?{' '}
-              <a href="/offer" className="text-sage underline-offset-2 hover:underline">
+              <a href="/offer" className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
                 Start the studies
               </a>
             </p>

@@ -166,7 +166,7 @@ export function TourButton({ steps, label }: { steps: TourStep[]; label: string 
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 self-start text-[13px] text-sage underline-offset-2 hover:underline"
+        className="inline-flex items-center gap-1.5 self-start text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
       >
         <span aria-hidden>◎</span> Take a quick tour
       </button>

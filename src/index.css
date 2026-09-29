@@ -15,7 +15,7 @@
   --color-canvas: #f4f1ea;
   --color-card: #fdfcf8;
   --color-edge: #e4dfd1;
-  --color-muted: #8a8676;
+  --color-muted: #716d60; /* #8a8676 before 0045: 3.2:1 on canvas, under the 4.5:1 small text needs */
   --color-muted-strong: #6b6754;
   /* The account's accent as RGB channels (sage by default; see branding.ts). */
   --accent: 63 74 58;

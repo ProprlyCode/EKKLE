@@ -118,7 +118,7 @@ export default function Team() {
                       onClick={() =>
                         act(() => sendInvitation(m.email, platformUrl('/platform')), `Invitation sent again to ${m.email}.`)
                       }
-                      className="text-sage underline-offset-2 hover:underline"
+                      className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
                     >
                       Resend
                     </button>

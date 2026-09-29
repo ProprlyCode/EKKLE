@@ -243,7 +243,7 @@ export function PlanPage({ base }: { base: string }) {
         {plan.days.length > visible.length && (
           <button
             onClick={() => setShowAll(true)}
-            className="self-start text-[13px] text-sage underline-offset-2 hover:underline"
+            className="self-start text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
           >
             Show all {plan.days.length} days
           </button>

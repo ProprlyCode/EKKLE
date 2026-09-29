@@ -539,7 +539,7 @@ function PlanBar({ day, back, onDone }: { day: number; back: string; onDone: () 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-edge bg-card px-4 py-2 text-[13px] text-muted-strong">
       <span className="flex-1">Day {day} of your reading plan</span>
-      <Link to={back} className="text-sage underline-offset-2 hover:underline">
+      <Link to={back} className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
         Back to the plan
       </Link>
       <Button

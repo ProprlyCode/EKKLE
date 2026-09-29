@@ -30,7 +30,7 @@ export function Phone({ reduced = false }: { reduced?: boolean }) {
           ))}
         </div>
 
-        <p className="px-6 pt-5 text-[12px] text-[#8a8676]">A note from {MEMBER}</p>
+        <p className="px-6 pt-5 text-[12px] text-[#716d60]">A note from {MEMBER}</p>
 
         <div className="relative flex-1 px-6 pt-4">
           {SCREENS.map((s, i) => (
