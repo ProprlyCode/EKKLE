@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { listStudies, type StudySummary } from '@/data/studies';
 import { getStudyReminder, setStudyReminder, type StudyReminder } from '@/data/seeker';
 import { Button } from '@/ui/Button';
+import { Collapsible } from '@/ui/Collapsible';
 import { ErrorNote, Spinner } from '@/ui/states';
 import { Credit } from './StudyReader';
 
@@ -113,23 +114,66 @@ export default function StudyDashboard() {
             </p>
           )}
 
-          {/* Full list */}
+          {/* Full list — each series folds away; the one with the next study starts open. */}
           {groupBySeries(studies).map(([series, list], g, groups) => (
-            <section key={series ?? g} className="flex flex-col gap-3">
-              <span className="flex flex-col gap-0.5">
-                <span className="eyebrow">{groups.length > 1 && series ? series : 'all studies'}</span>
-                {list[0]?.credit && <Credit credit={list[0].credit} url={list[0].credit_url} className="" />}
-              </span>
-              <ol className="flex flex-col gap-3">
-                {list.map((s, i) => (
-                  <StudyRow key={s.id} study={s} index={i} />
-                ))}
-              </ol>
-            </section>
+            <SeriesSection
+              key={series ?? g}
+              title={groups.length > 1 && series ? series : 'all studies'}
+              list={list}
+              current={list.some((s) => s.id === resume?.id) || (!resume && g === 0)}
+            />
           ))}
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * One series, collapsible. In a long series only the studies around where
+ * they are show at first (the one before, the next, and a few after), with
+ * "Show all" for the rest.
+ */
+function SeriesSection({ title, list, current }: { title: string; list: StudySummary[]; current: boolean }) {
+  const [all, setAll] = useState(false);
+  const done = list.filter((s) => s.completed).length;
+  const next = list.findIndex((s) => !s.locked && !s.completed);
+  const at = next === -1 ? 0 : next;
+  const long = list.length > 8;
+  const from = long && !all ? Math.max(0, Math.min(at - 1, list.length - 6)) : 0;
+  const shown = long && !all ? list.slice(from, from + 6) : list;
+  return (
+    <section className="card p-0">
+      <Collapsible
+        defaultOpen={current}
+        title={
+          <span className="flex flex-col gap-0.5">
+            <span className="eyebrow">{title}</span>
+            {list[0]?.credit && <Credit credit={list[0].credit} url={list[0].credit_url} className="" />}
+          </span>
+        }
+        summary={`${done} of ${list.length} done`}
+        headerClassName="px-5 py-4"
+      >
+        <div className="flex flex-col gap-3 border-t border-edge/70 px-3 py-3">
+          {long && !all && from > 0 && (
+            <button onClick={() => setAll(true)} className="self-center text-[13px] text-muted hover:text-sage">
+              Show the {from} before
+            </button>
+          )}
+          <ol className="flex flex-col gap-3">
+            {shown.map((s) => (
+              <StudyRow key={s.id} study={s} index={list.indexOf(s)} />
+            ))}
+          </ol>
+          {long && !all && from + shown.length < list.length && (
+            <button onClick={() => setAll(true)} className="self-center text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage">
+              Show all {list.length} studies
+            </button>
+          )}
+        </div>
+      </Collapsible>
+    </section>
   );
 }
 

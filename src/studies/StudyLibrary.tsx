@@ -12,6 +12,7 @@ import {
 } from '@/data/studyEditor';
 import { Button } from '@/ui/Button';
 import { Card } from '@/ui/Card';
+import { DisclosureButton, Fold } from '@/ui/Collapsible';
 import { TextInput } from '@/ui/Field';
 import { ErrorNote, Spinner } from '@/ui/states';
 import { importDocx } from './importDocx';
@@ -182,7 +183,14 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
         !error && <Spinner />
       ) : (
         series.map((sr) => (
-          <Card key={sr.id} className="p-0">
+          <Fold
+            key={sr.id}
+            storageKey={`series.${sr.id}`}
+            // Open when it's the only one, or has work in progress.
+            defaultOpen={series.length === 1 || sr.studies.some((st) => st.status === 'draft' || st.has_draft)}
+          >
+          {(open, toggle, bodyId) => (
+          <Card className="p-0">
             <div className="flex flex-wrap items-center gap-3 border-b border-edge/70 px-5 py-4">
               {renaming?.id === sr.id ? (
                 <form onSubmit={onRename} className="flex flex-1 items-end gap-2">
@@ -202,7 +210,18 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
               ) : (
                 <>
                   <span className="min-w-0 flex-1">
-                    <h2 className="text-base">{sr.title}</h2>
+                    <h2 className="text-base">
+                      <DisclosureButton
+                        open={open}
+                        onToggle={toggle}
+                        controls={bodyId}
+                        summary={`${sr.studies.length} ${sr.studies.length === 1 ? 'study' : 'studies'}${
+                          sr.studies.some((st) => st.status === 'draft' || st.has_draft) ? ' · drafts' : ''
+                        }`}
+                      >
+                        {sr.title}
+                      </DisclosureButton>
+                    </h2>
                     <span className="block text-[12px] text-muted">
                       {sr.credit ? `A study from ${sr.credit}${sr.credit_url ? ` · ${sr.credit_url}` : ''}` : 'No credit line'}
                       {' · '}
@@ -277,70 +296,74 @@ export function StudyLibrary({ base, bank }: { base: string; bank: boolean }) {
               </div>
             )}
 
-            {sr.studies.length === 0 ? (
-              <p className="px-5 py-5 text-sm text-muted">No studies in this series yet.</p>
-            ) : (
-              <ol className="divide-y divide-edge/70">
-                {sr.studies.map((s, i) => (
-                  <li key={s.id} className="flex items-center gap-3 px-5 py-3">
-                    <span className="w-7 shrink-0 text-center font-serif text-lg tabular-nums text-sage">{i + 1}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <span className="truncate font-medium text-sage">{s.title}</span>
-                        <span className="eyebrow text-[10px]">
-                          {s.status === 'draft' ? 'Draft' : s.has_draft ? 'Changes not published' : 'Published'}
+            <div id={bodyId} hidden={!open}>
+              {sr.studies.length === 0 ? (
+                <p className="px-5 py-5 text-sm text-muted">No studies in this series yet.</p>
+              ) : (
+                <ol className="divide-y divide-edge/70">
+                  {sr.studies.map((s, i) => (
+                    <li key={s.id} className="flex items-center gap-3 px-5 py-3">
+                      <span className="w-7 shrink-0 text-center font-serif text-lg tabular-nums text-sage">{i + 1}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="truncate font-medium text-sage">{s.title}</span>
+                          <span className="eyebrow text-[10px]">
+                            {s.status === 'draft' ? 'Draft' : s.has_draft ? 'Changes not published' : 'Published'}
+                          </span>
+                        </span>
+                        <span className="block text-[12px] text-muted">
+                          {s.pages} {s.pages === 1 ? 'page' : 'pages'} · {s.people_started} started
                         </span>
                       </span>
-                      <span className="block text-[12px] text-muted">
-                        {s.pages} {s.pages === 1 ? 'page' : 'pages'} · {s.people_started} started
-                      </span>
-                    </span>
-                    <Link
-                      to={`${base}/${s.id}`}
-                      className="text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
-                      aria-label={`${sr.locked ? 'View' : 'Edit'} ${s.title}`}
-                    >
-                      {sr.locked ? 'View' : 'Edit'}
-                    </Link>
-                    {!sr.locked && (
-                      <span className="flex flex-col">
-                        <button
-                          onClick={() => void act(`move-${s.id}`, () => moveStudy(s.id, -1))}
-                          disabled={i === 0 || !!busy}
-                          aria-label={`Move ${s.title} up`}
-                          className="px-1 text-[12px] leading-none text-muted hover:text-sage disabled:opacity-30"
-                        >
-                          ▲
-                        </button>
-                        <button
-                          onClick={() => void act(`move-${s.id}`, () => moveStudy(s.id, 1))}
-                          disabled={i === sr.studies.length - 1 || !!busy}
-                          aria-label={`Move ${s.title} down`}
-                          className="px-1 text-[12px] leading-none text-muted hover:text-sage disabled:opacity-30"
-                        >
-                          ▼
-                        </button>
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            )}
+                      <Link
+                        to={`${base}/${s.id}`}
+                        className="text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
+                        aria-label={`${sr.locked ? 'View' : 'Edit'} ${s.title}`}
+                      >
+                        {sr.locked ? 'View' : 'Edit'}
+                      </Link>
+                      {!sr.locked && (
+                        <span className="flex flex-col">
+                          <button
+                            onClick={() => void act(`move-${s.id}`, () => moveStudy(s.id, -1))}
+                            disabled={i === 0 || !!busy}
+                            aria-label={`Move ${s.title} up`}
+                            className="px-1 text-[12px] leading-none text-muted hover:text-sage disabled:opacity-30"
+                          >
+                            ▲
+                          </button>
+                          <button
+                            onClick={() => void act(`move-${s.id}`, () => moveStudy(s.id, 1))}
+                            disabled={i === sr.studies.length - 1 || !!busy}
+                            aria-label={`Move ${s.title} down`}
+                            className="px-1 text-[12px] leading-none text-muted hover:text-sage disabled:opacity-30"
+                          >
+                            ▼
+                          </button>
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              )}
 
-            {!sr.locked && (
-              <div className="flex flex-wrap items-center gap-2 border-t border-edge/70 px-5 py-3">
-                <ImportButton
-                  label={`Import from Word into ${sr.title}`}
-                  busy={busy === `import-${sr.id}`}
-                  disabled={!!busy}
-                  onFiles={(files) => void onImport(sr.id, files)}
-                />
-                <Button variant="ghost" size="sm" onClick={() => void onNewStudy(sr.id)} disabled={!!busy}>
-                  Write a new study
-                </Button>
-              </div>
-            )}
+              {!sr.locked && (
+                <div className="flex flex-wrap items-center gap-2 border-t border-edge/70 px-5 py-3">
+                  <ImportButton
+                    label={`Import from Word into ${sr.title}`}
+                    busy={busy === `import-${sr.id}`}
+                    disabled={!!busy}
+                    onFiles={(files) => void onImport(sr.id, files)}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => void onNewStudy(sr.id)} disabled={!!busy}>
+                    Write a new study
+                  </Button>
+                </div>
+              )}
+            </div>
           </Card>
+          )}
+          </Fold>
         ))
       )}
 

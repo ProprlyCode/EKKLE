@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { admin as service, DAVID, OWEN, PLATFORM, SARAH } from './support/supabase';
+import { expandAll } from './support/ui';
 
 /**
  * Faith in action (0039): the Ekklē team publishes one of its draft prompts,
@@ -40,6 +41,7 @@ test('prompts: Ekklē publishes, a ministry adds its own, a member sees them by 
     await signIn(sarah, SARAH.email, SARAH.password);
     await sarah.goto('/leadership/resources');
     await sarah.getByRole('link', { name: /Faith in action/ }).click();
+    await expandAll(sarah);
     await expect(sarah.getByText(theirs)).toBeVisible(); // Ekklē's, read-only
     await sarah.getByRole('button', { name: 'New prompt' }).click();
     await sarah.getByLabel('Kind').selectOption({ label: 'Conversation starters' });

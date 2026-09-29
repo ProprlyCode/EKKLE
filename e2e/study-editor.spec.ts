@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { strToU8, zipSync } from 'fflate';
 import { admin as service, OWEN, PLATFORM } from './support/supabase';
+import { expandAll } from './support/ui';
 
 /**
  * The study editor (Platform → Studies): the Owner starts a series, imports a
@@ -77,6 +78,7 @@ test('import a study from Word, check it, preview, publish, lock the series', as
     // Back in the library: published; then the series is locked.
     await page.getByRole('link', { name: '← Studies' }).click();
     const card = page.locator('.card').filter({ has: page.getByRole('heading', { name: series }) });
+    await expandAll(page);
     await expect(card.getByRole('listitem').filter({ hasText: 'The Test Study' })).toContainText('Published');
     await card.getByRole('button', { name: 'Lock series' }).click();
     await card.getByRole('button', { name: 'Lock it' }).click();

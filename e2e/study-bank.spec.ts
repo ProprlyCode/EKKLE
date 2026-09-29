@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { admin as service, SARAH } from './support/supabase';
+import { expandAll } from './support/ui';
 
 /**
  * Resources → Bible studies: the Ekklē study bank. An Admin sees the shared
@@ -18,6 +19,7 @@ test('the study bank in Resources: see, preview, choose', async ({ page }) => {
   await page.goto('/leadership/resources');
 
   await expect(page.getByRole('heading', { name: 'Bible studies' })).toBeVisible();
+  await expandAll(page);
   const row = page.getByRole('listitem').filter({ hasText: 'The Logic of Love' });
   await expect(row).toContainText('Ekklē');
   await expect(page.getByText('1 of 1 offered')).toBeVisible();

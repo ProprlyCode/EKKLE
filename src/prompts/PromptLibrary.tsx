@@ -10,6 +10,7 @@ import {
 } from '@/data/prompts';
 import { Button } from '@/ui/Button';
 import { Card } from '@/ui/Card';
+import { Collapsible } from '@/ui/Collapsible';
 import { TextArea } from '@/ui/Field';
 import { ErrorNote, Spinner } from '@/ui/states';
 
@@ -146,10 +147,18 @@ export function PromptLibrary({ bank }: { bank: boolean }) {
           if (!list.length && !theirs.length) return null;
           return (
             <Card key={kind} className="p-0">
-              <div className="border-b border-edge/70 px-5 py-3">
-                <h2 className="text-base">{PROMPT_KINDS[kind]}</h2>
-              </div>
-              <ul className="divide-y divide-edge/70">
+              <Collapsible
+                storageKey={`prompts.${kind}`}
+                // Open when short, or when there are drafts to publish.
+                defaultOpen={list.length + theirs.length <= 5 || list.some((p) => p.status === 'draft')}
+                title={<h2 className="text-base">{PROMPT_KINDS[kind]}</h2>}
+                summary={`${list.length + theirs.length}${
+                  list.some((p) => p.status === 'draft')
+                    ? ` · ${list.filter((p) => p.status === 'draft').length} drafts`
+                    : ''
+                }`}
+              >
+              <ul className="divide-y divide-edge/70 border-t border-edge/70">
                 {list.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-start gap-3 px-5 py-3">
                     <span className="min-w-0 flex-1 text-[15px] leading-relaxed text-sage">
@@ -187,6 +196,7 @@ export function PromptLibrary({ bank }: { bank: boolean }) {
                   </li>
                 ))}
               </ul>
+              </Collapsible>
             </Card>
           );
         })

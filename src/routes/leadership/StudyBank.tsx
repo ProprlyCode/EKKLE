@@ -6,6 +6,7 @@ import { SongForm, songLabel } from '@/studies/Song';
 import { Button } from '@/ui/Button';
 import { Card } from '@/ui/Card';
 import { ErrorNote, Spinner } from '@/ui/states';
+import { Collapsible } from '@/ui/Collapsible';
 
 /**
  * Resources → Bible studies (Admins and Leaders): the Ekklē study bank plus the
@@ -93,8 +94,16 @@ export function StudyBank() {
       ) : studies.length === 0 ? (
         <p className="px-5 py-6 text-sm text-muted">No studies yet.</p>
       ) : (
-        <ol className="divide-y divide-edge/70">
-          {studies.map((s, i) => (
+        // Grouped by series, each folding away (order and moving stay across the whole list).
+        seriesGroups(studies).map((group) => (
+          <div key={group.key} className="border-b border-edge/70 last:border-b-0">
+            <Collapsible
+              storageKey={`bank.${group.key}`}
+              title={<span className="font-medium text-sage">{group.label}</span>}
+              summary={`${group.items.length} ${group.items.length === 1 ? 'study' : 'studies'}`}
+            >
+              <ol className="divide-y divide-edge/70 border-t border-edge/70">
+                {group.items.map(({ s, i }) => (
             <li key={s.id} className="flex flex-col gap-2 px-5 py-3">
               <div className="flex items-center gap-3">
               <span className="w-7 shrink-0 text-center font-serif text-lg tabular-nums text-sage">
@@ -178,8 +187,11 @@ export function StudyBank() {
                 />
               )}
             </li>
-          ))}
-        </ol>
+                ))}
+              </ol>
+            </Collapsible>
+          </div>
+        ))
       )}
     </Card>
   );
@@ -243,4 +255,16 @@ function SongChoice({
       {error && <ErrorNote>{error}</ErrorNote>}
     </div>
   );
+}
+
+/** Neighbouring studies of the same series, keeping each one's place in the whole list. */
+function seriesGroups<T extends { series?: string | null; source: string }>(list: T[]) {
+  const groups: Array<{ key: string; label: string; items: Array<{ s: T; i: number }> }> = [];
+  list.forEach((s, i) => {
+    const label = s.series ?? (s.source === 'ekkle' ? 'Ekklē studies' : 'Your studies');
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) last.items.push({ s, i });
+    else groups.push({ key: `${label}-${groups.length}`, label, items: [{ s, i }] });
+  });
+  return groups;
 }

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { admin as service, OWEN, PLATFORM, SARAH } from './support/supabase';
+import { expandAll } from './support/ui';
 
 /**
  * A song for a study's Experience section (0040, audio only): the Ekklē team
@@ -58,6 +59,7 @@ test('a song at the Experience section: added by Ekklē, turned off by a ministr
 
     // The ministry turns it off.
     await sarah.goto('/leadership/resources');
+    await expandAll(sarah);
     const row = sarah.getByRole('listitem').filter({ hasText: 'The Logic of Love' });
     await expect(row).toContainText('Song: A Quiet Song — Some Artist');
     await row.getByRole('button', { name: 'Song for The Logic of Love' }).click();
