@@ -94,6 +94,19 @@ export default function Resources() {
       </Link>
 
       <Link
+        to="/leadership/devotionals"
+        className="card flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:border-sage/40"
+      >
+        <span>
+          <span className="block text-base text-sage">Devotionals</span>
+          <span className="text-sm text-muted-strong">
+            A thought for each day, with a passage, a question and a prayer — at the top of the Bible tab.
+          </span>
+        </span>
+        <span aria-hidden className="text-muted">→</span>
+      </Link>
+
+      <Link
         to="/leadership/faith-in-action"
         className="card flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:border-sage/40"
       >

@@ -18,6 +18,7 @@ import {
   type SearchHit,
   type Translation,
 } from './data';
+import { TodayDevotional } from './Devotional';
 import { Button } from '@/ui/Button';
 import { ErrorNote, Spinner } from '@/ui/states';
 
@@ -179,6 +180,9 @@ export default function BibleReader({ base, stickyTop = 'top-0' }: { base: strin
           Plans
         </Link>
       </div>
+
+      {/* Today's devotional from the ministry (not while following a plan's day). */}
+      {!(planId && planDay) && <TodayDevotional base={base} />}
 
       {planId && planDay && (
         <PlanBar

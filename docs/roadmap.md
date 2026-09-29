@@ -25,6 +25,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | Get started checklists | **Built** (0044) — Admins (Overview), members (QR page), seekers (Your space home) |
 | Guided tours | **Built** — seekers, members, Admins/Leaders; only when asked ("Take a quick tour") |
 | Pilot readiness | **Done** (0045, 29 Sep 2026) — security review, WCAG 2.1 AA scans in CI, smaller first download, phone walk-through |
+| Daily devotionals | **Built** (0046) — Leaders write one per date; today's at the top of the Bible tab; past ones; opt-in daily email |
 | "What fits you?" quiz | Idea — recommend a reading plan, pace and reminder from time, read/listen, familiarity; listening needs a licensed Bible audio source |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
 | Custom domains · Visit us card · age question · Tailwind 4 | On hold |
@@ -226,6 +227,19 @@ code, your photo…) with a short card: Back / Next / Skip, Esc to close, ← �
 to step. On phones the card sits at the bottom of the screen. Built in-house
 (src/tour), no library; no database. Steps live in src/tour/tours.ts — the
 leadership tour adds Account for Admins. The Get started checklists stay.
+
+## Daily devotionals — built (0046, 29 Sep 2026)
+
+- A ministry's Admins and Leaders: Resources → Devotionals. One per date,
+  written ahead: title, an optional passage ("John 15:1-11", verses shown),
+  a thought, a question to sit with, a short prayer. Draft or published,
+  with a live preview.
+- Everyone on the address (seekers and the team): "Today's devotional" at
+  the top of the Bible tab (the latest one when today has none; never ahead
+  of the day), folding away; Past devotionals, newest first.
+- Opt-in daily email at a time they choose, sent only on days with one
+  (`ekkle-devotional-reminders`, notify kind `devotional`). Deleting their
+  details removes it.
 
 ## Pilot readiness — done (29 Sep 2026)
 

@@ -37,6 +37,10 @@ Deno.serve(async (req) => {
       await addressRequest(payload.record.kind, payload.record.request_id);
       return new Response('ok', { status: 200 });
     }
+    if (payload.record?.kind === 'devotional') {
+      await dailyDevotional(payload.record);
+      return new Response('ok', { status: 200 });
+    }
     if (payload.record?.kind === 'study') {
       await studyReminder(payload.record.auth_uid, payload.record.org_id, payload.record.study);
       return new Response('ok', { status: 200 });
@@ -287,6 +291,32 @@ async function addressRequest(kind: 'address_request' | 'address_decided', reque
       : `Your request to move ${ministry} to ${req.subdomain} wasn’t approved.` +
           (req.reason ? `\n\n“${req.reason}”` : '') +
           `\n\nYou can ask for a different address in Account.`,
+    fromAccount(name),
+  );
+}
+
+/** Today's devotional (0046), for those who asked for it by email. */
+async function dailyDevotional(r: { auth_uid: string; org_id: string; area: string; devotional_id: string }) {
+  const { data: d } = await supabase
+    .from('devotionals')
+    .select('title, passage, body, question, prayer')
+    .eq('id', r.devotional_id)
+    .single();
+  if (!d) return;
+  const { data: user } = await supabase.auth.admin.getUserById(r.auth_uid);
+  const email = user?.user?.email;
+  if (!email) return;
+  const { base, name } = await accountInfo(supabase, r.org_id);
+  const link = base ? `${base}/${r.area === 'app' ? 'app' : 'space'}/bible` : '';
+  const passage = d.passage ? readingLabel(d.passage) : null;
+  await sendEmail(
+    email,
+    `Today’s devotional: ${d.title}`,
+    `${d.title}${passage ? ` — ${passage}` : ''}\n\n${d.body}` +
+      (d.question ? `\n\nTo sit with: ${d.question}` : '') +
+      (d.prayer ? `\n\n${d.prayer}` : '') +
+      (link ? `\n\nRead it with the passage: ${link}` : '') +
+      `\n\nYou asked for this daily email. To stop it, open the Bible tab and choose “Past devotionals”, then “Turn off”.`,
     fromAccount(name),
   );
 }

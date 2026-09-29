@@ -39,6 +39,8 @@ const StudyReader = lazy(() => import('@/space/StudyReader'));
 const ResourcesLibrary = lazy(() => import('@/space/ResourcesLibrary'));
 const ResourcePage = lazy(() => import('@/space/ResourcePage'));
 const BibleReader = lazy(() => import('@/bible/BibleReader'));
+const PastDevotionals = lazy(() => import('@/bible/Devotional').then((m) => ({ default: m.PastDevotionals })));
+const DevotionalEditor = lazy(() => import('@/bible/DevotionalEditor'));
 const PlanList = lazy(() => import('@/bible/ReadingPlans').then((m) => ({ default: m.PlanList })));
 const PlanPage = lazy(() => import('@/bible/ReadingPlans').then((m) => ({ default: m.PlanPage })));
 const WalletCards = lazy(() => import('@/routes/member/WalletCards'));
@@ -152,6 +154,7 @@ function AccountRoutes() {
           <Route path="/space/bible" element={<BibleReader base="/space/bible" stickyTop="top-[53px]" />} />
           <Route path="/space/bible/:book/:chapter" element={<BibleReader base="/space/bible" stickyTop="top-[53px]" />} />
           <Route path="/space/bible/plans" element={<PlanList base="/space/bible" />} />
+          <Route path="/space/bible/devotionals" element={<PastDevotionals base="/space/bible" />} />
           <Route path="/space/bible/plans/:planId" element={<PlanPage base="/space/bible" />} />
           <Route path="/space/resources" element={<ResourcesLibrary />} />
           <Route path="/space/resources/:resourceId" element={<ResourcePage />} />
@@ -181,6 +184,7 @@ function AccountRoutes() {
             <Route path="/app/bible" element={<BibleReader base="/app/bible" />} />
             <Route path="/app/bible/:book/:chapter" element={<BibleReader base="/app/bible" />} />
             <Route path="/app/bible/plans" element={<PlanList base="/app/bible" />} />
+          <Route path="/app/bible/devotionals" element={<PastDevotionals base="/app/bible" />} />
             <Route path="/app/bible/plans/:planId" element={<PlanPage base="/app/bible" />} />
             <Route path="/app/messages/:conversationId" element={<Thread />} />
 
@@ -199,6 +203,7 @@ function AccountRoutes() {
               />
               <Route path="/leadership/reading-plans/:planId" element={<PlanEditor base="/leadership/reading-plans" />} />
               <Route path="/leadership/faith-in-action" element={<PromptLibrary bank={false} />} />
+              <Route path="/leadership/devotionals" element={<DevotionalEditor />} />
               <Route path="/leadership/people" element={<People />} />
               <Route element={<RequireAccountAdmin />}>
                 <Route path="/leadership/account" element={<AccountSettings />} />

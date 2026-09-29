@@ -644,6 +644,16 @@ export interface Database {
       getting_started: { Args: { p_area: string }; Returns: Json };
       mark_getting_started: { Args: { p_area: string; p_step: string }; Returns: undefined };
       dismiss_getting_started: { Args: { p_area: string; p_hide: boolean }; Returns: undefined };
+      todays_devotional: { Args: { p_today: string }; Returns: Json };
+      past_devotionals: { Args: { p_today: string; p_before: string | null }; Returns: Json };
+      devotional_library: { Args: Record<string, never>; Returns: Json };
+      save_devotional: {
+        Args: { p_id: string | null; p_day: string; p_title: string; p_passage: string; p_body: string; p_question: string; p_prayer: string; p_status: string };
+        Returns: string;
+      };
+      delete_devotional: { Args: { p_id: string }; Returns: undefined };
+      my_devotional_reminder: { Args: Record<string, never>; Returns: Json };
+      set_devotional_reminder: { Args: { p_at: string | null; p_tz: string; p_area: string }; Returns: undefined };
       ministry_outcomes: { Args: { p_days: number | null }; Returns: Json };
       my_outcomes: { Args: { p_days: number | null }; Returns: Json };
       platform_outcomes: { Args: { p_days: number | null }; Returns: Json };
