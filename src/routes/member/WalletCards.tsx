@@ -49,30 +49,33 @@ export default function WalletCards() {
           </Button>
         </div>
       </div>
-      <div
-        aria-label="Sheet of wallet cards"
-        className="mx-auto grid w-[7in] grid-cols-2 border-l border-t border-dashed border-edge bg-white print:border-[#ccc]"
-      >
-        {Array.from({ length: 8 }, (_, i) => (
-          <div
-            key={i}
-            className="flex h-[2in] w-[3.5in] items-center gap-[0.18in] border-b border-r border-dashed border-edge px-[0.22in] print:border-[#ccc]"
-          >
-            {qr ? (
-              <img src={qr} alt={i === 0 ? `QR code linking to ${membership.name}` : ''} className="h-[1.4in] w-[1.4in] shrink-0" />
-            ) : (
-              <span className="h-[1.4in] w-[1.4in] shrink-0" />
-            )}
-            <div className="flex min-w-0 flex-col gap-[0.05in] text-left">
-              <p className="font-serif text-[13pt] leading-tight text-sage">{membership.name}</p>
-              {membership.short_message && (
-                <p className="text-[8pt] leading-snug text-muted-strong">“{membership.short_message}”</p>
+      {/* On a phone the sheet (true size, 7 in) scrolls sideways on its own. */}
+      <div className="overflow-x-auto pb-6 print:overflow-visible print:pb-0">
+        <div
+          aria-label="Sheet of wallet cards"
+          className="mx-auto grid w-[7in] grid-cols-2 border-l border-t border-dashed border-edge bg-white print:border-[#ccc]"
+        >
+          {Array.from({ length: 8 }, (_, i) => (
+            <div
+              key={i}
+              className="flex h-[2in] w-[3.5in] items-center gap-[0.18in] border-b border-r border-dashed border-edge px-[0.22in] print:border-[#ccc]"
+            >
+              {qr ? (
+                <img src={qr} alt={i === 0 ? `QR code linking to ${membership.name}` : ''} className="h-[1.4in] w-[1.4in] shrink-0" />
+              ) : (
+                <span className="h-[1.4in] w-[1.4in] shrink-0" />
               )}
-              {ministry && <p className="text-[7.5pt] uppercase tracking-eyebrow text-muted">{ministry}</p>}
-              <p className="break-all text-[6.5pt] text-muted">{shortUrl}</p>
+              <div className="flex min-w-0 flex-col gap-[0.05in] text-left">
+                <p className="font-serif text-[13pt] leading-tight text-sage">{membership.name}</p>
+                {membership.short_message && (
+                  <p className="text-[8pt] leading-snug text-muted-strong">“{membership.short_message}”</p>
+                )}
+                {ministry && <p className="text-[7.5pt] uppercase tracking-eyebrow text-muted">{ministry}</p>}
+                <p className="break-all text-[6.5pt] text-muted">{shortUrl}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

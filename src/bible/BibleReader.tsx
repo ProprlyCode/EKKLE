@@ -124,7 +124,10 @@ export default function BibleReader({ base, stickyTop = 'top-0' }: { base: strin
     <div className="flex flex-col gap-5">
       {/* Toolbar */}
       <div
-        className={`sticky ${stickyTop} z-[5] -mx-5 flex items-center gap-2 border-b border-edge/70 bg-canvas px-5 py-2`}
+        // Edge to edge: the members' app pads its pages 1rem, Your space 1.25rem.
+        className={`sticky ${stickyTop} z-[5] flex items-center gap-2 border-b border-edge/70 bg-canvas py-2 ${
+          base.startsWith('/app') ? '-mx-4 px-4' : '-mx-5 px-5'
+        }`}
       >
         <button
           onClick={() => setPanel(panel === 'books' ? null : 'books')}

@@ -22,7 +22,7 @@ export function PersonPhoto({ name, photo, size = 56 }: { name: string; photo: s
     <span
       aria-hidden
       className="flex shrink-0 items-center justify-center rounded-full bg-sage/10 font-serif text-sage"
-      style={{ width: size, height: size, fontSize: size * 0.36 }}
+      style={{ width: size, height: size, fontSize: Math.max(11, size * 0.36) }}
     >
       {initials || '·'}
     </span>

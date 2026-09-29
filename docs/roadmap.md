@@ -24,6 +24,7 @@ hold** pending a decision; Tailwind 4 is **on hold**.
 | Address change requests | **Built** (0043) — Admin asks in Account; Ekklē team approves in Platform → Accounts; old addresses keep working |
 | Get started checklists | **Built** (0044) — Admins (Overview), members (QR page), seekers (Your space home) |
 | Guided tours | **Built** — seekers, members, Admins/Leaders; only when asked ("Take a quick tour") |
+| Pilot readiness | **Done** (0045, 29 Sep 2026) — security review, WCAG 2.1 AA scans in CI, smaller first download, phone walk-through |
 | "What fits you?" quiz | Idea — recommend a reading plan, pace and reminder from time, read/listen, familiarity; listening needs a licensed Bible audio source |
 | Self-serve ministry sign-up + approval | Later (roles step 5) |
 | Custom domains · Visit us card · age question · Tailwind 4 | On hold |
@@ -225,6 +226,26 @@ code, your photo…) with a short card: Back / Next / Skip, Esc to close, ← �
 to step. On phones the card sits at the bottom of the screen. Built in-house
 (src/tour), no library; no database. Steps live in src/tour/tours.ts — the
 leadership tour adds Account for Admins. The Get started checklists stay.
+
+## Pilot readiness — done (29 Sep 2026)
+
+- **Security (0045):** Supabase's advisor plus a read of every function
+  added since N2. Closed the unused first study functions (anyone could
+  create seeker records and complete studies around the unlock rules);
+  signed-in-only functions no longer callable signed out; delete my details
+  and the weekly reminder now cover seekers known to more than one ministry;
+  fixed search paths; faster row checks; indexes for busy lookups.
+  *For Jonathan:* turn on leaked-password protection (Supabase → Auth →
+  Passwords).
+- **Accessibility:** `e2e/a11y.spec.ts` runs axe (WCAG 2.1 A/AA) over the
+  member link, offer, Your space, the members' app, leadership tabs and the
+  console — any violation fails CI. Fixed: muted text contrast (#8a8676 →
+  #716d60), links in text underlined, the outcomes table keyboard-scrollable.
+- **Speed:** pages load when first opened; the first download went from
+  206 KB to 147 KB (gzip). On a slow mobile connection (400 kbps, 400 ms) a
+  member's link is ready in about 5 s.
+- **Phones:** a 390 px walk-through of each role; fixed the Bible toolbar and
+  the wallet-card sheet running off the side, and tiny initials.
 
 ## "What fits you?" (idea, agreed Sep 2026 — not planned in detail)
 
