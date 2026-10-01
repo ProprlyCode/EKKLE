@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_ANON_KEY?: string;
   /** 'staging' on staging.ekkle.org and Vercel previews (shows the banner). */
   readonly VITE_APP_ENV?: string;
+  /** Cloudflare Turnstile site key (production only; unset = no CAPTCHA). */
+  readonly VITE_TURNSTILE_SITE_KEY?: string;
 }
 
 interface ImportMeta {

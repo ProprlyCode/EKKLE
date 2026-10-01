@@ -90,3 +90,19 @@ so sign-in emails are sent in each account's name with its logo and colour
 The hook's signing secret is derived from the project's service-role key, so
 every deploy sets the same value on both sides. Without `RESEND_API_KEY`,
 email is simply off and everything else still works.
+
+## CAPTCHA (Cloudflare Turnstile)
+
+Sign-in requests (email link or code, password, forgot password, invitations)
+carry a Turnstile token (`src/lib/captcha.ts`). Production only:
+
+- **Site key** (public): Vercel → Environment Variables →
+  `VITE_TURNSTILE_SITE_KEY`, type Config, Production only. Unset (local, CI,
+  staging) means no check, so the tests and staging's persona sign-ins run
+  without one.
+- **Secret key**: Supabase (production) → Authentication → Attack Protection →
+  Enable Captcha protection → Turnstile. Never in the repo, GitHub or Vercel.
+  Switch it on only once a build with the site key is live; turning it off
+  restores sign-in at once.
+- Most people see nothing; a small "One quick check" card appears only when
+  Cloudflare wants a tap.

@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { env } from '@/lib/env';
 import { isPlatformHost } from '@/account/address';
+import { captchaToken } from '@/lib/captcha';
 
 /** Auth actions (magic link). Kept out of components like the rest of src/data. */
 
@@ -10,7 +11,7 @@ export async function sendMagicLink(email: string): Promise<void> {
   const landing = isPlatformHost() ? '/platform' : '/app';
   const { error } = await supabase.auth.signInWithOtp({
     email: email.trim(),
-    options: { emailRedirectTo: `${redirectTo}${landing}` },
+    options: { emailRedirectTo: `${redirectTo}${landing}`, captchaToken: await captchaToken() },
   });
   if (error) throw error;
 }
@@ -37,6 +38,7 @@ export async function signInWithPassword(
   const { error } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password,
+    options: { captchaToken: await captchaToken() },
   });
   if (error) throw error;
 }
@@ -69,7 +71,7 @@ export async function sendStudyMagicLink(input: {
   }
   const { error } = await supabase.auth.signInWithOtp({
     email: input.email.trim(),
-    options: { emailRedirectTo: `${redirectTo}${input.next ?? '/space'}` },
+    options: { emailRedirectTo: `${redirectTo}${input.next ?? '/space'}`, captchaToken: await captchaToken() },
   });
   if (error) throw error;
 }
@@ -101,6 +103,7 @@ export async function sendPasswordReset(
   const redirectTo = env.siteUrl || window.location.origin;
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
     redirectTo: `${redirectTo}/reset-password?src=${src}`,
+    captchaToken: await captchaToken(),
   });
   if (error) throw error;
 }
@@ -113,7 +116,7 @@ export async function sendPasswordReset(
 export async function sendInvitation(email: string, landing: string): Promise<void> {
   const { error } = await supabase.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
-    options: { emailRedirectTo: landing, shouldCreateUser: true },
+    options: { emailRedirectTo: landing, shouldCreateUser: true, captchaToken: await captchaToken() },
   });
   if (error) throw error;
 }
@@ -127,6 +130,8 @@ export function authProblem(err: unknown): string | null {
   const e = (err ?? {}) as { code?: string; status?: number; message?: string };
   const code = e.code ?? '';
   const msg = (e.message ?? '').toLowerCase();
+  if (code === 'captcha_unfinished')
+    return 'The security check didn’t finish. Please try again.';
   if (code === 'captcha_failed' || msg.includes('captcha'))
     return 'Sign-in is blocked by a security setting on our side. Please tell the Ekklē team (it isn’t your email).';
   if (e.status === 429 || code.startsWith('over_') || msg.includes('rate limit'))

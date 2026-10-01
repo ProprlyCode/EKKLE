@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { sendStudyMagicLink } from '@/data/auth';
+import { authProblem, sendStudyMagicLink } from '@/data/auth';
 import { AccountFooter, AccountLogo } from '@/account/AccountMark';
 import { Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
@@ -32,9 +32,9 @@ export default function Offer() {
       // which lands them in /studies once confirmed.
       await sendStudyMagicLink({ email, firstName, ref, next: '/space/studies' });
       setSent(true);
-    } catch {
+    } catch (err) {
       setSubmitting(false);
-      setError('We couldn’t start just now. Please try again.');
+      setError(authProblem(err) ?? 'We couldn’t start just now. Please try again.');
     }
   }
 
