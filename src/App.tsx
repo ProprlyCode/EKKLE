@@ -54,6 +54,7 @@ const StudyEditor = lazy(() => import('@/studies/StudyEditor').then((m) => ({ de
 const PlanLibrary = lazy(() => import('@/bible/PlanLibrary').then((m) => ({ default: m.PlanLibrary })));
 const PlanEditor = lazy(() => import('@/bible/PlanLibrary').then((m) => ({ default: m.PlanEditor })));
 const PromptLibrary = lazy(() => import('@/prompts/PromptLibrary').then((m) => ({ default: m.PromptLibrary })));
+const TemplateEditor = lazy(() => import('@/situations/TemplateEditor'));
 const PlatformLayout = lazy(() => import('@/platform/PlatformLayout'));
 const PlatformAccounts = lazy(() => import('@/platform/Accounts'));
 const PlatformSettings = lazy(() => import('@/platform/Settings'));
@@ -113,11 +114,13 @@ function PlatformRoutes() {
           <Route path="/platform/plans" element={<PlanLibrary base="/platform/plans" bank />} />
           <Route path="/platform/plans/:planId" element={<PlanEditor base="/platform/plans" />} />
           <Route path="/platform/prompts" element={<PromptLibrary bank />} />
+          <Route path="/platform/templates" element={<TemplateEditor />} />
         </Route>
       </Route>
 
       {/* Account pages opened on ekkle.org → that account's address. */}
       <Route path="/r/:slug" element={<LegacyMemberLink />} />
+      <Route path="/r/:slug/:situation" element={<LegacyMemberLink />} />
       <Route path="/offer" element={<LegacyMemberLink />} />
       {['/space/*', '/studies/*', '/app/*', '/leadership/*', '/welcome'].map((path) => (
         <Route key={path} path={path} element={<FindAccount />} />
@@ -141,6 +144,7 @@ function AccountRoutes() {
 
       {/* Recipient experience (no login) */}
       <Route path="/r/:slug" element={<RecipientExperience />} />
+      <Route path="/r/:slug/:situation" element={<RecipientExperience />} />
 
       {/* Your space — a seeker's own gated home. Signed out → the seeker sign-in
           (then back to the page they asked for); signed in → home, messages,

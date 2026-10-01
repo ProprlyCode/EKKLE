@@ -11,7 +11,7 @@ select ok(not has_function_privilege('anon', 'public.complete_study(text, uuid, 
 select ok(not has_function_privilege('anon', 'public.seeker_connection()', 'execute')
       and not has_function_privilege('anon', 'public.erase_conversation(uuid)', 'execute'),
   'signed-in-only functions are out of reach without signing in');
-select ok(has_function_privilege('anon', 'public.get_recipient_landing(text)', 'execute')
+select ok(has_function_privilege('anon', 'public.get_recipient_landing(text, text)', 'execute')
       and has_function_privilege('anon', 'public.resolve_account(text)', 'execute'),
   'the public pages still work');
 

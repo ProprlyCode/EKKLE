@@ -55,7 +55,7 @@ test('the Ekklē team’s console', async ({ page }) => {
   await page.getByLabel('Password').fill(OWEN.password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL('**/platform');
-  for (const path of ['platform', 'platform/outcomes', 'platform/team', 'platform/studies', 'platform/waitlist']) {
+  for (const path of ['platform', 'platform/outcomes', 'platform/team', 'platform/studies', 'platform/templates', 'platform/waitlist']) {
     await page.goto(`${PLATFORM}${path}`);
     await scan(page, path);
   }

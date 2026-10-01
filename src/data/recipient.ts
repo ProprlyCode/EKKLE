@@ -23,6 +23,8 @@ export interface MemberCard {
 export interface RecipientLanding {
   member: MemberCard;
   sequence: { id: string; title: string };
+  /** The situation the link was for (/r/david/grief), when the ministry offers it. */
+  situation: { slug: string; name: string } | null;
   connect: { headline: string; body: string; ctas: RecipientCta[] };
   screens: Array<{ headline: string; body: string; icon: string | null }>;
 }
@@ -99,9 +101,10 @@ export async function registerOfferLead(input: {
 }
 
 /** Load the greeting + approved sequence for a member handle, or null. */
-export async function getLanding(slug: string): Promise<RecipientLanding | null> {
+export async function getLanding(slug: string, situation?: string | null): Promise<RecipientLanding | null> {
   const { data, error } = await supabase.rpc('get_recipient_landing', {
     p_slug: slug,
+    p_situation: situation || null,
   });
   if (error) throw error;
   return (data as RecipientLanding | null) ?? null;
@@ -110,11 +113,13 @@ export async function getLanding(slug: string): Promise<RecipientLanding | null>
 export async function logEvent(
   slug: string,
   event: SequenceEventKind,
+  situation?: string | null,
 ): Promise<void> {
   const { error } = await supabase.rpc('log_sequence_event', {
     p_session_token: getRecipientSessionToken(),
     p_slug: slug,
     p_event: event,
+    p_situation: situation || null,
   });
   // Telemetry is best-effort — never block the experience on it.
   if (error) console.warn('logEvent failed', error.message);
@@ -126,6 +131,7 @@ export async function startConversation(input: {
   firstName: string;
   email: string;
   body: string;
+  situation?: string | null;
 }): Promise<string> {
   const { data, error } = await supabase.rpc('start_conversation', {
     p_session_token: getRecipientSessionToken(),
@@ -133,6 +139,7 @@ export async function startConversation(input: {
     p_first_name: input.firstName,
     p_email: input.email,
     p_body: input.body,
+    p_situation: input.situation || null,
   });
   if (error) throw error;
   const conversationId = data as string;

@@ -261,6 +261,29 @@ leadership tour adds Account for Admins. The Get started checklists stay.
 - **Phones:** a 390 px walk-through of each role; fixed the Bible toolbar and
   the wallet-card sheet running off the side, and tiny initials.
 
+## Situations — part 1 built (0048–0049, 1 Oct 2026)
+
+One code, with situations a tap away; members never manage several codes.
+
+- **Templates (0048):** Ekklē writes flows for everyday situations in
+  Platform → Flow templates (situation, title, when to use it, screens,
+  ending). Eight drafts to edit and publish: Over coffee, Just met, Someone
+  grieving, Going through a hard time, Curious about faith (personal), and
+  Poster or notice board, Worn on clothing, Event or welcome table (public).
+- **A ministry's copy (0049):** Content → Templates → "Use this template"
+  copies one into the ministry's flows as a draft to edit freely; later
+  template edits never touch the copy. Any flow can be a situation: a name
+  ("Over coffee"), a link name (`coffee`) and "Offer to members". No limit.
+- **Members:** under their code, "Sharing somewhere specific?" and the
+  offered situations; tapping one shows `/r/david/coffee` (QR, copy,
+  download), "Back to your main code" returns. Wallet cards stay on the main
+  code. An unknown or withdrawn situation opens the main flow.
+- **Outcomes:** opens, finishes and messages record their flow; Overview has
+  "by flow and situation".
+- **Part 2 (next):** public codes for posters, clothing and welcome tables
+  (`/c/lobby`): the ministry's name, no member photo; messages go to the
+  designated responder, else an Admin; a printable poster and a QR download.
+
 ## "What fits you?" (idea, agreed Sep 2026 — not planned in detail)
 
 Not "learning styles" (matching teaching to a visual/auditory style isn't

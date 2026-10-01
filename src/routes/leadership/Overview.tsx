@@ -12,6 +12,7 @@ import { GetStarted } from '@/components/GetStarted';
 import { TourButton } from '@/tour/Tour';
 import { ADMIN_TOUR, LEADER_TOUR } from '@/tour/tours';
 import { isAccountAdmin } from '@/auth/roles';
+import { FlowOutcomes } from '@/situations/FlowOutcomes';
 
 /**
  * Leadership → Overview (Admins and Leaders): the ministry's outcomes — from a
@@ -96,6 +97,8 @@ export default function Overview() {
           />
         )}
       </Card>
+
+      <FlowOutcomes range={range} />
 
       <ConversationsCard orgId={org.id} />
     </div>

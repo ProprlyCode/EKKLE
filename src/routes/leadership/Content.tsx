@@ -21,6 +21,8 @@ import { Button } from '@/ui/Button';
 import { TextInput, TextArea } from '@/ui/Field';
 import { EmptyState, ErrorNote, Spinner } from '@/ui/states';
 import { SequenceScreenContent } from '@/recipient/SequenceScreenContent';
+import { TemplateGallery } from '@/situations/TemplateGallery';
+import { SituationCard } from '@/situations/SituationCard';
 
 /**
  * Leadership → Content. Manage multiple invitation flows: a list of flows, and
@@ -80,7 +82,8 @@ export default function Content() {
         <div>
           <h1 className="text-xl">Content</h1>
           <p className="mt-1 text-sm text-muted-strong">
-            Invitation flows your members can share.
+            Invitation flows your members can share. Offer some as situations — members tap one
+            under their code for that moment.
           </p>
         </div>
         <Button onClick={newFlow}>New flow</Button>
@@ -117,6 +120,7 @@ export default function Content() {
                     </span>
                     <span className="text-[13px] text-muted">
                       {s.status === 'approved' ? 'Published' : 'Draft'}
+                      {s.situation && s.offered ? ` · Offered to members: ${s.situation}` : ''}
                     </span>
                   </span>
                   <span aria-hidden className="text-muted">
@@ -128,6 +132,13 @@ export default function Content() {
           </ul>
         </Card>
       )}
+
+      <TemplateGallery
+        onOpen={(id) => {
+          void refresh();
+          setView({ mode: 'edit', id });
+        }}
+      />
     </div>
   );
 }
@@ -156,11 +167,13 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
   });
   const [saving, setSaving] = useState(false);
   const [preview, setPreview] = useState(0);
+  const [sequence, setSequence] = useState<Sequence | null>(null);
 
   useEffect(() => {
     getSequence(id)
       .then((data) => {
         if (!data) return;
+        setSequence(data.sequence);
         setTitle(data.sequence.title);
         setSavedTitle(data.sequence.title);
         setStatus(data.sequence.status);
@@ -313,6 +326,8 @@ function FlowEditor({ id, onBack }: { id: string; onBack: () => void }) {
           {status === 'approved' ? 'Move to draft' : 'Publish'}
         </Button>
       </Card>
+
+      {sequence && <SituationCard sequence={sequence} published={status === 'approved'} />}
 
       <div className="grid gap-8 md:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-4">

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
 import { updateMyProfile, setActiveSequence, setMyPhoto, type Member } from '@/data/members';
 import { listApprovedSequences, type Sequence } from '@/data/sequences';
+import { mySituations, type Situation } from '@/data/situations';
+import { situationUrl } from '@/situations/linkName';
 import { env } from '@/lib/env';
 import { appConfig } from '@/config/app';
 import { QrImage, useQrDataUrl } from '@/ui/QrCode';
@@ -25,6 +27,14 @@ import { MEMBER_TOUR } from '@/tour/tours';
  */
 export default function MemberDashboard() {
   const { membership, refreshMembership } = useSession();
+  const [situations, setSituations] = useState<Situation[]>([]);
+  const [situation, setSituation] = useState<Situation | null>(null);
+
+  useEffect(() => {
+    mySituations()
+      .then(setSituations)
+      .catch(() => setSituations([]));
+  }, []);
 
   const shareUrl = useMemo(() => {
     if (!membership) return '';
@@ -41,7 +51,10 @@ export default function MemberDashboard() {
       <KeepsakeCard
         name={membership.name}
         message={membership.short_message}
-        shareUrl={shareUrl}
+        shareUrl={situationUrl(shareUrl, situation?.slug ?? null)}
+        situation={situation}
+        situations={situations}
+        onSituation={setSituation}
       />
       <FaithInAction />
       <MyOutcomes />
@@ -70,10 +83,17 @@ function KeepsakeCard({
   name,
   message,
   shareUrl,
+  situation,
+  situations,
+  onSituation,
 }: {
   name: string;
   message: string;
   shareUrl: string;
+  /** The situation shown (null: their main code). */
+  situation: Situation | null;
+  situations: Situation[];
+  onSituation: (s: Situation | null) => void;
 }) {
   const dataUrl = useQrDataUrl(shareUrl, 640);
   const [copied, setCopied] = useState(false);
@@ -92,7 +112,7 @@ function KeepsakeCard({
     if (!dataUrl) return;
     const a = document.createElement('a');
     a.href = dataUrl;
-    a.download = `ekkle-${name.toLowerCase().replace(/\s+/g, '-')}.png`;
+    a.download = `ekkle-${name.toLowerCase().replace(/\s+/g, '-')}${situation ? `-${situation.slug}` : ''}.png`;
     a.click();
   }
 
@@ -105,7 +125,12 @@ function KeepsakeCard({
             <span className="eyebrow">{appConfig.tagline}</span>
             <Marker />
           </div>
-          <QrImage value={shareUrl} size={240} alt={`QR code linking to ${name}`} />
+          <QrImage
+            value={shareUrl}
+            size={240}
+            alt={situation ? `QR code linking to ${name}, for ${situation.name}` : `QR code linking to ${name}`}
+          />
+          {situation && <span className="eyebrow -mt-2">for {situation.name.toLowerCase()}</span>}
           <div className="flex flex-col gap-1">
             <p className="font-serif text-xl font-medium text-sage">{name}</p>
             {message && (
@@ -114,6 +139,45 @@ function KeepsakeCard({
           </div>
         </div>
       </div>
+
+      {situations.length > 0 && (
+        <div className="flex w-full max-w-sm flex-col gap-2" data-tour="situations">
+          <p id="situations-label" className="text-center text-[13px] text-muted-strong">
+            Sharing somewhere specific?
+          </p>
+          <div role="group" aria-labelledby="situations-label" className="flex flex-wrap justify-center gap-2">
+            {situations.map((s) => {
+              const on = situation?.slug === s.slug;
+              return (
+                <button
+                  key={s.slug}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => onSituation(on ? null : s)}
+                  className={
+                    'rounded-full border px-3 py-1.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/40 ' +
+                    (on ? 'border-sage bg-sage text-canvas' : 'border-edge bg-card text-sage hover:border-sage/50')
+                  }
+                >
+                  {s.name}
+                </button>
+              );
+            })}
+          </div>
+          {situation && (
+            <p role="status" className="text-center text-[13px] text-muted-strong">
+              Showing: {situation.name} ·{' '}
+              <button
+                type="button"
+                onClick={() => onSituation(null)}
+                className="text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
+              >
+                Back to your main code
+              </button>
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="flex w-full max-w-sm flex-col gap-2">
         <div className="flex gap-2">

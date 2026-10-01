@@ -45,7 +45,7 @@ export const MEMBER_TOUR: TourStep[] = [
   {
     target: '#your-code',
     title: 'Your code',
-    body: 'Hold it up for someone to scan, copy your link, or download it. Anyone who opens it meets a short introduction — and you.',
+    body: 'Hold it up for someone to scan, copy your link, or download it. Anyone who opens it meets a short introduction — and you. Sharing somewhere specific? Tap a situation under your code for that moment.',
   },
   {
     target: '[aria-label="Faith in action"]',
@@ -88,7 +88,7 @@ const LEADERSHIP: TourStep[] = [
   {
     target: nav('/leadership/content'),
     title: 'Content',
-    body: 'The short introduction people walk through when they open a member’s link. Edit it and preview it exactly as they’ll see it.',
+    body: 'The short introductions people walk through when they open a member’s link. Start from one of Ekklē’s templates, offer some as situations members can tap under their code, and preview each exactly as people will see it.',
   },
   {
     target: nav('/leadership/resources'),

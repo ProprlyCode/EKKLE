@@ -147,6 +147,10 @@ export interface Database {
           connect_headline: string;
           connect_body: string;
           ctas: Json;
+          situation: string | null;
+          situation_slug: string | null;
+          offered: boolean;
+          template_id: UUID | null;
           created_at: Timestamp;
           updated_at: Timestamp;
         };
@@ -159,6 +163,10 @@ export interface Database {
           connect_headline?: string;
           connect_body?: string;
           ctas?: Json;
+          situation?: string | null;
+          situation_slug?: string | null;
+          offered?: boolean;
+          template_id?: UUID | null;
           created_at?: Timestamp;
           updated_at?: Timestamp;
         };
@@ -483,11 +491,11 @@ export interface Database {
         Returns: Database['public']['Tables']['users']['Row'];
       };
       get_recipient_landing: {
-        Args: { p_slug: string };
+        Args: { p_slug: string; p_situation?: string | null };
         Returns: Json;
       };
       log_sequence_event: {
-        Args: { p_session_token: string; p_slug: string; p_event: string };
+        Args: { p_session_token: string; p_slug: string; p_event: string; p_situation?: string | null };
         Returns: undefined;
       };
       start_conversation: {
@@ -497,6 +505,7 @@ export interface Database {
           p_first_name: string;
           p_email: string;
           p_body: string;
+          p_situation?: string | null;
         };
         Returns: string;
       };
@@ -658,6 +667,24 @@ export interface Database {
       my_outcomes: { Args: { p_days: number | null }; Returns: Json };
       platform_outcomes: { Args: { p_days: number | null }; Returns: Json };
       faith_prompts: { Args: Record<string, never>; Returns: Json };
+      platform_flow_templates: { Args: Record<string, never>; Returns: Json };
+      save_flow_template: {
+        Args: {
+          p_id: string | null; p_situation: string; p_slug: string; p_title: string; p_when_to_use: string;
+          p_audience: string; p_screens: Json; p_connect_headline: string; p_connect_body: string; p_ctas: Json;
+          p_status: string;
+        };
+        Returns: string;
+      };
+      delete_flow_template: { Args: { p_id: string }; Returns: undefined };
+      flow_templates_for_ministry: { Args: Record<string, never>; Returns: Json };
+      use_flow_template: { Args: { p_template: string }; Returns: string };
+      set_flow_situation: {
+        Args: { p_sequence: string; p_situation: string; p_slug: string; p_offered: boolean };
+        Returns: undefined;
+      };
+      my_situations: { Args: Record<string, never>; Returns: Json };
+      flow_outcomes: { Args: { p_days: number | null }; Returns: Json };
       prompt_library: { Args: Record<string, never>; Returns: Json };
       save_faith_prompt: { Args: { p_id: string | null; p_kind: string; p_body: string; p_status: string }; Returns: string };
       delete_faith_prompt: { Args: { p_id: string }; Returns: undefined };

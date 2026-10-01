@@ -42,7 +42,7 @@ type Step =
   | { kind: 'closing' };
 
 export default function RecipientExperience() {
-  const { slug = '' } = useParams();
+  const { slug = '', situation = null } = useParams();
   const { session, membership } = useSession();
   const [landing, setLanding] = useState<RecipientLanding | null | undefined>(
     undefined,
@@ -53,26 +53,26 @@ export default function RecipientExperience() {
 
   useEffect(() => {
     let active = true;
-    getLanding(slug)
+    getLanding(slug, situation)
       .then((data) => active && setLanding(data))
       .catch(() => active && setLanding(null));
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [slug, situation]);
 
   // Fire 'started' once the content is available.
   useEffect(() => {
     if (landing && !startedRef.current) {
       startedRef.current = true;
-      void logEvent(slug, 'started');
+      void logEvent(slug, 'started', situation);
     }
-  }, [landing, slug]);
+  }, [landing, slug, situation]);
 
   function goTo(next: Step) {
     if (next.kind === 'connect' && !completedRef.current) {
       completedRef.current = true;
-      void logEvent(slug, 'completed');
+      void logEvent(slug, 'completed', situation);
     }
     setStep(next);
     window.scrollTo({ top: 0 });
@@ -159,6 +159,7 @@ export default function RecipientExperience() {
       {step.kind === 'message' && (
         <MessageForm
           slug={slug}
+          situation={situation}
           member={member}
           onSent={(conversationId, email, firstName) =>
             goTo({ kind: 'keep', conversationId, email, firstName })
@@ -363,11 +364,13 @@ function Connect({
 
 function MessageForm({
   slug,
+  situation,
   member,
   onSent,
   onCancel,
 }: {
   slug: string;
+  situation: string | null;
   member: MemberCard;
   onSent: (conversationId: string, email: string, firstName: string) => void;
   onCancel: () => void;
@@ -385,7 +388,7 @@ function MessageForm({
     setError(null);
     setSending(true);
     try {
-      const conversationId = await startConversation({ slug, firstName, email, body });
+      const conversationId = await startConversation({ slug, firstName, email, body, situation });
       onSent(conversationId, email.trim(), firstName.trim());
     } catch {
       setSending(false);
