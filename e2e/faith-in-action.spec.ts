@@ -41,6 +41,7 @@ test('prompts: Ekklē publishes, a ministry adds its own, a member sees them by 
     await signIn(sarah, SARAH.email, SARAH.password);
     await sarah.goto('/leadership/resources');
     await sarah.getByRole('link', { name: /Faith in action/ }).click();
+    await expect(sarah.getByRole('button', { name: 'New prompt' })).toBeVisible();
     await expandAll(sarah);
     await expect(sarah.getByText(theirs)).toBeVisible(); // Ekklē's, read-only
     await sarah.getByRole('button', { name: 'New prompt' }).click();
