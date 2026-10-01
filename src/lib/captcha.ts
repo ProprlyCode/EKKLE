@@ -3,7 +3,8 @@
  * forgot password, invitations). Supabase checks the token when CAPTCHA is
  * switched on under Authentication → Attack Protection.
  *
- * Off when VITE_TURNSTILE_SITE_KEY isn't set (local development, CI, staging):
+ * Off when VITE_TURNSTILE_SITE_KEY isn’t set (local development, CI), and
+ * always off on staging, whose smoke tests sign in as the demo personas:
  * captchaToken() returns undefined and requests go without one.
  *
  * Most people never see anything: the check runs in the background and only
@@ -23,7 +24,8 @@ declare global {
 }
 
 const SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '';
+const SITE_KEY =
+  import.meta.env.VITE_APP_ENV === 'staging' ? '' : (import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '');
 
 /** The check didn't finish (blocked script, timed out, or Cloudflare refused). */
 export class CaptchaError extends Error {

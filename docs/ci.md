@@ -97,9 +97,9 @@ Sign-in requests (email link or code, password, forgot password, invitations)
 carry a Turnstile token (`src/lib/captcha.ts`). Production only:
 
 - **Site key** (public): Vercel → Environment Variables →
-  `VITE_TURNSTILE_SITE_KEY`, type Config, Production only. Unset (local, CI,
-  staging) means no check, so the tests and staging's persona sign-ins run
-  without one.
+  `VITE_TURNSTILE_SITE_KEY`, type Config, Production only. Unset (local, CI)
+  means no check, and staging builds (`VITE_APP_ENV=staging`) skip it even if
+  the key is there, so the tests and staging's persona sign-ins run without one.
 - **Secret key**: Supabase (production) → Authentication → Attack Protection →
   Enable Captcha protection → Turnstile. Never in the repo, GitHub or Vercel.
   Switch it on only once a build with the site key is live; turning it off
