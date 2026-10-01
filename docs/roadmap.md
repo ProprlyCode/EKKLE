@@ -261,7 +261,7 @@ leadership tour adds Account for Admins. The Get started checklists stay.
 - **Phones:** a 390 px walk-through of each role; fixed the Bible toolbar and
   the wallet-card sheet running off the side, and tiny initials.
 
-## Situations — part 1 built (0048–0049, 1 Oct 2026)
+## Situations — built (0048–0050, 1 Oct 2026)
 
 One code, with situations a tap away; members never manage several codes.
 
@@ -280,9 +280,13 @@ One code, with situations a tap away; members never manage several codes.
   code. An unknown or withdrawn situation opens the main flow.
 - **Outcomes:** opens, finishes and messages record their flow; Overview has
   "by flow and situation".
-- **Part 2 (next):** public codes for posters, clothing and welcome tables
-  (`/c/lobby`): the ministry's name, no member photo; messages go to the
-  designated responder, else an Admin; a printable poster and a QR download.
+- **Public codes (0050):** Leadership → Public codes (linked from Content).
+  Admins make codes for posters, clothing and welcome tables (`/c/lobby`)
+  that open a chosen flow as the ministry — its name and logo, no member
+  photo. Messages go to the designated responder, else the longest-standing
+  Admin; Leaders can move them. Each code: a printable Letter poster, a QR
+  download (PNG 2048 px, or SVG for clothing), on/off, and opened / wrote
+  counts. Opens and messages count for the ministry, not a member.
 
 ## "What fits you?" (idea, agreed Sep 2026 — not planned in detail)
 

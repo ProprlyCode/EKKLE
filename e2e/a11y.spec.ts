@@ -101,7 +101,7 @@ test('a member', async ({ page }) => {
 
 test('a ministry’s leaders', async ({ page }) => {
   await signIn(page, SARAH.email, SARAH.password);
-  for (const path of ['/leadership/overview', '/leadership/content', '/leadership/resources', '/leadership/people', '/leadership/account']) {
+  for (const path of ['/leadership/overview', '/leadership/content', '/leadership/public-codes', '/leadership/resources', '/leadership/people', '/leadership/account']) {
     await page.goto(path);
     await scan(page, path);
   }

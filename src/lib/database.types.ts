@@ -685,6 +685,18 @@ export interface Database {
       };
       my_situations: { Args: Record<string, never>; Returns: Json };
       flow_outcomes: { Args: { p_days: number | null }; Returns: Json };
+      public_code_landing: { Args: { p_code: string }; Returns: Json };
+      log_public_code_event: { Args: { p_session_token: string; p_code: string; p_event: string }; Returns: undefined };
+      start_public_conversation: {
+        Args: { p_session_token: string; p_code: string; p_first_name: string; p_email: string; p_body: string };
+        Returns: string;
+      };
+      public_codes_list: { Args: Record<string, never>; Returns: Json };
+      save_public_code: {
+        Args: { p_id: string | null; p_name: string; p_code: string; p_sequence: string | null; p_active: boolean };
+        Returns: string;
+      };
+      delete_public_code: { Args: { p_id: string }; Returns: undefined };
       prompt_library: { Args: Record<string, never>; Returns: Json };
       save_faith_prompt: { Args: { p_id: string | null; p_kind: string; p_body: string; p_status: string }; Returns: string };
       delete_faith_prompt: { Args: { p_id: string }; Returns: undefined };

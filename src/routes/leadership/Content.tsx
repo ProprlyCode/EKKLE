@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
 import {
   listSequences,
@@ -85,6 +86,12 @@ export default function Content() {
             Invitation flows your members can share. Offer some as situations — members tap one
             under their code for that moment.
           </p>
+          <Link
+            to="/leadership/public-codes"
+            className="mt-2 inline-block text-[13px] text-sage underline decoration-sage/30 underline-offset-2 hover:decoration-sage"
+          >
+            Public codes for posters, clothing and welcome tables
+          </Link>
         </div>
         <Button onClick={newFlow}>New flow</Button>
       </div>

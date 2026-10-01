@@ -54,6 +54,8 @@ const StudyEditor = lazy(() => import('@/studies/StudyEditor').then((m) => ({ de
 const PlanLibrary = lazy(() => import('@/bible/PlanLibrary').then((m) => ({ default: m.PlanLibrary })));
 const PlanEditor = lazy(() => import('@/bible/PlanLibrary').then((m) => ({ default: m.PlanEditor })));
 const PromptLibrary = lazy(() => import('@/prompts/PromptLibrary').then((m) => ({ default: m.PromptLibrary })));
+const PublicCodes = lazy(() => import('@/situations/PublicCodes'));
+const PublicCodePoster = lazy(() => import('@/situations/PublicCodePoster'));
 const TemplateEditor = lazy(() => import('@/situations/TemplateEditor'));
 const PlatformLayout = lazy(() => import('@/platform/PlatformLayout'));
 const PlatformAccounts = lazy(() => import('@/platform/Accounts'));
@@ -145,6 +147,7 @@ function AccountRoutes() {
       {/* Recipient experience (no login) */}
       <Route path="/r/:slug" element={<RecipientExperience />} />
       <Route path="/r/:slug/:situation" element={<RecipientExperience />} />
+      <Route path="/c/:code" element={<RecipientExperience kind="public" />} />
 
       {/* Your space — a seeker's own gated home. Signed out → the seeker sign-in
           (then back to the page they asked for); signed in → home, messages,
@@ -179,6 +182,7 @@ function AccountRoutes() {
           {/* A study exactly as seekers see it (full-screen reader, no saving). */}
           <Route element={<RequireLeadership />}>
             <Route path="/leadership/studies/:studyId" element={<StudyReader preview />} />
+            <Route path="/leadership/public-codes/:id/poster" element={<PublicCodePoster />} />
           </Route>
           {/* Wallet cards print on their own, without the app around them. */}
           <Route path="/app/wallet-cards" element={<WalletCards />} />
@@ -195,6 +199,7 @@ function AccountRoutes() {
             <Route element={<RequireLeadership />}>
               <Route path="/leadership/overview" element={<Overview />} />
               <Route path="/leadership/content" element={<Content />} />
+              <Route path="/leadership/public-codes" element={<PublicCodes />} />
               <Route path="/leadership/resources" element={<Resources />} />
               <Route
                 path="/leadership/study-editor"

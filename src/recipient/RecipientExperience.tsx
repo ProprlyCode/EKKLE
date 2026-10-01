@@ -6,8 +6,11 @@ import { EmailCode } from '@/ui/EmailCode';
 import { safeHref } from '@/lib/video';
 import {
   getLanding,
+  getPublicLanding,
   logEvent,
+  logPublicEvent,
   startConversation,
+  startPublicConversation,
   getConversation,
   sendRecipientMessage,
   savedConversation,
@@ -41,8 +44,13 @@ type Step =
   | { kind: 'thread'; conversationId: string }
   | { kind: 'closing' };
 
-export default function RecipientExperience() {
-  const { slug = '', situation = null } = useParams();
+export default function RecipientExperience({ kind = 'member' }: { kind?: 'member' | 'public' }) {
+  const params = useParams();
+  // A ministry's public code (/c/lobby) speaks as the ministry; a member's
+  // link (/r/david, /r/david/grief) as the member.
+  const isPublic = kind === 'public';
+  const slug = (isPublic ? params.code : params.slug) ?? '';
+  const situation = isPublic ? null : (params.situation ?? null);
   const { session, membership } = useSession();
   const [landing, setLanding] = useState<RecipientLanding | null | undefined>(
     undefined,
@@ -53,26 +61,26 @@ export default function RecipientExperience() {
 
   useEffect(() => {
     let active = true;
-    getLanding(slug, situation)
+    (isPublic ? getPublicLanding(slug) : getLanding(slug, situation))
       .then((data) => active && setLanding(data))
       .catch(() => active && setLanding(null));
     return () => {
       active = false;
     };
-  }, [slug, situation]);
+  }, [slug, situation, isPublic]);
 
   // Fire 'started' once the content is available.
   useEffect(() => {
     if (landing && !startedRef.current) {
       startedRef.current = true;
-      void logEvent(slug, 'started', situation);
+      void (isPublic ? logPublicEvent(slug, 'started') : logEvent(slug, 'started', situation));
     }
-  }, [landing, slug, situation]);
+  }, [landing, slug, situation, isPublic]);
 
   function goTo(next: Step) {
     if (next.kind === 'connect' && !completedRef.current) {
       completedRef.current = true;
-      void logEvent(slug, 'completed', situation);
+      void (isPublic ? logPublicEvent(slug, 'completed') : logEvent(slug, 'completed', situation));
     }
     setStep(next);
     window.scrollTo({ top: 0 });
@@ -102,13 +110,14 @@ export default function RecipientExperience() {
   }
 
   const { member, screens } = landing;
-  const resumeId = savedConversation(slug);
+  const resumeId = savedConversation(isPublic ? `c:${slug}` : slug);
 
   return (
     <Shell>
       {step.kind === 'intro' && (
         <Intro
           member={member}
+          isPublic={isPublic}
           inSpace={Boolean(session && !membership)}
           onBegin={() =>
             goTo(
@@ -151,6 +160,7 @@ export default function RecipientExperience() {
         <Connect
           connect={landing.connect}
           memberName={member.name}
+          isPublic={isPublic}
           onMessage={() => goTo({ kind: 'message' })}
           onKeepReading={() => goTo({ kind: 'closing' })}
         />
@@ -159,6 +169,7 @@ export default function RecipientExperience() {
       {step.kind === 'message' && (
         <MessageForm
           slug={slug}
+          isPublic={isPublic}
           situation={situation}
           member={member}
           onSent={(conversationId, email, firstName) =>
@@ -170,7 +181,7 @@ export default function RecipientExperience() {
 
       {step.kind === 'keep' && (
         <KeepConversation
-          slug={slug}
+          slug={isPublic ? (landing.ref ?? '') : slug}
           email={step.email}
           firstName={step.firstName}
           memberName={member.name}
@@ -203,11 +214,13 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Intro({
   member,
+  isPublic,
   inSpace,
   onBegin,
   onResume,
 }: {
   member: RecipientLanding['member'];
+  isPublic: boolean;
   /** A signed-in seeker: their conversation lives in Your space. */
   inSpace: boolean;
   onBegin: () => void;
@@ -216,7 +229,7 @@ function Intro({
   return (
     <div className="flex flex-1 flex-col justify-center gap-8 py-8">
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-muted">A note from {member.name}</p>
+        <p className="text-sm text-muted">{isPublic ? `A welcome from ${member.name}` : `A note from ${member.name}`}</p>
         {member.short_message && (
           <p className="font-serif text-2xl leading-snug text-sage">
             “{member.short_message}”
@@ -298,11 +311,13 @@ function Progress({ index, total }: { index: number; total: number }) {
 function Connect({
   connect,
   memberName,
+  isPublic,
   onMessage,
   onKeepReading,
 }: {
   connect: RecipientLanding['connect'] | undefined;
   memberName: string;
+  isPublic: boolean;
   onMessage: () => void;
   onKeepReading: () => void;
 }) {
@@ -311,6 +326,9 @@ function Connect({
   const headline = connect?.headline?.trim() || 'someone here would love to talk';
   const body =
     connect?.body?.trim() ||
+    (isPublic
+      ? `Someone from ${memberName} would genuinely welcome a conversation — no pressure, no script. Or you can sit with it a while. Both are okay.`
+      : null) ||
     `${memberName} shared this with you and would genuinely welcome a conversation — no pressure, no script. Or you can sit with it a while. Both are okay.`;
   // Default to a single "message the member" action if nothing is configured.
   const ctas =
@@ -364,12 +382,14 @@ function Connect({
 
 function MessageForm({
   slug,
+  isPublic,
   situation,
   member,
   onSent,
   onCancel,
 }: {
   slug: string;
+  isPublic: boolean;
   situation: string | null;
   member: MemberCard;
   onSent: (conversationId: string, email: string, firstName: string) => void;
@@ -388,7 +408,9 @@ function MessageForm({
     setError(null);
     setSending(true);
     try {
-      const conversationId = await startConversation({ slug, firstName, email, body, situation });
+      const conversationId = isPublic
+        ? await startPublicConversation({ code: slug, firstName, email, body })
+        : await startConversation({ slug, firstName, email, body, situation });
       onSent(conversationId, email.trim(), firstName.trim());
     } catch {
       setSending(false);
@@ -430,7 +452,9 @@ function MessageForm({
           placeholder="Even a few words is a good start."
         />
         <p className="text-[12px] leading-relaxed text-muted">
-          By sending, you’re sharing your name and email with {memberName} so they can reply.
+          {isPublic
+            ? `By sending, you’re sharing your name and email with ${memberName} so someone there can reply personally.`
+            : `By sending, you’re sharing your name and email with ${memberName} so they can reply.`}
         </p>
         {error && (
           <p className="rounded-lg border border-sage/20 bg-sage/5 px-3 py-2 text-[13px] text-muted-strong">

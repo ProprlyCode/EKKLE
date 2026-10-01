@@ -25,6 +25,10 @@ export interface RecipientLanding {
   sequence: { id: string; title: string };
   /** The situation the link was for (/r/david/grief), when the ministry offers it. */
   situation: { slug: string; name: string } | null;
+  /** A ministry's public code (/c/lobby): the ministry speaks, not a member. */
+  public?: boolean;
+  /** Public codes: the responder's link, for "keep this conversation". */
+  ref?: string | null;
   connect: { headline: string; body: string; ctas: RecipientCta[] };
   screens: Array<{ headline: string; body: string; icon: string | null }>;
 }
@@ -197,4 +201,42 @@ export function savedConversation(slug: string): string | null {
   } catch {
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Public codes (0050): /c/:code — posters, clothing, welcome tables
+// ---------------------------------------------------------------------------
+
+export async function getPublicLanding(code: string): Promise<RecipientLanding | null> {
+  const { data, error } = await supabase.rpc('public_code_landing', { p_code: code });
+  if (error) throw error;
+  return (data as RecipientLanding | null) ?? null;
+}
+
+export async function logPublicEvent(code: string, event: Exclude<SequenceEventKind, 'messaged'>): Promise<void> {
+  const { error } = await supabase.rpc('log_public_code_event', {
+    p_session_token: getRecipientSessionToken(),
+    p_code: code,
+    p_event: event,
+  });
+  if (error) console.warn('logPublicEvent failed', error.message);
+}
+
+export async function startPublicConversation(input: {
+  code: string;
+  firstName: string;
+  email: string;
+  body: string;
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('start_public_conversation', {
+    p_session_token: getRecipientSessionToken(),
+    p_code: input.code,
+    p_first_name: input.firstName,
+    p_email: input.email,
+    p_body: input.body,
+  });
+  if (error) throw error;
+  const conversationId = data as string;
+  rememberConversation(`c:${input.code}`, conversationId);
+  return conversationId;
 }
