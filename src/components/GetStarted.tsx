@@ -18,6 +18,7 @@ const STEPS: Record<StartArea, { title: string; intro: string; steps: Step[] }> 
       { key: 'invite_leader', label: 'Invite a Leader or another Admin', to: '/leadership/people' },
       { key: 'preview_intro', label: 'Look over your introduction', to: '/leadership/content' },
       { key: 'invite_members', label: 'Invite your members, or share the join code', to: '/leadership/people' },
+      { key: 'devotional', label: 'Write a devotional for this week', to: '/leadership/devotionals' },
     ],
   },
   member: {

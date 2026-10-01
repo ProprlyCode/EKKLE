@@ -22,7 +22,7 @@ export const SEEKER_TOUR: TourStep[] = [
   {
     target: nav('/space/bible'),
     title: 'Bible',
-    body: 'Read in three translations, search, highlight and keep notes. Reading plans are here too, if you’d like a path through.',
+    body: 'Today’s devotional from the ministry, three translations, search, highlights and notes. Reading plans are here too, if you’d like a path through.',
   },
   {
     target: nav('/space/resources'),
@@ -65,7 +65,7 @@ export const MEMBER_TOUR: TourStep[] = [
   {
     target: nav('/app/bible'),
     title: 'Bible',
-    body: 'The same Bible your friends read, with notes, highlights and reading plans.',
+    body: 'The same Bible your friends read, with today’s devotional from your ministry, notes, highlights and reading plans.',
   },
   {
     target: '[aria-label="Get started"]',
@@ -93,7 +93,7 @@ const LEADERSHIP: TourStep[] = [
   {
     target: nav('/leadership/resources'),
     title: 'Resources',
-    body: 'Bible studies, reading plans, Faith in action prompts, and articles or videos for people exploring.',
+    body: 'Bible studies, reading plans, daily devotionals, Faith in action prompts, and articles or videos. Try writing a devotional: it shows at the top of everyone’s Bible tab.',
   },
   {
     target: nav('/leadership/people'),

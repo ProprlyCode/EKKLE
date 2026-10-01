@@ -22,7 +22,7 @@ set local "request.headers" to '{"origin":"https://gs.ekkle.org"}';
 -- ---- An Admin ----
 set local "request.jwt.claims" to '{"sub":"d9510000-0000-0000-0000-000000000001","role":"authenticated"}';
 select is(getting_started('admin') -> 'steps',
-  '{"brand":false,"invite_leader":false,"invite_members":true,"preview_intro":false}'::jsonb,
+  '{"brand":false,"devotional":false,"invite_leader":false,"invite_members":true,"preview_intro":false}'::jsonb,
   'an Admin''s steps come from the ministry');
 select lives_ok($$ select mark_getting_started('admin', 'preview_intro') $$, 'the app marks a step');
 select is((getting_started('admin') -> 'steps' ->> 'preview_intro')::boolean, true, '…and it''s ticked');
