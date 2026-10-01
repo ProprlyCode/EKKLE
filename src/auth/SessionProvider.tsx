@@ -65,9 +65,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     // auth lock, so awaiting another Supabase call here can stall every
     // request after it (e.g. a seeker arriving from a magic link sat on a
     // spinner). Defer the membership load until the lock is released.
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       if (!mounted) return;
       setSession(next);
+      // A password-reset link can land on any page (e.g. one sent from the
+      // Supabase dashboard goes to the site's root): always finish it on the
+      // reset page.
+      if (event === 'PASSWORD_RECOVERY' && window.location.pathname !== '/reset-password') {
+        window.history.replaceState(null, '', '/reset-password');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
       setTimeout(() => {
         if (mounted) void loadMembership(next);
       }, 0);

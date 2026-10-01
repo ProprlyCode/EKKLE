@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useSession } from '@/auth/SessionProvider';
 import { useAccount } from '@/account/AccountProvider';
-import { sendMagicLink, signInWithPassword, sendPasswordReset } from '@/data/auth';
+import { sendMagicLink, signInWithPassword, sendPasswordReset, authProblem } from '@/data/auth';
 import { Wordmark } from '@/components/Wordmark';
 import { Button } from '@/ui/Button';
 import { TextInput } from '@/ui/Field';
@@ -51,7 +51,9 @@ export default function SignIn() {
       setStatus('idle');
       const status = (err as { status?: number } | null)?.status;
       setError(
-        status === 429
+        authProblem(err) && status !== 429
+          ? authProblem(err)
+          : status === 429
           ? 'We just emailed you — check your inbox (or wait a minute and try again).'
           : 'That didn’t send. Check the address and try again.',
       );
@@ -65,9 +67,9 @@ export default function SignIn() {
     try {
       await signInWithPassword(email, password);
       // Session updates via the auth listener → redirect happens above.
-    } catch {
+    } catch (err) {
       setStatus('idle');
-      setError('That didn’t work. Check your email and password.');
+      setError(authProblem(err) ?? 'That didn’t work. Check your email and password.');
     }
   }
 
@@ -82,9 +84,9 @@ export default function SignIn() {
       await sendPasswordReset(email, 'admin');
       setSentKind('reset');
       setStatus('sent');
-    } catch {
+    } catch (err) {
       setStatus('idle');
-      setError('We couldn’t send that. Check the address and try again.');
+      setError(authProblem(err) ?? 'We couldn’t send that. Check the address and try again.');
     }
   }
 

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { sendStudyMagicLink, signInWithPassword, sendPasswordReset } from '@/data/auth';
+import { sendStudyMagicLink, signInWithPassword, sendPasswordReset, authProblem } from '@/data/auth';
 import { AccountFooter } from '@/account/AccountMark';
 import { Marker } from '@/ui/Card';
 import { Button } from '@/ui/Button';
@@ -31,9 +31,9 @@ export default function SeekerSignIn() {
       await sendStudyMagicLink({ email, ref, next: window.location.pathname });
       setSentKind('link');
       setStatus('sent');
-    } catch {
+    } catch (err) {
       setStatus('idle');
-      setError('We couldn’t send that just now. Please try again.');
+      setError(authProblem(err) ?? 'We couldn’t send that just now. Please try again.');
     }
   }
 
@@ -48,9 +48,9 @@ export default function SeekerSignIn() {
       await sendPasswordReset(email, 'seeker');
       setSentKind('reset');
       setStatus('sent');
-    } catch {
+    } catch (err) {
       setStatus('idle');
-      setError('We couldn’t send that just now. Please try again.');
+      setError(authProblem(err) ?? 'We couldn’t send that just now. Please try again.');
     }
   }
 
@@ -61,9 +61,9 @@ export default function SeekerSignIn() {
     try {
       await signInWithPassword(email, password);
       // On success the auth state changes and the gate renders the dashboard.
-    } catch {
+    } catch (err) {
       setStatus('idle');
-      setError('That email and password didn’t match.');
+      setError(authProblem(err) ?? 'That email and password didn’t match.');
     }
   }
 

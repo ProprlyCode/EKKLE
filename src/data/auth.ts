@@ -117,3 +117,19 @@ export async function sendInvitation(email: string, landing: string): Promise<vo
   });
   if (error) throw error;
 }
+
+/**
+ * A plain reason for an auth failure that isn't the person's fault, so the
+ * page doesn't wrongly say "check the address" (e.g. CAPTCHA switched on in
+ * Supabase, or too many emails). Null: use the page's own message.
+ */
+export function authProblem(err: unknown): string | null {
+  const e = (err ?? {}) as { code?: string; status?: number; message?: string };
+  const code = e.code ?? '';
+  const msg = (e.message ?? '').toLowerCase();
+  if (code === 'captcha_failed' || msg.includes('captcha'))
+    return 'Sign-in is blocked by a security setting on our side. Please tell the Ekklē team (it isn’t your email).';
+  if (e.status === 429 || code.startsWith('over_') || msg.includes('rate limit'))
+    return 'Too many tries in a short time. Wait a few minutes and try again.';
+  return null;
+}
