@@ -164,7 +164,7 @@ export function PlanPage({ base }: { base: string }) {
 
       {plan.together && (
         <div className="rounded-lg border border-sage/20 bg-sage/5 px-4 py-3 text-[14px] text-muted-strong">
-          Your ministry is reading this together — the group is on day {Math.min(plan.together.day, plan.days.length)}
+          {base.startsWith('/space') ? 'Others are reading this together' : 'Your ministry is reading this together'} — the group is on day {Math.min(plan.together.day, plan.days.length)}
           {plan.together.readers > 0 &&
             ` · ${plan.together.readers} ${plan.together.readers === 1 ? 'person' : 'people'} reading along`}
           .

@@ -18,6 +18,11 @@ export interface AuthEmailInput {
   /** The account the person signed in on, or null for Ekklē itself. */
   account: EmailAccount | null;
   /**
+   * Someone exploring faith (the link goes back to Your space): the email
+   * stays personal — no ministry name, logo or "uses Ekklē" line.
+   */
+  seeker?: boolean;
+  /**
    * They have a pending invitation there (to the ministry, or on ekkle.org to
    * the Ekklē team): the sign-in reads as an invitation.
    */
@@ -78,18 +83,63 @@ const COPY: Record<string, Copy> = {
 // A first sign-in (a new account) reads exactly like any other sign-in.
 COPY.signup = COPY.magiclink;
 
+/** For seekers: personal, with no ministry name (see `seeker`). */
+const SEEKER_COPY: Record<string, Copy> = {
+  magiclink: {
+    subject: () => 'Your sign-in code',
+    lead: 'Tap the button to open your space, or enter this code where you started:',
+    button: 'Open your space',
+    showCode: true,
+  },
+  recovery: {
+    subject: () => 'Reset your password',
+    lead: 'Tap the button to choose a new password.',
+    button: 'Choose a new password',
+    showCode: false,
+  },
+  email_change: {
+    subject: () => 'Confirm your new email',
+    lead: 'Tap the button to confirm this is your new email address.',
+    button: 'Confirm my email',
+    showCode: false,
+  },
+  reauthentication: {
+    subject: () => 'Your confirmation code',
+    lead: 'Enter this code to confirm it’s you:',
+    button: null,
+    showCode: true,
+  },
+};
+SEEKER_COPY.signup = SEEKER_COPY.magiclink;
+
+/** A link back to Your space (or a seeker's password reset): a seeker's email. */
+export function isSeekerLink(redirectTo: string | null | undefined): boolean {
+  if (!redirectTo) return false;
+  try {
+    const u = new URL(redirectTo);
+    return u.pathname.startsWith('/space') || (u.pathname === '/reset-password' && u.searchParams.get('src') === 'seeker');
+  } catch {
+    return false;
+  }
+}
+
 function expiry(copy: Copy): string {
   if (copy.showCode && copy.button) return 'The code and link work once and expire soon.';
   if (copy.showCode) return 'The code works once and expires soon.';
   return 'The link works once and expires soon.';
 }
 
-export function renderAuthEmail({ action, token, link, account, invited = false }: AuthEmailInput): RenderedEmail {
+export function renderAuthEmail({ action, token, link, account: accountIn, invited = false, seeker = false }: AuthEmailInput): RenderedEmail {
   const signIn = action === 'magiclink' || action === 'signup';
-  const copy = invited && signIn ? COPY.invite : (COPY[action] ?? COPY.magiclink);
+  // Seekers: the account's colour only, never its name or logo.
+  const account = seeker && accountIn ? null : accountIn;
+  const accentIn = accountIn?.accent;
+  const copy = seeker
+    ? (SEEKER_COPY[action] ?? SEEKER_COPY.magiclink)
+    : invited && signIn ? COPY.invite : (COPY[action] ?? COPY.magiclink);
   // An invitation on ekkle.org is to the Ekklē team.
-  const who = account?.name ?? (invited && signIn ? 'the Ekklē team' : 'Ekklē');
-  const accent = account?.accent && /^#[0-9a-f]{6}$/i.test(account.accent) ? account.accent : SAGE;
+  const who = seeker ? 'Your space' : (account?.name ?? (invited && signIn ? 'the Ekklē team' : 'Ekklē'));
+  const accent = accentIn && /^#[0-9a-f]{6}$/i.test(accentIn) ? accentIn : SAGE;
   const subject = copy.subject(who);
 
   const heading = account?.logoUrl
@@ -101,7 +151,7 @@ export function renderAuthEmail({ action, token, link, account, invited = false 
   const button = copy.button && link
     ? `<p style="margin: 0 0 28px;"><a href="${escape(link)}" style="display: inline-block; background: ${accent}; color: #fdfcf8; font-family: Arial, sans-serif; font-size: 14px; text-decoration: none; padding: 12px 22px; border-radius: 8px;">${escape(copy.button)}</a></p>`
     : '';
-  const footer = account
+  const footer = account && !seeker
     ? `${escape(who)} uses Ekkl&#275; for conversations and studies.`
     : '';
 

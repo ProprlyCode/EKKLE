@@ -13,7 +13,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 import { fromAccount, sendEmailOrThrow } from '../_shared/email.ts';
-import { hostOf, renderAuthEmail, verifyLink, type EmailAccount } from '../_shared/auth-email.ts';
+import { hostOf, isSeekerLink, renderAuthEmail, verifyLink, type EmailAccount } from '../_shared/auth-email.ts';
 
 const HOOK_SECRET = (Deno.env.get('SEND_EMAIL_HOOK_SECRET') ?? '').replace(/^v1,whsec_/, '');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -79,6 +79,7 @@ Deno.serve(async (req) => {
   const action = d.email_action_type;
   const email = renderAuthEmail({
     invited: invited === true,
+    seeker: invited !== true && isSeekerLink(d.redirect_to),
     action,
     token: d.token,
     link: verifyLink(SUPABASE_URL, d.token_hash, action, d.redirect_to || d.site_url),

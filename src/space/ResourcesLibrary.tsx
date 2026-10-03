@@ -47,7 +47,7 @@ export default function ResourcesLibrary() {
         <span className="eyebrow">resources</span>
         <h1 className="font-serif text-3xl leading-tight text-sage">For the journey</h1>
         <p className="text-[15px] leading-relaxed text-muted-strong">
-          Reading, videos and links the ministry has chosen — at your own pace.
+          Reading, videos and links shared with you — explore them at your own pace.
         </p>
       </header>
 

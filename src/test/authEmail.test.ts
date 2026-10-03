@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   hostOf,
+  isSeekerLink,
   renderAuthEmail,
   verifyLink,
 } from '../../supabase/functions/_shared/auth-email';
@@ -76,5 +77,26 @@ describe('links and addresses', () => {
     expect(hostOf('http://pilot.localhost:5173/app')).toBe('pilot.localhost:5173');
     expect(hostOf('')).toBeNull();
     expect(hostOf('not a url')).toBeNull();
+  });
+
+  it('for a seeker, stays personal: no ministry name, logo or Ekklē line', () => {
+    const e = renderAuthEmail({ action: 'magiclink', token: '123456', link: 'https://l.test', account: grace, seeker: true });
+    expect(e.subject).toBe('Your sign-in code');
+    expect(e.html).not.toContain('Grace Chapel');
+    expect(e.html).not.toContain('logo.png');
+    expect(e.html).not.toContain('uses Ekkl');
+    expect(e.html).toContain('123456');
+    expect(e.html).toContain('background: #1e3a5f');
+    expect(e.text).not.toContain('Grace Chapel');
+    expect(renderAuthEmail({ action: 'recovery', token: '', link: 'https://l.test', account: grace, seeker: true }).subject)
+      .toBe('Reset your password');
+  });
+
+  it('knows a seeker by where the link goes', () => {
+    expect(isSeekerLink('https://pilot.ekkle.org/space/messages')).toBe(true);
+    expect(isSeekerLink('https://pilot.ekkle.org/reset-password?src=seeker')).toBe(true);
+    expect(isSeekerLink('https://pilot.ekkle.org/reset-password?src=admin')).toBe(false);
+    expect(isSeekerLink('https://pilot.ekkle.org/app')).toBe(false);
+    expect(isSeekerLink('')).toBe(false);
   });
 });

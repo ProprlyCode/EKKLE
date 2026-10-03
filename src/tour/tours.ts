@@ -22,12 +22,12 @@ export const SEEKER_TOUR: TourStep[] = [
   {
     target: nav('/space/bible'),
     title: 'Bible',
-    body: 'Today’s devotional from the ministry, three translations, search, highlights and notes. Reading plans are here too, if you’d like a path through.',
+    body: 'A short devotional each day, three translations, search, highlights and notes. Reading plans are here too, if you’d like a path through.',
   },
   {
     target: nav('/space/resources'),
     title: 'Resources',
-    body: 'Articles and videos your ministry has chosen for people exploring faith.',
+    body: 'Articles and videos shared with you for exploring faith, whenever you’re ready.',
   },
   {
     target: nav('/space/account'),
