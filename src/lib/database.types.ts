@@ -685,6 +685,7 @@ export interface Database {
       };
       my_situations: { Args: Record<string, never>; Returns: Json };
       flow_outcomes: { Args: { p_days: number | null }; Returns: Json };
+      space_visit: { Args: Record<string, never>; Returns: boolean | null };
       public_code_landing: { Args: { p_code: string }; Returns: Json };
       log_public_code_event: { Args: { p_session_token: string; p_code: string; p_event: string }; Returns: undefined };
       start_public_conversation: {

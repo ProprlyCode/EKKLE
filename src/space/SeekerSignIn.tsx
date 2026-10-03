@@ -104,10 +104,10 @@ export default function SeekerSignIn() {
         ) : (
           <>
             <h1 className="text-center font-serif text-3xl leading-tight text-sage">
-              welcome back
+              sign in to your space
             </h1>
             <p className="mx-auto mt-3 max-w-sm text-center text-[15px] leading-relaxed text-muted-strong">
-              Sign in to pick up your studies right where you left off.
+              Your conversation and studies, kept together — on any device.
             </p>
 
             {mode === 'magic' ? (

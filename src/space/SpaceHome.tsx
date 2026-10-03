@@ -10,6 +10,7 @@ import { GetStarted } from '@/components/GetStarted';
 import { TourButton } from '@/tour/Tour';
 import { SEEKER_TOUR } from '@/tour/tours';
 import { listPlans, type PlanSummary } from '@/bible/plans';
+import { greeting, useFirstVisit } from './useFirstVisit';
 
 /**
  * Your space — home (/space). The seeker's own place: the person they're
@@ -17,6 +18,7 @@ import { listPlans, type PlanSummary } from '@/bible/plans';
  * here is theirs; nothing is forced. A few resources close the page.
  */
 export default function SpaceHome() {
+  const firstVisit = useFirstVisit();
   const [convo, setConvo] = useState<SeekerConnection | null | undefined>(undefined);
   const [studies, setStudies] = useState<StudySummary[] | null | undefined>(undefined);
   const [resources, setResources] = useState<SeekerResourceSummary[]>([]);
@@ -61,7 +63,7 @@ export default function SpaceHome() {
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-1">
         <span className="eyebrow">your space</span>
-        <h1 className="font-serif text-3xl leading-tight text-sage">Welcome</h1>
+        <h1 className="font-serif text-3xl leading-tight text-sage">{greeting(firstVisit)}</h1>
         <p className="text-[15px] leading-relaxed text-muted-strong">
           Your conversation and your studies, kept together — on any device.
         </p>

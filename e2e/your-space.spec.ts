@@ -47,6 +47,11 @@ test('a recipient keeps the conversation in Your space', async ({ browser }) => 
   await expect(seeker.getByText(reply)).toBeVisible({ timeout: 15_000 });
   await seeker.goto('/space');
   await expect(seeker.getByText(reply)).toBeVisible();
+  // Their first visit says "Welcome"; a later one, "Welcome back".
+  await expect(seeker.getByRole('heading', { name: 'Welcome', exact: true })).toBeVisible();
+  await seeker.evaluate(() => sessionStorage.clear());
+  await seeker.reload();
+  await expect(seeker.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 
   // Back on the member's link, they're pointed to their space.
   await seeker.goto(`/r/${DAVID.slug}`);
@@ -56,7 +61,7 @@ test('a recipient keeps the conversation in Your space', async ({ browser }) => 
 test('Your space is gated: signed-out visitors get the sign-in', async ({ page }) => {
   for (const path of ['/space', '/space/messages', '/space/studies', '/space/account']) {
     await page.goto(path);
-    await expect(page.getByRole('heading', { name: 'welcome back' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'sign in to your space' })).toBeVisible();
   }
   // Old study links still work — they lead to Your space.
   await page.goto('/studies/connection');

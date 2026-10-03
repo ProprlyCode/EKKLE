@@ -6,6 +6,7 @@ import { Button } from '@/ui/Button';
 import { Collapsible } from '@/ui/Collapsible';
 import { ErrorNote, Spinner } from '@/ui/states';
 import { Credit } from './StudyReader';
+import { greeting, useFirstVisit } from './useFirstVisit';
 
 /**
  * The student dashboard (/studies) — a signed-in home: resume where you left
@@ -14,6 +15,7 @@ import { Credit } from './StudyReader';
  */
 export default function StudyDashboard() {
   const location = useLocation();
+  const firstVisit = useFirstVisit();
   const justCompleted = (location.state as { completed?: string } | null)?.completed;
   const [studies, setStudies] = useState<StudySummary[] | null | undefined>(undefined);
 
@@ -51,7 +53,7 @@ export default function StudyDashboard() {
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-1">
         <span className="eyebrow">your studies</span>
-        <h1 className="font-serif text-3xl leading-tight text-sage">Welcome back</h1>
+        <h1 className="font-serif text-3xl leading-tight text-sage">{greeting(firstVisit)}</h1>
       </header>
 
       {total === 0 ? (
