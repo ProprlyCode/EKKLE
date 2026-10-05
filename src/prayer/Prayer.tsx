@@ -225,13 +225,14 @@ function PersonRow({ p, onChanged }: { p: PrayerPerson; onChanged: () => void })
     );
   return (
     <li className="flex flex-col gap-2 py-3">
-      <div className="flex flex-wrap items-start gap-2">
+      {/* On phones the buttons sit under the name, so the request keeps the full width. */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-2">
         <span className="min-w-0 flex-1">
           <span className="font-medium text-sage">{p.name}</span>
           {p.request && <span className="block text-[14px] text-muted-strong">{p.request}</span>}
         </span>
         {mode === 'view' && (
-          <span className="flex gap-1">
+          <span className="-ml-3 flex gap-1 sm:ml-0">
             <Button size="sm" variant="ghost" onClick={() => setMode('answer')}>
               Answered
             </Button>
@@ -341,7 +342,7 @@ function Times({ times, onChanged }: { times: PrayerTime[]; onChanged: () => voi
         storageKey="prayer.times"
         defaultOpen={times.length === 0}
         title={<h2 className="text-base">Your times</h2>}
-        summary={times.length ? times.map((t) => t.label).join(' · ') : 'none yet'}
+        summary={times.length ? `${times.length}` : undefined}
       >
         <div className="flex flex-col gap-3 border-t border-edge/70 px-5 py-4">
           <p className="text-[13px] text-muted">
@@ -400,10 +401,12 @@ function TimeRow({
       </li>
     );
   return (
-    <li className="flex flex-wrap items-center gap-2 py-3">
+    <li className="flex flex-wrap items-center gap-x-2 gap-y-1 py-3">
       <span className="min-w-0 flex-1">
-        <span className="font-medium text-sage">{t.label}</span>{' '}
-        <span className="text-[14px] text-muted-strong">{showTime(t.at)}</span>
+        <span className="flex flex-wrap items-baseline gap-x-2">
+          <span className="font-medium text-sage">{t.label}</span>
+          <span className="whitespace-nowrap text-[14px] tabular-nums text-muted-strong">{showTime(t.at)}</span>
+        </span>
         <span className="block text-[12px] text-muted">{t.email ? 'A short email at this time' : 'No email'}</span>
       </span>
       <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>

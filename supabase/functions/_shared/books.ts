@@ -72,5 +72,5 @@ export const BOOK_NAMES: Record<string, string> = {
 export function readingLabel(id: string): string {
   const m = /^([1-3A-Z]{3})\.(\d+)(?::(\d+)-(\d+))?$/.exec(id);
   if (!m) return id;
-  return `${BOOK_NAMES[m[1]] ?? m[1]} ${m[2]}${m[3] ? `:${m[3]}–${m[4]}` : ""}`;
+  return `${BOOK_NAMES[m[1]] ?? m[1]} ${m[2]}${m[3] ? `:${m[3]}${m[4] !== m[3] ? `–${m[4]}` : ""}` : ""}`;
 }

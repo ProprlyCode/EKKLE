@@ -7,7 +7,8 @@ export function Card({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('card p-6', className)} {...props}>
+    // A padding class passed in replaces the default (cn doesn't merge classes).
+    <div className={cn('card', /(^|\s)p-\d/.test(className ?? '') ? null : 'p-6', className)} {...props}>
       {children}
     </div>
   );

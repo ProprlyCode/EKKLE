@@ -23,7 +23,7 @@ export function parseReadingId(id: string): Reading | null {
 export function readingLabel(id: string): string {
   const r = parseReadingId(id);
   if (!r) return id;
-  return `${r.book.name} ${r.chapter}${r.from ? `:${r.from}–${r.to}` : ''}`;
+  return `${r.book.name} ${r.chapter}${r.from ? `:${r.from}${r.to && r.to !== r.from ? `–${r.to}` : ''}` : ''}`;
 }
 
 /** A day's readings as one line: "Genesis 1–3", "Psalms 1–5; Proverbs 1". */
