@@ -93,7 +93,7 @@ test('a seeker in Your space', async ({ page }) => {
 
 test('a member', async ({ page }) => {
   await signIn(page, DAVID.email, DAVID.password);
-  for (const path of ['/app', '/app/messages', '/app/bible', '/app/wallet-cards']) {
+  for (const path of ['/app', '/app/messages', '/app/bible', '/app/prayer', '/app/wallet-cards']) {
     await page.goto(path);
     await scan(page, path);
   }

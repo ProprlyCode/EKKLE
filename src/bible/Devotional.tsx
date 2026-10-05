@@ -21,7 +21,7 @@ import { parseReadingId, readingLabel } from './readings';
  */
 
 /** The passage's verses (Berean Standard Bible), shown on the card. */
-function Passage({ passage, base }: { passage: string; base: string }) {
+export function Passage({ passage, base }: { passage: string; base: string }) {
   const r = parseReadingId(passage);
   const [verses, setVerses] = useState<string[] | null>(null);
   useEffect(() => {

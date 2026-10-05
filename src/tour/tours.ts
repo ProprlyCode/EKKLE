@@ -68,6 +68,11 @@ export const MEMBER_TOUR: TourStep[] = [
     body: 'The same Bible your friends read, with today’s devotional from your ministry, notes, highlights and reading plans.',
   },
   {
+    target: nav('/app/prayer'),
+    title: 'Prayer',
+    body: 'A few quiet pauses in your day, if they help — a verse, and the people on your heart. Your list is yours alone.',
+  },
+  {
     target: '[aria-label="Get started"]',
     title: 'Get started',
     body: 'A few steps to be ready. They tick themselves off as you go.',

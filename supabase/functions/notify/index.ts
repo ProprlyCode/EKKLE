@@ -41,6 +41,10 @@ Deno.serve(async (req) => {
       await dailyDevotional(payload.record);
       return new Response('ok', { status: 200 });
     }
+    if (payload.record?.kind === 'prayer') {
+      await prayerTime(payload.record);
+      return new Response('ok', { status: 200 });
+    }
     if (payload.record?.kind === 'study') {
       await studyReminder(payload.record.auth_uid, payload.record.org_id, payload.record.study);
       return new Response('ok', { status: 200 });
@@ -317,6 +321,36 @@ async function dailyDevotional(r: { auth_uid: string; org_id: string; area: stri
       (d.prayer ? `\n\n${d.prayer}` : '') +
       (link ? `\n\nRead it with the passage: ${link}` : '') +
       `\n\nYou asked for this daily email. To stop it, open the Bible tab and choose “Past devotionals”, then “Turn off”.`,
+    fromAccount(name),
+  );
+}
+
+/**
+ * A chosen prayer time (0052), for those who asked for an email: a quiet
+ * moment, never a to-do — a verse and, if they like, a few names.
+ */
+async function prayerTime(r: {
+  auth_uid: string;
+  org_id: string;
+  label: string;
+  verse: string;
+  names: Array<{ name: string; request: string }>;
+}) {
+  const { data: user } = await supabase.auth.admin.getUserById(r.auth_uid);
+  const email = user?.user?.email;
+  if (!email) return;
+  const { base, name } = await accountInfo(supabase, r.org_id);
+  const link = base ? `${base}/app/prayer` : '';
+  const names = (r.names ?? [])
+    .map((n) => `· ${n.name}${n.request ? ` — ${n.request}` : ''}`)
+    .join('\n');
+  await sendEmail(
+    email,
+    `A quiet moment${r.label ? ` · ${r.label}` : ''}`,
+    `A quiet moment, whenever you have one.\n\n${readingLabel(r.verse)}` +
+      (names ? `\n\nIf you’d like, a few people to hold before God:\n${names}` : '') +
+      (link ? `\n\nThe verse and your list: ${link}` : '') +
+      `\n\nYou chose this reminder. To change or stop it, open Prayer and choose “Your times”.`,
     fromAccount(name),
   );
 }

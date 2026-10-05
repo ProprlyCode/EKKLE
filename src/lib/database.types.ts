@@ -685,6 +685,17 @@ export interface Database {
       };
       my_situations: { Args: Record<string, never>; Returns: Json };
       flow_outcomes: { Args: { p_days: number | null }; Returns: Json };
+      my_prayer: { Args: Record<string, never>; Returns: Json };
+      prayer_moment: { Args: { p_today: string; p_exclude: string[] }; Returns: Json };
+      prayer_amen: { Args: { p_ids: string[] }; Returns: undefined };
+      save_prayer_person: { Args: { p_id: string | null; p_name: string; p_request: string }; Returns: string };
+      answer_prayer: { Args: { p_id: string; p_answered: boolean; p_note: string }; Returns: undefined };
+      delete_prayer_person: { Args: { p_id: string }; Returns: undefined };
+      save_prayer_time: {
+        Args: { p_id: string | null; p_label: string; p_at: string; p_tz: string; p_email: boolean };
+        Returns: string;
+      };
+      delete_prayer_time: { Args: { p_id: string }; Returns: undefined };
       space_visit: { Args: Record<string, never>; Returns: boolean | null };
       public_code_landing: { Args: { p_code: string }; Returns: Json };
       log_public_code_event: { Args: { p_session_token: string; p_code: string; p_event: string }; Returns: undefined };

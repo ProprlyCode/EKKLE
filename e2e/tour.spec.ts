@@ -12,7 +12,7 @@ test('a member’s tour, on a phone', async ({ browser }) => {
   await expect(page.getByRole('dialog')).toHaveCount(0); // never by itself
   await page.getByRole('button', { name: 'Take a quick tour' }).click();
   const tour = page.getByRole('dialog', { name: 'Tour of your code page' });
-  await expect(tour).toContainText('1 of 6');
+  await expect(tour).toContainText('1 of 7');
   await expect(tour.getByRole('heading')).toHaveText('Your code');
   await tour.getByRole('button', { name: 'Next' }).click();
   await expect(tour.getByRole('heading')).toHaveText('Faith in action');

@@ -56,6 +56,7 @@ const PlanEditor = lazy(() => import('@/bible/PlanLibrary').then((m) => ({ defau
 const PromptLibrary = lazy(() => import('@/prompts/PromptLibrary').then((m) => ({ default: m.PromptLibrary })));
 const PublicCodes = lazy(() => import('@/situations/PublicCodes'));
 const PublicCodePoster = lazy(() => import('@/situations/PublicCodePoster'));
+const Prayer = lazy(() => import('@/prayer/Prayer'));
 const TemplateEditor = lazy(() => import('@/situations/TemplateEditor'));
 const PlatformLayout = lazy(() => import('@/platform/PlatformLayout'));
 const PlatformAccounts = lazy(() => import('@/platform/Accounts'));
@@ -195,6 +196,7 @@ function AccountRoutes() {
           <Route path="/app/bible/devotionals" element={<PastDevotionals base="/app/bible" />} />
             <Route path="/app/bible/plans/:planId" element={<PlanPage base="/app/bible" />} />
             <Route path="/app/messages/:conversationId" element={<Thread />} />
+            <Route path="/app/prayer" element={<Prayer />} />
 
             <Route element={<RequireLeadership />}>
               <Route path="/leadership/overview" element={<Overview />} />

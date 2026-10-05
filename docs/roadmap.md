@@ -288,6 +288,20 @@ One code, with situations a tap away; members never manage several codes.
   download (PNG 2048 px, or SVG for clothing), on/off, and opened / wrote
   counts. Opens and messages count for the ministry, not a member.
 
+## Prayer — built (0052, 5 Oct 2026)
+
+A quiet reminder through a busy day, never a to-do (Daniel 6:10).
+
+- **Prayer tab** for members, Leaders and Admins: a verse for the day (from
+  the built-in Bible, rotating through 30) and, if they like, two or three
+  names from their list. "Amen" closes it; "Someone else" swaps the names.
+- **Their list is private** — only they can read it, not Leaders or the
+  Ekklē team. Names rotate gently; answered prayers move to "Answered" with
+  an optional note, to look back on.
+- **Their times:** up to five a day (Morning / Midday / Evening suggested),
+  each with an optional short email ("A quiet moment") within the hour.
+- **Nothing is scored:** no ticks, streaks, counts or "missed" times.
+
 ## "What fits you?" (idea, agreed Sep 2026 — not planned in detail)
 
 Not "learning styles" (matching teaching to a visual/auditory style isn't

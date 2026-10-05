@@ -86,6 +86,7 @@ export function AuthedLayout() {
     { to: '/app', label: 'Your code' },
     { to: '/app/messages', label: 'Messages', dot: unread > 0 },
     { to: '/app/bible', label: 'Bible', end: false },
+    { to: '/app/prayer', label: 'Prayer' },
     ...(leader
       ? [
           { to: '/leadership/overview', label: 'Overview' },
